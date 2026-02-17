@@ -1,0 +1,317 @@
+<p align="center">
+  <img src="Icons/icon.png" alt="Notemac++" width="128" height="128">
+</p>
+
+<h1 align="center">Notemac++</h1>
+
+<p align="center">
+  A powerful, feature-rich text and source code editor for <strong>macOS</strong> and <strong>Web</strong>, inspired by <a href="https://notepad-plus-plus.org/">Notepad++</a>.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/tests-163%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
+</p>
+
+---
+
+Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, and much more.
+
+## Quick Start
+
+**Web (any platform):**
+
+```bash
+./build-web.sh
+```
+
+This builds and serves the app locally. Works on macOS, Linux, and WSL.
+
+**Desktop (macOS):**
+
+```bash
+# Portable — runs directly from the disk image
+./build-portable-dmg.sh
+
+# Installable — drag to Applications
+./build-install-dmg.sh
+```
+
+**Development:**
+
+```bash
+npm install
+npm run dev              # Web dev server
+npm run electron:dev     # Electron dev mode
+```
+
+## Features
+
+<details>
+<summary><strong>Editing</strong> — Monaco-powered editor with full code intelligence</summary>
+
+&nbsp;
+
+Notemac++ is built on the [Monaco Editor](https://microsoft.github.io/monaco-editor/), the same engine that powers VS Code. This gives you:
+
+- Syntax highlighting for **70+ languages** including C, C++, Python, JavaScript, TypeScript, Rust, Go, Java, Ruby, PHP, Swift, Kotlin, SQL, HTML/CSS, Markdown, and many more
+- Multi-cursor editing
+- Code folding with 8 levels of granularity
+- Bracket matching and auto-closing for brackets and quotes
+- Smart auto-indent
+- Comment toggling (line and block comments)
+- Configurable tab size, spaces vs. tabs
+- Virtual space mode, smooth scrolling
+- Minimap for quick navigation
+- Indent guides
+- Word wrap with optional wrap symbols
+- Whitespace and EOL character visualization
+- Line numbers with current-line highlighting
+
+</details>
+
+<details>
+<summary><strong>Tabs</strong> — Drag, pin, color-code, and manage your workspace</summary>
+
+&nbsp;
+
+- Drag-and-drop tab reordering
+- Pin tabs to prevent accidental closure
+- Color-code tabs (6 colors: red, green, blue, orange, magenta, or none)
+- Visual indicators for modified, pinned, and read-only files
+- Middle-click to close
+- Right-click context menu: Close, Close Others, Close to Left/Right, Close Unchanged, Close All but Pinned
+- Restore last closed tab (with full undo history)
+- Recent files list (last 20 files)
+- Clone tab to split view
+
+</details>
+
+<details>
+<summary><strong>Find & Replace</strong> — Regex, marks, and bulk operations</summary>
+
+&nbsp;
+
+- Find with regex, case-sensitive, whole-word, and wrap-around options
+- Replace single or all occurrences
+- Find in Files across your workspace
+- Incremental search (live results as you type)
+- **Mark system** with 5 color styles — highlight all matches visually, then operate on marked lines: cut, copy, delete, replace, or inverse
+- Go to Line dialog
+- Go to Matching Bracket
+- Bookmark system: toggle, navigate next/previous, clear all
+
+See [Keybindings Reference](docs/KEYBINDINGS.md) for all search shortcuts.
+
+</details>
+
+<details>
+<summary><strong>Split View</strong> — Work on two files side by side</summary>
+
+&nbsp;
+
+- Horizontal or vertical split
+- Clone any tab into the split pane
+- Synchronized vertical and/or horizontal scrolling
+- Close split to return to single-pane mode
+
+</details>
+
+<details>
+<summary><strong>Themes</strong> — 6 built-in color themes</summary>
+
+&nbsp;
+
+| Theme | Style |
+|---|---|
+| Dark | VS Code Dark (default) |
+| Light | VS Code Light |
+| Monokai | Classic warm palette |
+| Dracula | Purple-toned dark theme |
+| Solarized Dark | Ethan Schoonover's dark variant |
+| Solarized Light | Ethan Schoonover's light variant |
+
+Each theme fully styles the editor, tabs, sidebar, menus, dialogs, and status bar.
+
+</details>
+
+<details>
+<summary><strong>Macros</strong> — Record, replay, and save action sequences</summary>
+
+&nbsp;
+
+- Record keyboard actions (typing, deletions, cursor movement, commands)
+- Playback recorded macro
+- Run macro multiple times (with count dialog)
+- Save macros with custom names for reuse
+- Recording indicator in the status bar
+
+</details>
+
+<details>
+<summary><strong>Sidebar & Panels</strong> — File explorer, function list, and more</summary>
+
+&nbsp;
+
+- **File Explorer**: Open folders as workspaces, browse the tree, click to open files
+- **Document List**: Quick overview of all open tabs
+- **Function List**: Code symbol navigation
+- **Clipboard History**: Last 50 clipboard entries, paste from history
+- **Character Panel**: Inspect character details and code points
+- **Search Results**: Find-in-files results panel
+
+The sidebar is resizable (150–500px) and togglable with `Cmd+B`.
+
+</details>
+
+<details>
+<summary><strong>Encoding & Line Endings</strong> — Full character set support</summary>
+
+&nbsp;
+
+Notemac++ supports a wide range of encodings: UTF-8, UTF-8 BOM, UTF-16 LE/BE, Windows-1250 through 1258, ISO 8859 family, KOI8-R/U, Big5, GB2312, Shift JIS, EUC-KR, and dozens of DOS/OEM code pages. Line endings are auto-detected and switchable between LF, CRLF, and CR.
+
+See the full list in [docs/FEATURES.md](docs/FEATURES.md#encoding--line-endings).
+
+</details>
+
+<details>
+<summary><strong>Line Operations</strong> — Sort, deduplicate, trim, and transform</summary>
+
+&nbsp;
+
+- Sort lines (ascending, descending, case-insensitive, by length)
+- Remove duplicate lines (all or consecutive only)
+- Remove empty lines (including blank-only)
+- Trim leading/trailing/both spaces
+- Convert EOL to spaces, TAB to spaces, spaces to TABs
+- Insert blank lines above/below
+- Reverse line order
+
+</details>
+
+<details>
+<summary><strong>Tools</strong> — Hashing, encoding, and formatting utilities</summary>
+
+&nbsp;
+
+- Hash generation: MD5, SHA-1, SHA-256, SHA-512 (from text or file)
+- Copy hash to clipboard
+- Base64 encode/decode
+- URL encode/decode
+- JSON format (pretty-print) and minify
+
+</details>
+
+<details>
+<summary><strong>Case Conversion</strong> — 6 text case transforms</summary>
+
+&nbsp;
+
+UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
+
+</details>
+
+<details>
+<summary><strong>More Features</strong></summary>
+
+&nbsp;
+
+- **Distraction-Free Mode**: Hides all UI chrome for focused writing
+- **Always on Top**: Keep the editor above other windows
+- **Monitoring (tail -f)**: Live file watching with auto-scroll
+- **Column Editor**: Multi-line vertical editing
+- **Run Command**: Execute shell commands from within the editor
+- **Search on Google/Wikipedia**: Quick web lookups for selected text
+- **Open in Browser**: Preview files directly
+- **Insert Date/Time**: Configurable format
+- **File Summary**: Line, word, and character counts at a glance
+- **Session Save/Load**: Persist your workspace across sessions
+- **Copy File Path/Name/Dir**: Quick path operations
+
+</details>
+
+## Architecture
+
+Notemac++ follows a **layered architecture** with clear separation of concerns:
+
+| Layer | Responsibility |
+|---|---|
+| **Configs** | Static settings and configuration data |
+| **Models** | Runtime state (tabs, search, macros, UI, file tree) |
+| **Controllers** | Business logic and coordination |
+| **ViewPresenters** | UI components — no business logic |
+
+State management uses **Zustand** with **Immer** for immutable updates, split into composable slices. Dependencies are resolved through a lightweight **Service Locator** pattern, and components communicate via a typed **event dispatcher** (pub/sub).
+
+For more detail, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Project Structure
+
+```
+src/
+├── Notemac/                    # Project-specific code
+│   ├── Commons/                # Constants, enums, shared types
+│   ├── Configs/                # EditorConfig, ThemeConfig
+│   ├── Controllers/            # Business logic controllers
+│   ├── Model/                  # TabModel, SearchModel, MacroModel, UIModel, FileTreeModel
+│   └── UI/                     # ViewPresenter components
+│       └── Params/             # Parameter/DTO classes
+├── Shared/                     # Reusable framework library
+│   ├── DependencyInjection/    # Service locator
+│   ├── EventDispatcher/        # Typed pub/sub events
+│   ├── Helpers/                # FileHelpers, IdHelpers
+│   ├── Persistence/            # Save/load services
+│   └── Pooling/                # Object pool management
+├── components/                 # React UI components
+├── store/                      # Zustand store slices
+└── __tests__/                  # 163 unit tests (Vitest)
+```
+
+## Testing
+
+```bash
+npx vitest run
+```
+
+163 unit tests across 7 test suites covering tab management, search, macros, UI state, file tree, configurations, and helper utilities.
+
+See [docs/TESTING.md](docs/TESTING.md) for details.
+
+## Building
+
+| Target | Command | Output |
+|---|---|---|
+| Web (dev) | `npm run dev` | `localhost:5173` |
+| Web (prod) | `./build-web.sh` | Built + served |
+| Desktop (dev) | `npm run electron:dev` | Live Electron window |
+| Portable DMG | `./build-portable-dmg.sh` | `release/Notemac++-Portable.dmg` |
+| Installable DMG | `./build-install-dmg.sh` | `release/Notemac++-Installer.dmg` |
+
+Build scripts auto-install prerequisites (Homebrew, Node.js, Python/Pillow) if missing.
+
+See [docs/BUILDING.md](docs/BUILDING.md) for full build documentation.
+
+## Tech Stack
+
+| Technology | Role |
+|---|---|
+| [React](https://react.dev/) | UI framework |
+| [Monaco Editor](https://microsoft.github.io/monaco-editor/) | Code editor engine |
+| [TypeScript](https://www.typescriptlang.org/) | Type-safe development |
+| [Zustand](https://zustand-demo.pmnd.rs/) + [Immer](https://immerjs.github.io/immer/) | State management |
+| [Vite](https://vitejs.dev/) | Build tooling |
+| [Electron](https://www.electronjs.org/) | Desktop shell |
+| [Vitest](https://vitest.dev/) | Testing framework |
+
+## Author
+
+**Sergio Agustin De Vita**
+[LinkedIn](https://linkedin.com/in/sergioadevita)
+
+## License
+
+This project is licensed under the MIT License.

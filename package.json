@@ -1,0 +1,66 @@
+{
+  "name": "notemac-plus-plus",
+  "version": "1.0.0",
+  "description": "Notemac++ - A Notepad++ inspired text editor for Mac and Web",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
+    "electron:build": "vite build && electron-builder --mac",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "file-saver": "^2.0.5",
+    "iconv-lite": "^0.6.3",
+    "immer": "^10.0.4",
+    "js-md5": "^0.8.3",
+    "js-sha1": "^0.7.0",
+    "js-sha256": "^0.11.0",
+    "js-sha512": "^0.9.0",
+    "jschardet": "^3.1.1",
+    "monaco-editor": "^0.45.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/file-saver": "^2.0.7",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "jsdom": "^28.1.0",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.0",
+    "vitest": "^4.0.18",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.notemac.plusplus",
+    "productName": "Notemac++",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "public/icon.icns"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  }
+}
