@@ -20,6 +20,14 @@
 
 Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, and much more.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/editor-dark.png" alt="Notemac++ — Dark theme with JavaScript syntax highlighting" width="900">
+</p>
+
+<p align="center"><em>Dark theme with JavaScript syntax highlighting, showing the menu bar, toolbar, tabs, and status bar.</em></p>
+
 ## Quick Start
 
 **Web (any platform):**
@@ -280,6 +288,47 @@ npx vitest run
 163 unit tests across 7 test suites covering tab management, search, macros, UI state, file tree, configurations, and helper utilities.
 
 See [docs/TESTING.md](docs/TESTING.md) for details.
+
+## Comparison
+
+How Notemac++ stacks up against other editors:
+
+| Feature | Notemac++ | Notepad++ | VS Code |
+|---|---|---|---|
+| **Platform** | macOS / Web | Windows | All |
+| **Size** | ~50 MB | ~5 MB | ~300 MB |
+| **Startup Time** | Instant | Fast | Moderate |
+| **Syntax Languages** | 70+ | 80+ | 200+ |
+| **Macros** | Yes | Yes | Via Extensions |
+| **Split View** | Yes | Yes | Yes |
+| **Themes** | 6 | 30+ | 1000+ |
+| **Plugins** | Planned | 200+ | 30K+ |
+| **Price** | Free (MIT) | Free (GPL) | Free |
+
+Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity with modern web technology and native desktop integration.
+
+## Roadmap
+
+Planned features for future releases:
+
+- **Plugin System** — Extensibility through custom plugins
+- **Custom Theme Editor** — Create and share your own themes
+- **Integrated Terminal** — Run commands without leaving the editor
+- **Git Integration** — Built-in version control support
+- **Snippet Manager** — Save and reuse code snippets
+- **Auto-complete / IntelliSense** — Language-aware code completion
+- **Print Support** — Format and print documents
+
+Have a feature request? Open an [issue](https://github.com/sergioadevita/notemac-plus-plus/issues) or [discussion](https://github.com/sergioadevita/notemac-plus-plus/discussions).
+
+## Contributing
+
+We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+
+- Setting up your development environment
+- Project architecture and coding standards
+- How to submit pull requests
+- Code of conduct
 
 ## Building
 
