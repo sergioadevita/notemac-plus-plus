@@ -17,6 +17,7 @@ import { ColumnEditorDialog } from './components/ColumnEditorDialog';
 import { SummaryDialog } from './components/SummaryDialog';
 import { CharInRangeDialog } from './components/CharInRangeDialog';
 import { ShortcutMapperDialog } from './components/ShortcutMapperDialog';
+import { FeedbackPopup } from './components/FeedbackPopup';
 import { detectLanguage, detectLineEnding } from './utils/helpers';
 
 export default function App() {
@@ -437,6 +438,7 @@ export default function App() {
       {showSummary && <SummaryDialog theme={theme} />}
       {showCharInRange && <CharInRangeDialog theme={theme} />}
       {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
+      <FeedbackPopup theme={theme} />
     </div>
   );
 }

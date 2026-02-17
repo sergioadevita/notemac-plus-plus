@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-163%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
+  <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
 
 <p align="center">
@@ -393,7 +394,13 @@ See [docs/BUILDING.md](docs/BUILDING.md) for full build documentation.
 ## Author
 
 **Sergio Agustin De Vita**
-[LinkedIn](https://linkedin.com/in/sergioadevita)
+[LinkedIn](https://linkedin.com/in/sergioadevita) · [GitHub](https://github.com/sergioadevita) · [Ko-fi](https://ko-fi.com/sergioadevita)
+
+## Support
+
+If you find Notemac++ useful, consider supporting its development:
+
+<a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Notemac++-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support on Ko-fi"></a>
 
 ## License
 
