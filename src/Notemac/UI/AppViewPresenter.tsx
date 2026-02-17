@@ -20,6 +20,7 @@ import { ColumnEditorDialog } from './ColumnEditorDialogViewPresenter';
 import { SummaryDialog } from './SummaryDialogViewPresenter';
 import { CharInRangeDialog } from './CharInRangeDialogViewPresenter';
 import { ShortcutMapperDialog } from './ShortcutMapperDialogViewPresenter';
+import { FeedbackPopup } from './FeedbackPopupViewPresenter';
 
 export default function App()
 {
@@ -195,6 +196,7 @@ export default function App()
       {showSummary && <SummaryDialog theme={theme} />}
       {showCharInRange && <CharInRangeDialog theme={theme} />}
       {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
+      <FeedbackPopup theme={theme} />
     </div>
   );
 }
