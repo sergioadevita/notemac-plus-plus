@@ -16,6 +16,14 @@
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
 </p>
 
+<p align="center">
+  <a href="https://sergioadevita.github.io/notemac-plus-plus/app/"><strong>🚀 Try it in your browser</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://sergioadevita.github.io/notemac-plus-plus/">Landing Page</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/sergioadevita/notemac-plus-plus/releases">Releases</a>
+</p>
+
 ---
 
 Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, and much more.
@@ -23,10 +31,36 @@ Notemac++ brings the familiar power of Notepad++ to macOS — both as a native d
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/editor-dark.png" alt="Notemac++ — Dark theme with JavaScript syntax highlighting" width="900">
+  <img src="docs/screenshots/editor-dark.png" alt="Notemac++ — Dark theme" width="900">
 </p>
+<p align="center"><em>Dark theme — the default look, with JavaScript syntax highlighting.</em></p>
 
-<p align="center"><em>Dark theme with JavaScript syntax highlighting, showing the menu bar, toolbar, tabs, and status bar.</em></p>
+<details>
+<summary><strong>More themes and features</strong></summary>
+
+&nbsp;
+
+<p align="center">
+  <img src="docs/screenshots/editor-light.png" alt="Notemac++ — Light theme" width="900">
+</p>
+<p align="center"><em>Light theme</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-monokai.png" alt="Notemac++ — Monokai theme" width="900">
+</p>
+<p align="center"><em>Monokai theme</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-dracula.png" alt="Notemac++ — Dracula theme" width="900">
+</p>
+<p align="center"><em>Dracula theme</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/find-replace.png" alt="Notemac++ — Find & Replace" width="900">
+</p>
+<p align="center"><em>Find & Replace with regex support, mark system, and multiple search modes.</em></p>
+
+</details>
 
 ## Quick Start
 
