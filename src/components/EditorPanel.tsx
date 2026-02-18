@@ -15,7 +15,7 @@ interface EditorPanelProps {
 
 export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monacoRef = useRef<any>(null);
+  const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
   const { updateTabContent, updateTab, showFindReplace } = useEditorStore();
   const [monacoReady, setMonacoReady] = useState(false);
 
