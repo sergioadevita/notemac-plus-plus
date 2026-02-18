@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026
+
+### Zero `any` Milestone
+- **Complete type safety**: Eliminated every remaining `any` type annotation across the entire production codebase — 0 instances of `any` in `.ts` and `.tsx` files
+- **Proper discriminated union for MacroAction**: `type: 'type' | 'delete' | 'move' | 'select' | 'command'` with narrowed `data` fields
+- **Menu action value type**: `boolean | string | number` union replaces `any` with proper narrowing at all consumption sites
+- **EditorGlobals type**: `EditorActionFn` properly typed as `(action: string, value?: boolean | string | number) => void`
+
+### Fixed
+- **Race condition**: `AIModel.LoadAIState()` — sync `set({credentials: []})` was running after async `RetrieveSecureValue` was kicked off, overwriting credentials on resolve. Reordered to set sync state first, then async credentials
+- **Memory safety**: `SidebarViewPresenter` — `FileSystemHandle` iterator entries now properly cast with kind checks (`FileSystemFileHandle` / `FileSystemDirectoryHandle`)
+- **React hooks**: `EditorPanelViewPresenter` — added missing `updateTabContent`, `tab.scrollTop`, `updateTab` to `useCallback` dependency arrays
+
+### Improved
+- **Accessibility**: All 9 dialog/modal components now have `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` pointing to titled headings (GoToLine, ShortcutMapper, ColumnEditor, CharInRange, FeedbackPopup, Summary, RunCommand, Settings, About)
+- **CSS hover utilities**: Replaced 16 direct DOM style mutations (`onMouseEnter`/`onMouseLeave`) with CSS classes using custom properties (`hover-bg`, `hover-color`, `hover-opacity`, `hover-border`, `hover-bg-color`)
+- **vite-env.d.ts**: All Window interface declarations properly typed (no `any[]`, uses `FileTreeNode[]`, proper callback signatures)
+
 ## [2.2.2] - 2026
 
 ### Fixed
