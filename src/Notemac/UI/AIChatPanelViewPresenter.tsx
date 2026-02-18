@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { AIMessage, AIConversation } from "../Commons/Types";
@@ -40,6 +40,8 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
     const activeConversation = conversations.find(c => c.id === activeConversationId) || null;
     const activeProvider = GetActiveProvider();
     const hasCredential = null !== activeProvider && null !== GetCredentialForProvider(activeProvider.id);
+    const trimmedInput = inputValue.trim();
+    const hasInput = 0 < trimmedInput.length;
 
     // Auto-scroll to bottom on new messages
     useEffect(() =>
@@ -49,8 +51,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 
     const handleSend = useCallback(async () =>
     {
-        const trimmed = inputValue.trim();
-        if (0 === trimmed.length || isAiStreaming)
+        if (!hasInput || isAiStreaming)
             return;
 
         setInputValue('');
@@ -58,13 +59,13 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 
         try
         {
-            await SendChatMessage(trimmed);
+            await SendChatMessage(trimmedInput);
         }
         catch
         {
             // Error is handled in AIActionController
         }
-    }, [inputValue, isAiStreaming]);
+    }, [trimmedInput, hasInput, isAiStreaming]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent) =>
     {
@@ -399,15 +400,15 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
                     ) : (
                         <button
                             onClick={handleSend}
-                            disabled={0 === inputValue.trim().length}
+                            disabled={!hasInput}
                             title="Send (Enter)"
                             style={{
-                                backgroundColor: 0 < inputValue.trim().length ? theme.accent : theme.bgHover,
-                                color: 0 < inputValue.trim().length ? theme.accentText : theme.textMuted,
+                                backgroundColor: hasInput ? theme.accent : theme.bgHover,
+                                color: hasInput ? theme.accentText : theme.textMuted,
                                 border: 'none',
                                 borderRadius: 6,
                                 padding: '6px 12px',
-                                cursor: 0 < inputValue.trim().length ? 'pointer' : 'default',
+                                cursor: hasInput ? 'pointer' : 'default',
                                 fontSize: 12,
                                 fontWeight: 600,
                                 flexShrink: 0,
@@ -434,13 +435,13 @@ interface MessageBubbleProps
     streamContent?: string;
 }
 
-function MessageBubble({ message, theme, isStreaming, streamContent }: MessageBubbleProps)
+const MessageBubble = memo(function MessageBubble({ message, theme, isStreaming, streamContent }: MessageBubbleProps)
 {
     const isUser = 'user' === message.role;
     const displayContent = isStreaming && undefined !== streamContent ? streamContent : message.content;
 
-    // Parse code blocks for rendering
-    const parts = parseMessageContent(displayContent);
+    // Parse code blocks for rendering — memoize to avoid re-parsing on unrelated re-renders
+    const parts = useMemo(() => parseMessageContent(displayContent), [displayContent]);
 
     return (
         <div style={{
@@ -496,7 +497,7 @@ function MessageBubble({ message, theme, isStreaming, streamContent }: MessageBu
             </div>
         </div>
     );
-}
+});
 
 // ─── Code Block Display ─────────────────────────────────────────
 

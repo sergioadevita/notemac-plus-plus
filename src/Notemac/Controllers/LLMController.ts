@@ -35,13 +35,20 @@ function BuildOpenAIBody(messages: { role: string; content: string }[], modelId:
 
 function BuildAnthropicBody(messages: { role: string; content: string }[], modelId: string, options: ChatCompletionOptions): any
 {
-    // Anthropic separates system prompt from messages
-    const systemMessages = messages.filter(m => 'system' === m.role);
-    const nonSystemMessages = messages.filter(m => 'system' !== m.role);
+    // Anthropic separates system prompt from messages — single-pass split
+    const systemParts: string[] = [];
+    const nonSystemMessages: { role: string; content: string }[] = [];
+    for (let i = 0, len = messages.length; i < len; i++)
+    {
+        if ('system' === messages[i].role)
+            systemParts.push(messages[i].content);
+        else
+            nonSystemMessages.push(messages[i]);
+    }
 
     return {
         model: modelId,
-        system: 0 < systemMessages.length ? systemMessages.map(m => m.content).join('\n') : undefined,
+        system: 0 < systemParts.length ? systemParts.join('\n') : undefined,
         messages: nonSystemMessages.map(m => ({
             role: m.role,
             content: m.content,

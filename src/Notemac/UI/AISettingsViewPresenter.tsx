@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetBuiltInProviders, CreateCustomProvider, CreateCustomModel } from "../Configs/AIConfig";
@@ -54,6 +54,9 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
         }
         return flags;
     });
+
+    // Memoize custom providers to avoid re-filtering on every render
+    const customProviders = useMemo(() => providers.filter(p => !p.isBuiltIn), [providers]);
 
     // Custom provider form
     const [customName, setCustomName] = useState('');
@@ -460,12 +463,12 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
                             </button>
 
                             {/* List custom providers */}
-                            {providers.filter(p => !p.isBuiltIn).length > 0 && (
+                            {0 < customProviders.length && (
                                 <div>
                                     <div style={{ fontSize: 12, fontWeight: 600, color: theme.text, marginBottom: 8 }}>
                                         Custom Providers
                                     </div>
-                                    {providers.filter(p => !p.isBuiltIn).map(p => (
+                                    {customProviders.map(p => (
                                         <div key={p.id} style={{
                                             display: 'flex',
                                             justifyContent: 'space-between',

@@ -131,9 +131,10 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
                 return;
             }
 
+            setCommitMessage('');
             await GenerateCommitMessage(
                 diff,
-                (chunk) => { setCommitMessage(prev => prev + chunk); },
+                (_chunk) => { setCommitMessage(useNotemacStore.getState().commitMessageDraft); },
                 (finalMsg) => { setCommitMessage(finalMsg); },
             );
         }

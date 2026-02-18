@@ -201,10 +201,18 @@ export function RegisterAIInlineCompletionProvider(monaco: any, editor: any): an
                 return { items: [] };
 
             // Build prefix and suffix from the editor content
+            // Truncate to a reasonable window to avoid sending huge files
+            const MAX_CONTEXT_CHARS = 2000;
             const offset = model.getOffsetAt(position);
             const fullText = model.getValue();
-            const prefix = fullText.substring(0, offset);
-            const suffix = fullText.substring(offset);
+            const rawPrefix = fullText.substring(0, offset);
+            const rawSuffix = fullText.substring(offset);
+            const prefix = rawPrefix.length > MAX_CONTEXT_CHARS
+                ? rawPrefix.substring(rawPrefix.length - MAX_CONTEXT_CHARS)
+                : rawPrefix;
+            const suffix = rawSuffix.length > MAX_CONTEXT_CHARS
+                ? rawSuffix.substring(0, MAX_CONTEXT_CHARS)
+                : rawSuffix;
 
             // Skip if prefix is too short or ends with whitespace only
             const trimmedPrefix = prefix.trimEnd();
