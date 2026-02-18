@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2026
+
+### Fixed
+- **Critical**: `GitFileSystemAdapter.ts` — `null !== typeof window` (always true) corrected to `'undefined' !== typeof window`; was causing incorrect environment detection
+- **Critical**: `SecureEncryptionService.ts` — `String.fromCharCode(...combined)` stack overflow on large Uint8Arrays replaced with loop-based approach
+
+### Improved
+- **Type safety**: Eliminated `any` types from UIModel (Immer Draft), SearchModel (FindResult[]), SnippetController (Monaco types), FileController (typed IPC callbacks), ThemeConfig (Monaco namespace), EventDispatcher (T = unknown), MacroAction (typed data), GitFileSystemAdapter (FsReadOptions, FsStat, typed return values)
+- **Code deduplication**: Extracted `RunCodeAction` helper in AIActionController — 5 code-action functions reduced from ~200 to ~40 lines
+- **Constants extraction**: `AI_INLINE_MAX_CONTEXT_CHARS`, `AI_COMMIT_MESSAGE_MAX_TOKENS`, `AI_COMMIT_MESSAGE_TEMPERATURE`, `AI_COMMIT_SUMMARY_MAX_CHARS`, `ANTHROPIC_API_VERSION` — replacing hardcoded values across 3 controllers
+
 ## [2.2.1] - 2026
 
 ### Fixed
