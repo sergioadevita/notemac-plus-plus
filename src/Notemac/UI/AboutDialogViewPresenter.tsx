@@ -28,7 +28,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           Notemac++
         </h2>
         <div style={{ color: theme.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Version 2.1.0
+          Version 2.2.0
         </div>
 
         <div style={{
@@ -100,7 +100,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             e.stopPropagation();
             if (window.electronAPI) {
               e.preventDefault();
-              const { shell } = (window as any).require?.('electron') || {};
+              const { shell } = (window as unknown as { require?: (m: string) => { shell?: { openExternal: (url: string) => void } } }).require?.('electron') || {};
               if (shell) shell.openExternal('https://linkedin.com/in/sergioadevita');
               else window.open('https://linkedin.com/in/sergioadevita', '_blank');
             }
