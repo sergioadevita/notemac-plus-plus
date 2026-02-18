@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create, StateCreator } from 'zustand';
 import { createTabSlice, NotemacTabSlice } from "./TabModel";
 import { createSearchSlice, NotemacSearchSlice } from "./SearchModel";
 import { createMacroSlice, NotemacMacroSlice } from "./MacroModel";
@@ -14,7 +14,7 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createTabSlice(...a),
     ...createSearchSlice(...a),
     ...createMacroSlice(...a),
-    ...(createUISlice as any)(...a),
+    ...(createUISlice as StateCreator<NotemacState, [], [], NotemacUISlice>)(...a),
     ...createFileTreeSlice(...a),
     ...createSnippetSlice(...a),
     ...createGitSlice(...a),
