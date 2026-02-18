@@ -2,6 +2,7 @@ import React, { useState, useCallback, lazy, Suspense, useEffect, useRef } from 
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { FileTreeNode } from "../Commons/Types";
+import './hover-utilities.css';
 import {
   UI_SIDEBAR_MIN_WIDTH,
   UI_SIDEBAR_MAX_WIDTH,
@@ -206,15 +207,15 @@ export function Sidebar({ theme }: SidebarProps) {
               onClick={() => {
                 document.dispatchEvent(new CustomEvent('notemac-goto-line', { detail: { line: fn.line } }));
               }}
+              className="hover-bg hover-bg-reset"
               style={{
                 padding: '4px 8px',
                 cursor: 'pointer',
                 fontSize: 13,
                 color: theme.sidebarText,
                 borderRadius: 4,
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = theme.bgHover}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+                '--hover-bg': theme.bgHover,
+              } as React.CSSProperties}
             >
               <span style={{ color: theme.accent, marginRight: 4 }}>f</span>
               {fn.name}
@@ -316,6 +317,7 @@ export function Sidebar({ theme }: SidebarProps) {
           <div
             title="Collapse Panel"
             onClick={() => setSidebarPanel(null)}
+            className="hover-bg-color"
             style={{
               width: 20,
               height: 20,
@@ -326,9 +328,9 @@ export function Sidebar({ theme }: SidebarProps) {
               borderRadius: 4,
               fontSize: 12,
               color: theme.textMuted,
-            }}
-            onMouseEnter={(e) => { (e.target as HTMLElement).style.backgroundColor = theme.bgHover; (e.target as HTMLElement).style.color = theme.text; }}
-            onMouseLeave={(e) => { (e.target as HTMLElement).style.backgroundColor = 'transparent'; (e.target as HTMLElement).style.color = theme.textMuted; }}
+              '--hover-bg': theme.bgHover,
+              '--hover-color': theme.text,
+            } as React.CSSProperties}
           >
             {'\u2715'}
           </div>
@@ -639,15 +641,15 @@ const SearchPanel = React.memo(function SearchPanel({ theme }: { theme: ThemeCol
           {results.map((r, i) => (
             <div
               key={i}
+              className="hover-bg hover-bg-reset"
               style={{
                 padding: '4px 8px',
                 fontSize: 12,
                 color: theme.sidebarText,
                 cursor: 'pointer',
                 borderRadius: 4,
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = theme.bgHover}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+                '--hover-bg': theme.bgHover,
+              } as React.CSSProperties}
             >
               <div style={{ color: theme.accent, fontSize: 11 }}>{r.file}:{r.line}</div>
               <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.text}</div>
@@ -708,7 +710,7 @@ function extractFunctions(content: string, language: string): { name: string; li
   return functions;
 }
 
-async function buildWebFileTree(dirHandle: any, depth = 0): Promise<FileTreeNode[]> {
+async function buildWebFileTree(dirHandle: FileSystemDirectoryHandle, depth = 0): Promise<FileTreeNode[]> {
   if (depth > UI_FILE_TREE_MAX_DEPTH) return [];
 
   const entries: FileTreeNode[] = [];
@@ -716,16 +718,19 @@ async function buildWebFileTree(dirHandle: any, depth = 0): Promise<FileTreeNode
   for await (const entry of dirHandle.values()) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
 
-    const node: FileTreeNode & { handle?: any } = {
+    const fileHandle = entry.kind === 'file' ? entry as FileSystemFileHandle : undefined;
+    const dirEntry = entry.kind === 'directory' ? entry as FileSystemDirectoryHandle : undefined;
+
+    const node: FileTreeNode = {
       name: entry.name,
       path: entry.name,
       isDirectory: entry.kind === 'directory',
       isExpanded: false,
-      handle: entry,
+      handle: fileHandle,
     };
 
-    if (entry.kind === 'directory') {
-      node.children = await buildWebFileTree(entry, depth + 1);
+    if (dirEntry) {
+      node.children = await buildWebFileTree(dirEntry, depth + 1);
     }
 
     entries.push(node);
