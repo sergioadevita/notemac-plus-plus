@@ -185,6 +185,6 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
             tabs,
             activeTabId: tabs[session.activeTabIndex]?.id || tabs[0]?.id || null,
             sidebarPanel: session.sidebarPanel,
-        } as any);
+        } as unknown as Parameters<typeof set>[0]);
     },
 });
