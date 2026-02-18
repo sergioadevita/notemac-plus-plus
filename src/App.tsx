@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import type { FileTreeNode } from './types';
 import { useEditorStore } from './store/editorStore';
 import { getTheme } from './utils/themes';
 import { MenuBar } from './components/MenuBar';
@@ -171,7 +172,7 @@ export default function App() {
   // Handle Electron IPC
   useEffect(() => {
     if (window.electronAPI) {
-      window.electronAPI.onFileOpened((data: any) => {
+      window.electronAPI.onFileOpened((data: { path: string; content: string; name: string }) => {
         const existing = tabs.find(t => t.path === data.path);
         if (existing) {
           setActiveTab(existing.id);
@@ -187,7 +188,7 @@ export default function App() {
         }
       });
 
-      window.electronAPI.onFolderOpened((data: any) => {
+      window.electronAPI.onFolderOpened((data: { path: string; tree: FileTreeNode[] }) => {
         setFileTree(data.tree);
         setWorkspacePath(data.path);
         setSidebarPanel('explorer');
@@ -196,13 +197,13 @@ export default function App() {
         InitGitForWorkspace();
       });
 
-      window.electronAPI.onMenuAction((action: string, value: any) => {
+      window.electronAPI.onMenuAction((action: string, value?: boolean | string | number) => {
         handleMenuAction(action, value);
       });
     }
   }, []);
 
-  const handleMenuAction = useCallback((action: string, value?: any) => {
+  const handleMenuAction = useCallback((action: string, value?: boolean | string | number) => {
     const editorAction = window.__editorAction;
 
     switch (action) {
@@ -229,14 +230,14 @@ export default function App() {
       case 'find-char-in-range': setShowCharInRange(true); break;
 
       // View actions
-      case 'word-wrap': updateSettings({ wordWrap: value }); break;
-      case 'show-whitespace': updateSettings({ showWhitespace: value, renderWhitespace: value ? 'all' : 'none' }); break;
-      case 'show-eol': updateSettings({ showEOL: value }); break;
-      case 'show-non-printable': updateSettings({ showNonPrintable: value }); break;
-      case 'show-wrap-symbol': updateSettings({ showWrapSymbol: value }); break;
-      case 'indent-guide': updateSettings({ showIndentGuides: value }); break;
-      case 'show-line-numbers': updateSettings({ showLineNumbers: value }); break;
-      case 'toggle-minimap': updateSettings({ showMinimap: value }); break;
+      case 'word-wrap': updateSettings({ wordWrap: value as boolean | undefined }); break;
+      case 'show-whitespace': updateSettings({ showWhitespace: value as boolean | undefined, renderWhitespace: (value as boolean) ? 'all' : 'none' }); break;
+      case 'show-eol': updateSettings({ showEOL: value as boolean | undefined }); break;
+      case 'show-non-printable': updateSettings({ showNonPrintable: value as boolean | undefined }); break;
+      case 'show-wrap-symbol': updateSettings({ showWrapSymbol: value as boolean | undefined }); break;
+      case 'indent-guide': updateSettings({ showIndentGuides: value as boolean | undefined }); break;
+      case 'show-line-numbers': updateSettings({ showLineNumbers: value as boolean | undefined }); break;
+      case 'toggle-minimap': updateSettings({ showMinimap: value as boolean | undefined }); break;
       case 'zoom-in': setZoomLevel(zoomLevel + 1); break;
       case 'zoom-out': setZoomLevel(zoomLevel - 1); break;
       case 'zoom-reset': setZoomLevel(0); break;
@@ -244,14 +245,14 @@ export default function App() {
       case 'show-doc-list': setSidebarPanel('docList'); break;
       case 'show-function-list': setSidebarPanel('functions'); break;
       case 'show-project-panel': setSidebarPanel('project'); break;
-      case 'distraction-free': updateSettings({ distractionFreeMode: value }); break;
+      case 'distraction-free': updateSettings({ distractionFreeMode: value as boolean | undefined }); break;
       case 'always-on-top': {
-        updateSettings({ alwaysOnTop: value });
-        if (window.electronAPI) window.electronAPI.setAlwaysOnTop?.(value);
+        updateSettings({ alwaysOnTop: value as boolean | undefined });
+        if (window.electronAPI) window.electronAPI.setAlwaysOnTop?.(value as boolean);
         break;
       }
-      case 'sync-scroll-v': updateSettings({ syncScrollVertical: value }); break;
-      case 'sync-scroll-h': updateSettings({ syncScrollHorizontal: value }); break;
+      case 'sync-scroll-v': updateSettings({ syncScrollVertical: value as boolean | undefined }); break;
+      case 'sync-scroll-h': updateSettings({ syncScrollHorizontal: value as boolean | undefined }); break;
       case 'split-right': if (activeTabId) setSplitView('vertical', activeTabId); break;
       case 'split-down': if (activeTabId) setSplitView('horizontal', activeTabId); break;
       case 'close-split': setSplitView('none'); break;
@@ -265,9 +266,9 @@ export default function App() {
       }
 
       // Language / Encoding
-      case 'language': if (activeTabId) updateTab(activeTabId, { language: value }); break;
-      case 'encoding': if (activeTabId) updateTab(activeTabId, { encoding: value }); break;
-      case 'line-ending': if (activeTabId) updateTab(activeTabId, { lineEnding: value }); break;
+      case 'language': if (activeTabId) updateTab(activeTabId, { language: value as string | undefined }); break;
+      case 'encoding': if (activeTabId) updateTab(activeTabId, { encoding: value as string | undefined }); break;
+      case 'line-ending': if (activeTabId) updateTab(activeTabId, { lineEnding: value as 'LF' | 'CRLF' | 'CR' | undefined }); break;
 
       // Macro
       case 'macro-start': startRecordingMacro(); break;
