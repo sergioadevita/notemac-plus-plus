@@ -112,6 +112,15 @@ export const AI_CHAT_TEMPERATURE = 0.7;
 export const AI_MAX_CONVERSATIONS = 50;
 export const AI_MAX_INLINE_TOKENS = 256;
 
+// AI - Inline Completion
+export const AI_INLINE_MAX_CONTEXT_CHARS = 2000;
+export const AI_COMMIT_MESSAGE_MAX_TOKENS = 256;
+export const AI_COMMIT_MESSAGE_TEMPERATURE = 0.3;
+export const AI_COMMIT_SUMMARY_MAX_CHARS = 72;
+
+// Anthropic API
+export const ANTHROPIC_API_VERSION = '2023-06-01';
+
 // Credential Security
 export const CRED_STORAGE_PREFIX = "SecureCred_";
 export const CRED_DEFAULT_AI_EXPIRY_HOURS = 24;
