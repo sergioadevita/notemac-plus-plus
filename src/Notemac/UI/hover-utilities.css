@@ -1,0 +1,38 @@
+/* Hover utilities using CSS custom properties for theme-aware hover effects.
+ * Usage: Set --hover-bg, --hover-color, --hover-opacity, --hover-border-color
+ * as inline styles, then apply the corresponding class.
+ */
+
+.hover-bg {
+  transition: background-color 0.1s ease;
+}
+.hover-bg:hover {
+  background-color: var(--hover-bg, transparent) !important;
+}
+.hover-bg-reset:not(:hover) {
+  background-color: transparent !important;
+}
+
+.hover-color {
+  transition: color 0.1s ease;
+}
+.hover-color:hover {
+  color: var(--hover-color) !important;
+}
+
+.hover-opacity:hover {
+  opacity: var(--hover-opacity, 0.85) !important;
+}
+
+.hover-border:hover {
+  border-color: var(--hover-border-color) !important;
+}
+
+/* Combined bg + color hover (used in sidebar icons) */
+.hover-bg-color {
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+.hover-bg-color:hover {
+  background-color: var(--hover-bg, transparent) !important;
+  color: var(--hover-color) !important;
+}
