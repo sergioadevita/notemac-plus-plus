@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetDefaultShortcuts, GetShortcutCategories } from "../Configs/ShortcutConfig";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface ShortcutMapperDialogProps
 {
@@ -13,6 +14,7 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
   const { setShowShortcutMapper } = useNotemacStore();
   const [filter, setFilter] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const shortcuts = GetDefaultShortcuts();
   const categories = ['all', ...GetShortcutCategories()];
@@ -25,9 +27,12 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
     return matchesCategory && matchesFilter;
   });
 
+  useFocusTrap(dialogRef, true, () => setShowShortcutMapper(false));
+
   return (
     <div className="dialog-overlay" onClick={() => setShowShortcutMapper(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="shortcut-mapper-title"
