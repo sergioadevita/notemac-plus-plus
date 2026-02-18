@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import type { SearchOptions } from "../Commons/Types";
+import type { SearchOptions, FindResult } from "../Commons/Types";
 import type { FindReplaceMode } from "../Commons/Enums";
 
 const defaultSearchOptions: SearchOptions =
@@ -18,7 +18,7 @@ export interface NotemacSearchSlice
     showFindReplace: boolean;
     findReplaceMode: FindReplaceMode;
     searchOptions: SearchOptions;
-    searchResults: any[];
+    searchResults: FindResult[];
     showIncrementalSearch: boolean;
 
     setShowFindReplace: (show: boolean, mode?: FindReplaceMode) => void;
