@@ -96,7 +96,7 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
             await CreateCommit(commitMessage.trim());
             setCommitMessage('');
         }
-        catch {}
+        catch { /* Commit failed — git panel will reflect current state */ }
     }, [commitMessage]);
 
     const handleCommitAndPush = useCallback(async () =>
@@ -109,7 +109,7 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
             setCommitMessage('');
             await PushToRemote();
         }
-        catch {}
+        catch { /* Commit or push failed — git panel will reflect current state */ }
     }, [commitMessage]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent) =>
