@@ -3,6 +3,7 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { SavedSnippet } from "../Commons/Types";
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
+import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 
 interface SnippetManagerProps
 {
@@ -167,7 +168,7 @@ export function SnippetManagerViewPresenter({ theme }: SnippetManagerProps)
                 position: 'fixed',
                 top: 0, left: 0, right: 0, bottom: 0,
                 backgroundColor: 'rgba(0,0,0,0.4)',
-                zIndex: 10000,
+                zIndex: UI_ZINDEX_MODAL,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
