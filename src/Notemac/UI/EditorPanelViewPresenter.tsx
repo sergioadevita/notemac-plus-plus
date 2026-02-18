@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
+import type { editor, IRange } from 'monaco-editor';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { defineMonacoThemes } from "../Configs/ThemeConfig";
@@ -26,7 +26,7 @@ interface EditorPanelProps {
 
 export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monacoRef = useRef<any>(null);
+  const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
   const { updateTabContent, updateTab, showFindReplace } = useNotemacStore();
   const [monacoReady, setMonacoReady] = useState(false);
 
@@ -87,7 +87,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Explain Code',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 1,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -102,7 +102,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Refactor Code',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 2,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -119,7 +119,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Generate Tests',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 3,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -142,7 +142,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Generate Documentation',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 4,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -159,7 +159,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Fix Error',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 5,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -177,7 +177,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       label: 'AI: Simplify Code',
       contextMenuGroupId: '9_ai',
       contextMenuOrder: 6,
-      run: (ed: any) => {
+      run: (ed: editor.IStandaloneCodeEditor) => {
         const sel = ed.getSelection();
         const model = ed.getModel();
         if (sel && !sel.isEmpty() && model) {
@@ -198,13 +198,13 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
 
     // Focus the editor
     editor.focus();
-  }, [tab.id, theme.editorMonacoTheme]);
+  }, [tab.id, theme.editorMonacoTheme, tab.scrollTop, updateTab]);
 
   const handleChange: OnChange = useCallback((value) => {
     if (value !== undefined) {
       updateTabContent(tab.id, value);
     }
-  }, [tab.id]);
+  }, [tab.id, updateTabContent]);
 
   // Update theme when it changes
   useEffect(() => {
@@ -244,7 +244,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     const monaco = monacoRef.current;
     if (!editor || !monaco) return;
 
-    const actionHandler = (action: string, value?: any) => {
+    const actionHandler = (action: string, value?: boolean | string | number) => {
       const model = editor.getModel();
       if (!model) return;
 
@@ -546,7 +546,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
             if ('type' === macroAction.type) {
               editor.trigger('keyboard', 'type', { text: macroAction.data });
             } else if ('command' === macroAction.type) {
-              editor.trigger('keyboard', String(macroAction.data), null);
+              editor.trigger('keyboard', macroAction.data, null);
             }
           }
           break;
@@ -564,7 +564,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
               if ('type' === macroAction.type) {
                 editor.trigger('keyboard', 'type', { text: macroAction.data });
               } else if ('command' === macroAction.type) {
-                editor.trigger('keyboard', String(macroAction.data), null);
+                editor.trigger('keyboard', macroAction.data, null);
               }
             }
           }
@@ -877,7 +877,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       const model = editor.getModel();
       if (!model) return;
 
-      const edits: Array<{ range: any; text: string }> = [];
+      const edits: Array<{ range: IRange; text: string }> = [];
       const maxLine = Math.min(endLine || model.getLineCount(), model.getLineCount());
       for (let i = startLine || 1; i <= maxLine; i++)
       {
