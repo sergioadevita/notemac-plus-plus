@@ -343,6 +343,9 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
                 credentials,
                 aiEnabled: 0 < credentials.length,
             });
+        }).catch(() =>
+        {
+            /* Credential retrieval failed — defaults already set above */
         });
 
         set({
