@@ -130,9 +130,9 @@ export async function SendChatMessage(userContent: string): Promise<void>
             },
         );
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -185,9 +185,9 @@ export async function RefactorCode(
         const refactored = 0 < blocks.length ? blocks[0].code : result;
         onResult(refactored);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -224,9 +224,9 @@ export async function GenerateTests(
         const tests = 0 < blocks.length ? blocks[0].code : result;
         onResult(tests);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -263,9 +263,9 @@ export async function GenerateDocumentation(
         const documented = 0 < blocks.length ? blocks[0].code : result;
         onResult(documented);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -303,9 +303,9 @@ export async function FixError(
         const fixed = 0 < blocks.length ? blocks[0].code : result;
         onResult(fixed);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -342,9 +342,9 @@ export async function SimplifyCode(
         const simplified = 0 < blocks.length ? blocks[0].code : result;
         onResult(simplified);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -382,9 +382,9 @@ export async function ConvertLanguage(
         const converted = 0 < blocks.length ? blocks[0].code : result;
         onResult(converted);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -434,9 +434,9 @@ export async function GenerateCommitMessage(
 
         return fullMessage;
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetAiOperationError(error.message);
+        store.SetAiOperationError(error instanceof Error ? error.message : String(error));
         return '';
     }
     finally
