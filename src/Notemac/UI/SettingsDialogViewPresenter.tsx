@@ -120,6 +120,9 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
         className="dialog"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -138,7 +141,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
           alignItems: 'center',
           marginBottom: 16,
         }}>
-          <h2 style={{ color: theme.text, fontSize: 18, fontWeight: 600 }}>Preferences</h2>
+          <h2 id="settings-title" style={{ color: theme.text, fontSize: 18, fontWeight: 600 }}>Preferences</h2>
           <span
             onClick={() => setShowSettings(false)}
             style={{ cursor: 'pointer', color: theme.textMuted, fontSize: 20 }}
