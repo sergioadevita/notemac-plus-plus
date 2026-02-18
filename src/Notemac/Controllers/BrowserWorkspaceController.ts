@@ -45,7 +45,7 @@ export function OpenBrowserWorkspace(workspaceId: string): boolean
     const _fs = CreateLightningFsAdapter(workspace.id);
 
     // Set workspace path to the workspace name
-    (store as any).setWorkspacePath?.(workspace.name);
+    store.setWorkspacePath(workspace.name);
 
     return true;
 }
