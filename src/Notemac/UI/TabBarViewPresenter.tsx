@@ -138,7 +138,8 @@ export function TabBar({ theme }: TabBarProps) {
                 {tab.name}
               </span>
               {!tab.isPinned && (
-                <span
+                <button
+                  aria-label={`Close tab: ${tab.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     closeTab(tab.id);
@@ -153,6 +154,11 @@ export function TabBar({ theme }: TabBarProps) {
                     fontSize: 14,
                     opacity: 0.5,
                     flexShrink: 0,
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'inherit',
+                    padding: 0,
                   }}
                   onMouseEnter={(e) => {
                     (e.target as HTMLElement).style.opacity = '1';
@@ -164,14 +170,15 @@ export function TabBar({ theme }: TabBarProps) {
                   }}
                 >
                   {'\u00d7'}
-                </span>
+                </button>
               )}
             </div>
           );
         })}
 
         {/* New tab button */}
-        <div
+        <button
+          aria-label="New tab"
           onClick={() => addTab()}
           style={{
             display: 'flex',
@@ -183,6 +190,9 @@ export function TabBar({ theme }: TabBarProps) {
             color: theme.textMuted,
             fontSize: 18,
             flexShrink: 0,
+            backgroundColor: 'transparent',
+            border: 'none',
+            padding: 0,
           }}
           onMouseEnter={(e) => {
             (e.target as HTMLElement).style.color = theme.text;
@@ -192,7 +202,7 @@ export function TabBar({ theme }: TabBarProps) {
           }}
         >
           +
-        </div>
+        </button>
       </div>
 
       {/* Context Menu */}
