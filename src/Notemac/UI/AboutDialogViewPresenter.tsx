@@ -55,6 +55,10 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px', fontSize: 12, color: theme.textSecondary }}>
             <span>Syntax Highlighting (70+ langs)</span>
+            <span>Git Integration</span>
+            <span>AI Assistant (Multi-provider)</span>
+            <span>Integrated Terminal</span>
+            <span>Code Snippets</span>
             <span>Multi-cursor Editing</span>
             <span>Find & Replace (Regex)</span>
             <span>Code Folding</span>
@@ -64,8 +68,8 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             <span>Bookmarks</span>
             <span>6 Color Themes</span>
             <span>File Explorer</span>
-            <span>Function List</span>
-            <span>Hash Tools</span>
+            <span>Clipboard History</span>
+            <span>Encrypted Credentials</span>
             <span>Encoding Support</span>
             <span>Line Operations</span>
             <span>Drag & Drop Tabs</span>
@@ -78,7 +82,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           color: theme.textMuted,
           marginBottom: 16,
         }}>
-          Built with React, Monaco Editor, TypeScript, and Electron
+          Built with React, Monaco Editor, TypeScript, Electron, isomorphic-git, and Xterm.js
         </div>
 
         <div style={{
