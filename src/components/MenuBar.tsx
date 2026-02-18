@@ -5,7 +5,7 @@ import { ENCODINGS, ALL_LANGUAGES } from '../types';
 
 interface MenuBarProps {
   theme: ThemeColors;
-  onAction: (action: string, value?: any) => void;
+  onAction: (action: string, value?: boolean | string | number) => void;
   isElectron?: boolean;
 }
 
@@ -13,7 +13,7 @@ interface MenuItem {
   label: string;
   shortcut?: string;
   action?: string;
-  value?: any;
+  value?: boolean | string | number;
   type?: 'separator' | 'checkbox';
   checked?: boolean;
   children?: MenuItem[];
