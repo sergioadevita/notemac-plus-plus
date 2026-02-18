@@ -1,6 +1,6 @@
 export type TabColor = 'none' | 'color1' | 'color2' | 'color3' | 'color4' | 'color5';
 
-export type SidebarPanel = 'explorer' | 'search' | 'functions' | 'project' | 'clipboardHistory' | 'charPanel' | 'docList' | null;
+export type SidebarPanel = 'explorer' | 'search' | 'functions' | 'project' | 'clipboardHistory' | 'charPanel' | 'docList' | 'terminal' | null;
 
 export type SplitViewMode = 'none' | 'horizontal' | 'vertical';
 

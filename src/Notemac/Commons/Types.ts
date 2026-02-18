@@ -124,3 +124,30 @@ export interface SessionData
     activeTabIndex: number;
     sidebarPanel: SidebarPanel;
 }
+
+export interface CommandDefinition
+{
+    id: string;
+    label: string;
+    category: string;
+    keybinding?: string;
+    action: string;
+    icon?: string;
+}
+
+export interface SavedSnippet
+{
+    id: string;
+    name: string;
+    prefix: string;
+    body: string;
+    language: string;
+    description?: string;
+}
+
+export interface DiffSession
+{
+    id: string;
+    originalTabId: string;
+    modifiedTabId: string;
+}

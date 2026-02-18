@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import { GetTheme } from "../Configs/ThemeConfig";
 import { HandleKeyDown } from "../Controllers/AppController";
@@ -11,42 +11,52 @@ import { EditorPanel } from './EditorPanelViewPresenter';
 import { StatusBar } from './StatusBarViewPresenter';
 import { Sidebar } from './SidebarViewPresenter';
 import { FindReplace } from './FindReplaceViewPresenter';
-import { SettingsDialog } from './SettingsDialogViewPresenter';
-import { GoToLineDialog } from './GoToLineDialogViewPresenter';
-import { AboutDialog } from './AboutDialogViewPresenter';
 import { WelcomeScreen } from './WelcomeScreenViewPresenter';
-import { RunCommandDialog } from './RunCommandDialogViewPresenter';
-import { ColumnEditorDialog } from './ColumnEditorDialogViewPresenter';
-import { SummaryDialog } from './SummaryDialogViewPresenter';
-import { CharInRangeDialog } from './CharInRangeDialogViewPresenter';
-import { ShortcutMapperDialog } from './ShortcutMapperDialogViewPresenter';
 import { FeedbackPopup } from './FeedbackPopupViewPresenter';
+
+// Lazy-loaded dialogs (rarely shown — improves initial load time)
+const SettingsDialog = lazy(() => import('./SettingsDialogViewPresenter').then(m => ({ default: m.SettingsDialog })));
+const GoToLineDialog = lazy(() => import('./GoToLineDialogViewPresenter').then(m => ({ default: m.GoToLineDialog })));
+const AboutDialog = lazy(() => import('./AboutDialogViewPresenter').then(m => ({ default: m.AboutDialog })));
+const RunCommandDialog = lazy(() => import('./RunCommandDialogViewPresenter').then(m => ({ default: m.RunCommandDialog })));
+const ColumnEditorDialog = lazy(() => import('./ColumnEditorDialogViewPresenter').then(m => ({ default: m.ColumnEditorDialog })));
+const SummaryDialog = lazy(() => import('./SummaryDialogViewPresenter').then(m => ({ default: m.SummaryDialog })));
+const CharInRangeDialog = lazy(() => import('./CharInRangeDialogViewPresenter').then(m => ({ default: m.CharInRangeDialog })));
+const ShortcutMapperDialog = lazy(() => import('./ShortcutMapperDialogViewPresenter').then(m => ({ default: m.ShortcutMapperDialog })));
+const CommandPaletteViewPresenter = lazy(() => import('./CommandPaletteViewPresenter').then(m => ({ default: m.CommandPaletteViewPresenter })));
+const QuickOpenViewPresenter = lazy(() => import('./QuickOpenViewPresenter').then(m => ({ default: m.QuickOpenViewPresenter })));
+const DiffViewerViewPresenter = lazy(() => import('./DiffViewerViewPresenter').then(m => ({ default: m.DiffViewerViewPresenter })));
+const SnippetManagerViewPresenter = lazy(() => import('./SnippetManagerViewPresenter').then(m => ({ default: m.SnippetManagerViewPresenter })));
+const TerminalPanelViewPresenter = lazy(() => import('./TerminalPanelViewPresenter').then(m => ({ default: m.TerminalPanelViewPresenter })));
 
 export default function App()
 {
-  const {
-    tabs,
-    activeTabId,
-    sidebarPanel,
-    showStatusBar,
-    showToolbar,
-    settings,
-    showFindReplace,
-    showSettings,
-    showGoToLine,
-    showAbout,
-    showRunCommand,
-    showColumnEditor,
-    showSummary,
-    showCharInRange,
-    showShortcutMapper,
-    splitView,
-    splitTabId,
-    addTab,
-    zoomLevel,
-  } = useNotemacStore();
+  const tabs = useNotemacStore(s => s.tabs);
+  const activeTabId = useNotemacStore(s => s.activeTabId);
+  const sidebarPanel = useNotemacStore(s => s.sidebarPanel);
+  const showStatusBar = useNotemacStore(s => s.showStatusBar);
+  const showToolbar = useNotemacStore(s => s.showToolbar);
+  const settings = useNotemacStore(s => s.settings);
+  const showFindReplace = useNotemacStore(s => s.showFindReplace);
+  const showSettings = useNotemacStore(s => s.showSettings);
+  const showGoToLine = useNotemacStore(s => s.showGoToLine);
+  const showAbout = useNotemacStore(s => s.showAbout);
+  const showRunCommand = useNotemacStore(s => s.showRunCommand);
+  const showColumnEditor = useNotemacStore(s => s.showColumnEditor);
+  const showSummary = useNotemacStore(s => s.showSummary);
+  const showCharInRange = useNotemacStore(s => s.showCharInRange);
+  const showShortcutMapper = useNotemacStore(s => s.showShortcutMapper);
+  const showCommandPalette = useNotemacStore(s => s.showCommandPalette);
+  const showQuickOpen = useNotemacStore(s => s.showQuickOpen);
+  const showDiffViewer = useNotemacStore(s => s.showDiffViewer);
+  const showSnippetManager = useNotemacStore(s => s.showSnippetManager);
+  const showTerminalPanel = useNotemacStore(s => s.showTerminalPanel);
+  const splitView = useNotemacStore(s => s.splitView);
+  const splitTabId = useNotemacStore(s => s.splitTabId);
+  const addTab = useNotemacStore(s => s.addTab);
+  const zoomLevel = useNotemacStore(s => s.zoomLevel);
 
-  const theme = GetTheme(settings.theme);
+  const theme = useMemo(() => GetTheme(settings.theme), [settings.theme]);
 
   // Keyboard shortcut handler — delegates to NotemacAppController
   const onKeyDown = useCallback((e: KeyboardEvent) =>
@@ -183,19 +193,33 @@ export default function App()
               <WelcomeScreen theme={theme} />
             )}
           </div>
+
+          {/* Terminal panel — between editor and status bar */}
+          {showTerminalPanel && (
+            <Suspense fallback={null}>
+              <TerminalPanelViewPresenter theme={theme} />
+            </Suspense>
+          )}
         </div>
       </div>
 
       {showStatusBar && !isDistractionFree && <StatusBar theme={theme} />}
 
-      {showSettings && <SettingsDialog theme={theme} />}
-      {showGoToLine && <GoToLineDialog theme={theme} />}
-      {showAbout && <AboutDialog theme={theme} />}
-      {showRunCommand && <RunCommandDialog theme={theme} />}
-      {showColumnEditor && <ColumnEditorDialog theme={theme} />}
-      {showSummary && <SummaryDialog theme={theme} />}
-      {showCharInRange && <CharInRangeDialog theme={theme} />}
-      {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
+      {/* Lazy-loaded dialogs */}
+      <Suspense fallback={null}>
+        {showSettings && <SettingsDialog theme={theme} />}
+        {showGoToLine && <GoToLineDialog theme={theme} />}
+        {showAbout && <AboutDialog theme={theme} />}
+        {showRunCommand && <RunCommandDialog theme={theme} />}
+        {showColumnEditor && <ColumnEditorDialog theme={theme} />}
+        {showSummary && <SummaryDialog theme={theme} />}
+        {showCharInRange && <CharInRangeDialog theme={theme} />}
+        {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
+        {showCommandPalette && <CommandPaletteViewPresenter theme={theme} />}
+        {showQuickOpen && <QuickOpenViewPresenter theme={theme} />}
+        {showDiffViewer && <DiffViewerViewPresenter theme={theme} />}
+        {showSnippetManager && <SnippetManagerViewPresenter theme={theme} />}
+      </Suspense>
       <FeedbackPopup theme={theme} />
     </div>
   );

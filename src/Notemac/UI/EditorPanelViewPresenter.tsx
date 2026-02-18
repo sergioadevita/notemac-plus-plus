@@ -5,6 +5,9 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { defineMonacoThemes } from "../Configs/ThemeConfig";
 import type { FileTab, AppSettings } from "../Commons/Types";
+import { RegisterCompletionProviders } from "../Controllers/CompletionController";
+import { InsertSnippet } from "../Controllers/SnippetController";
+import { Subscribe, Unsubscribe, NOTEMAC_EVENTS } from "../../Shared/EventDispatcher/EventDispatcher";
 
 interface EditorPanelProps {
   tab: FileTab;
@@ -70,6 +73,10 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       editor.setScrollTop(tab.scrollTop);
     }
 
+    // Register custom completion providers (IntelliSense)
+    const completionDisposables = RegisterCompletionProviders(monaco, editor);
+    (editor as any).__completionDisposables = completionDisposables;
+
     // Focus the editor
     editor.focus();
   }, [tab.id, theme.editorMonacoTheme]);
@@ -86,6 +93,30 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
       monacoRef.current.editor.setTheme(theme.editorMonacoTheme);
     }
   }, [theme.editorMonacoTheme]);
+
+  // Snippet insertion handler
+  useEffect(() => {
+    const handleSnippetInsert = (data: { body: string }) => {
+      if (editorRef.current && data?.body) {
+        InsertSnippet(editorRef.current, data.body);
+        editorRef.current.focus();
+      }
+    };
+    Subscribe(NOTEMAC_EVENTS.INSERT_SNIPPET, handleSnippetInsert);
+    return () => Unsubscribe(NOTEMAC_EVENTS.INSERT_SNIPPET, handleSnippetInsert);
+  }, []);
+
+  // Cleanup completion providers on unmount
+  useEffect(() => {
+    return () => {
+      const editor = editorRef.current;
+      if (editor && (editor as any).__completionDisposables) {
+        for (const d of (editor as any).__completionDisposables) {
+          d?.dispose?.();
+        }
+      }
+    };
+  }, []);
 
   // Handle external actions
   useEffect(() => {

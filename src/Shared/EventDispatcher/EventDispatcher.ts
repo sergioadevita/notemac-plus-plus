@@ -47,4 +47,6 @@ export const NOTEMAC_EVENTS =
     COLUMN_EDIT: 'notemac-column-edit',
     CLEAR_MARKS: 'notemac-clear-marks',
     EDITOR_ACTION: 'notemac-editor-action',
+    INSERT_SNIPPET: 'notemac-insert-snippet',
+    EXECUTE_COMMAND: 'notemac-execute-command',
 } as const;

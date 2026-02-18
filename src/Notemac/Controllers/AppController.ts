@@ -65,6 +65,11 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
         e.preventDefault();
         store.setZoomLevel(0);
     }
+    else if (isMod && e.shiftKey && 'P' === e.key)
+    {
+        e.preventDefault();
+        store.setShowCommandPalette(true);
+    }
     else if (isMod && e.shiftKey && 'F' === e.key)
     {
         e.preventDefault();
@@ -73,7 +78,12 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
     else if (isMod && 'p' === e.key)
     {
         e.preventDefault();
-        window.print();
+        store.setShowQuickOpen(true);
+    }
+    else if (e.ctrlKey && '`' === e.key)
+    {
+        e.preventDefault();
+        store.setShowTerminalPanel(!store.showTerminalPanel);
     }
     else if ('Escape' === e.key)
     {
@@ -86,5 +96,9 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
         store.setShowSummary(false);
         store.setShowCharInRange(false);
         store.setShowShortcutMapper(false);
+        store.setShowCommandPalette(false);
+        store.setShowQuickOpen(false);
+        store.setShowDiffViewer(false);
+        store.setShowSnippetManager(false);
     }
 }

@@ -220,6 +220,23 @@ export function HandleMenuAction(
             store.stopRecordingMacro();
             break;
 
+        // New feature dialogs
+        case 'command-palette':
+            store.setShowCommandPalette(true);
+            break;
+        case 'quick-open':
+            store.setShowQuickOpen(true);
+            break;
+        case 'compare-files':
+            store.setShowDiffViewer(true);
+            break;
+        case 'snippet-manager':
+            store.setShowSnippetManager(true);
+            break;
+        case 'toggle-terminal':
+            store.setShowTerminalPanel(!store.showTerminalPanel);
+            break;
+
         // Dialogs
         case 'preferences':
             store.setShowSettings(true);

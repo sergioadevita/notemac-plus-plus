@@ -12,7 +12,19 @@ export default defineConfig({
   base: './',
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'monaco-editor': ['monaco-editor'],
+          'react-vendor': ['react', 'react-dom'],
+        },
+      },
+    },
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
   },
   server: {
     port: 5173,

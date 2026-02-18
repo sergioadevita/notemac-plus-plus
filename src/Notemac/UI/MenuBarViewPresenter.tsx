@@ -129,6 +129,9 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Copy File Name', action: 'copy-file-name' },
       { label: 'Copy File Dir', action: 'copy-file-dir' },
       { type: 'separator', label: '' },
+      { label: 'Compare Files...', action: 'compare-files' },
+      { label: 'Snippet Manager...', action: 'snippet-manager' },
+      { type: 'separator', label: '' },
       { label: 'Set Read-Only', action: 'toggle-readonly' },
     ],
     Search: [
@@ -206,6 +209,10 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { type: 'separator', label: '' },
       { label: 'Summary...', action: 'show-summary' },
       { label: 'Monitoring (tail -f)', action: 'toggle-monitoring' },
+      { type: 'separator', label: '' },
+      { label: 'Command Palette...', shortcut: `${shift}${mod}P`, action: 'command-palette' },
+      { label: 'Quick Open...', shortcut: `${mod}P`, action: 'quick-open' },
+      { label: 'Toggle Terminal', shortcut: 'Ctrl+`', action: 'toggle-terminal' },
     ],
     Encoding: [
       ...GetEncodings().flatMap(group => [

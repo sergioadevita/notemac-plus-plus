@@ -6,6 +6,8 @@ export const DB_SETTINGS = "Settings";
 export const DB_RECENT_FILES = "RecentFiles";
 export const DB_SAVED_MACROS = "SavedMacros";
 export const DB_CLIPBOARD_HISTORY = "ClipboardHistory";
+export const DB_SAVED_SNIPPETS = "SavedSnippets";
+export const DB_TERMINAL_HISTORY = "TerminalHistory";
 
 // UI - Panels
 export const UI_EXPLORER_PANEL = "Explorer";
@@ -25,6 +27,11 @@ export const UI_COLUMN_EDITOR_DIALOG = "ColumnEditor";
 export const UI_SUMMARY_DIALOG = "Summary";
 export const UI_CHAR_IN_RANGE_DIALOG = "CharInRange";
 export const UI_SHORTCUT_MAPPER_DIALOG = "ShortcutMapper";
+export const UI_COMMAND_PALETTE = "CommandPalette";
+export const UI_QUICK_OPEN = "QuickOpen";
+export const UI_DIFF_VIEWER = "DiffViewer";
+export const UI_SNIPPET_MANAGER = "SnippetManager";
+export const UI_TERMINAL_PANEL = "Terminal";
 
 // MARK - Colors
 export const MARK_COLORS: Record<number, string> =
@@ -61,3 +68,10 @@ export const LIMIT_RECENT_FILES = 20;
 export const LIMIT_CLIPBOARD_HISTORY = 50;
 export const LIMIT_ZOOM_MIN = -5;
 export const LIMIT_ZOOM_MAX = 10;
+export const LIMIT_TERMINAL_HISTORY = 100;
+export const LIMIT_QUICK_OPEN_RESULTS = 50;
+
+// TERMINAL
+export const TERMINAL_DEFAULT_HEIGHT = 200;
+export const TERMINAL_MIN_HEIGHT = 100;
+export const TERMINAL_MAX_HEIGHT = 600;

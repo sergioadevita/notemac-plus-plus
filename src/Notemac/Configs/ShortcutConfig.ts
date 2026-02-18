@@ -15,7 +15,7 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'File', name: 'Save All', shortcut: 'Cmd+Alt+S', action: 'save-all' },
     { category: 'File', name: 'Close Tab', shortcut: 'Cmd+W', action: 'close-tab' },
     { category: 'File', name: 'Restore Last Closed', shortcut: 'Cmd+Shift+T', action: 'restore-last-closed' },
-    { category: 'File', name: 'Print', shortcut: 'Cmd+P', action: 'print' },
+    { category: 'File', name: 'Quick Open', shortcut: 'Cmd+P', action: 'quick-open' },
 
     // Edit
     { category: 'Edit', name: 'Undo', shortcut: 'Cmd+Z', action: 'undo' },
@@ -56,6 +56,12 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'Macro', name: 'Start Recording', shortcut: 'Cmd+Shift+R', action: 'macro-start' },
     { category: 'Macro', name: 'Stop Recording', shortcut: 'Cmd+Shift+R', action: 'macro-stop' },
     { category: 'Macro', name: 'Playback', shortcut: 'Cmd+Shift+P', action: 'macro-playback' },
+
+    // New features
+    { category: 'View', name: 'Command Palette', shortcut: 'Cmd+Shift+P', action: 'command-palette' },
+    { category: 'View', name: 'Toggle Terminal', shortcut: 'Ctrl+`', action: 'toggle-terminal' },
+    { category: 'Edit', name: 'Compare Files', shortcut: '', action: 'compare-files' },
+    { category: 'Edit', name: 'Snippet Manager', shortcut: '', action: 'snippet-manager' },
 ] as const;
 
 export function GetDefaultShortcuts(): readonly ShortcutItem[]

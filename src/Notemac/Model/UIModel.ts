@@ -4,7 +4,7 @@ import type { AppSettings, ClipboardEntry, SessionData, FileTab } from "../Commo
 import type { SidebarPanel, SplitViewMode } from "../Commons/Enums";
 import { GetDefaultSettings } from "../Configs/EditorConfig";
 import { generateId } from '../../Shared/Helpers/IdHelpers';
-import { LIMIT_CLIPBOARD_HISTORY, LIMIT_ZOOM_MIN, LIMIT_ZOOM_MAX } from '../Commons/Constants';
+import { LIMIT_CLIPBOARD_HISTORY, LIMIT_ZOOM_MIN, LIMIT_ZOOM_MAX, TERMINAL_DEFAULT_HEIGHT, TERMINAL_MIN_HEIGHT, TERMINAL_MAX_HEIGHT } from '../Commons/Constants';
 
 export interface NotemacUISlice
 {
@@ -27,6 +27,12 @@ export interface NotemacUISlice
     showSummary: boolean;
     showCharInRange: boolean;
     showShortcutMapper: boolean;
+    showCommandPalette: boolean;
+    showQuickOpen: boolean;
+    showDiffViewer: boolean;
+    showSnippetManager: boolean;
+    showTerminalPanel: boolean;
+    terminalHeight: number;
 
     setSidebarPanel: (panel: SidebarPanel) => void;
     toggleSidebar: () => void;
@@ -42,6 +48,12 @@ export interface NotemacUISlice
     setShowSummary: (show: boolean) => void;
     setShowCharInRange: (show: boolean) => void;
     setShowShortcutMapper: (show: boolean) => void;
+    setShowCommandPalette: (show: boolean) => void;
+    setShowQuickOpen: (show: boolean) => void;
+    setShowDiffViewer: (show: boolean) => void;
+    setShowSnippetManager: (show: boolean) => void;
+    setShowTerminalPanel: (show: boolean) => void;
+    setTerminalHeight: (height: number) => void;
 
     saveSession: () => SessionData;
     loadSession: (session: SessionData) => void;
@@ -67,6 +79,12 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     showSummary: false,
     showCharInRange: false,
     showShortcutMapper: false,
+    showCommandPalette: false,
+    showQuickOpen: false,
+    showDiffViewer: false,
+    showSnippetManager: false,
+    showTerminalPanel: false,
+    terminalHeight: TERMINAL_DEFAULT_HEIGHT,
 
     setSidebarPanel: (panel) => set({ sidebarPanel: panel }),
 
@@ -106,6 +124,12 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     setShowSummary: (show) => set({ showSummary: show }),
     setShowCharInRange: (show) => set({ showCharInRange: show }),
     setShowShortcutMapper: (show) => set({ showShortcutMapper: show }),
+    setShowCommandPalette: (show) => set({ showCommandPalette: show }),
+    setShowQuickOpen: (show) => set({ showQuickOpen: show }),
+    setShowDiffViewer: (show) => set({ showDiffViewer: show }),
+    setShowSnippetManager: (show) => set({ showSnippetManager: show }),
+    setShowTerminalPanel: (show) => set({ showTerminalPanel: show }),
+    setTerminalHeight: (height) => set({ terminalHeight: Math.max(TERMINAL_MIN_HEIGHT, Math.min(TERMINAL_MAX_HEIGHT, height)) }),
 
     saveSession: () =>
     {
