@@ -8,7 +8,7 @@ interface FeedbackPopupProps
 
 const FEEDBACK_TIMER_MS = 20 * 60 * 1000;
 const FEEDBACK_STORAGE_KEY = 'notemac_feedback_shown_version';
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 
 export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {
