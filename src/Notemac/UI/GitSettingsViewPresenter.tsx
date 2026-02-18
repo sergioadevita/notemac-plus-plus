@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { SaveCredentialsWithToken, ClearCredentials, TestAuthentication, StartGitHubOAuth, PollGitHubOAuthToken } from "../Controllers/AuthController";
@@ -37,6 +37,7 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
     const [oauthState, setOauthState] = useState<OAuthState | null>(null);
     const [oauthStatus, setOauthStatus] = useState<'idle' | 'waiting' | 'success' | 'error'>('idle');
     const [oauthError, setOauthError] = useState('');
+    const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleClose = useCallback(() => setShowGitSettings(false), [setShowGitSettings]);
 
@@ -84,10 +85,10 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
             }
             else if ('waiting' === oauthStatus)
             {
-                setTimeout(poll, pollInterval);
+                pollTimerRef.current = setTimeout(poll, pollInterval);
             }
         };
-        setTimeout(poll, pollInterval);
+        pollTimerRef.current = setTimeout(poll, pollInterval);
         }
         catch
         {
@@ -125,6 +126,15 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
             setTestResult({ success: false, error: 'Authentication test failed unexpectedly.' });
         }
     }, [testUrl, username, token]);
+
+    useEffect(() => {
+        return () => {
+            if (pollTimerRef.current) {
+                clearTimeout(pollTimerRef.current);
+                pollTimerRef.current = null;
+            }
+        };
+    }, []);
 
     const inputStyle = {
         width: '100%', height: 30, backgroundColor: theme.bgSecondary, color: theme.text,
