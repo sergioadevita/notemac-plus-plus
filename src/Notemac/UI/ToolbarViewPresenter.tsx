@@ -4,7 +4,7 @@ import type { ThemeColors } from "../Configs/ThemeConfig";
 
 interface ToolbarProps {
   theme: ThemeColors;
-  onAction: (action: string, value?: any) => void;
+  onAction: (action: string, value?: boolean | string | number) => void;
 }
 
 // SVG icon components — crisp on all platforms, no emoji dependency
