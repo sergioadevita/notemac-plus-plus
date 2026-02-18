@@ -8,7 +8,7 @@
 
 import type { editor } from 'monaco-editor';
 
-type EditorActionFn = (action: string, value?: unknown) => void;
+type EditorActionFn = (action: string, value?: boolean | string | number) => void;
 
 let monacoEditor: editor.IStandaloneCodeEditor | null = null;
 let editorAction: EditorActionFn | null = null;
