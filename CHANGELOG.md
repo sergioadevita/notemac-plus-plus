@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026
+
+### Improved
+- **Zero `as any` casts**: Eliminated ALL remaining type-unsafe casts from production code (45→0)
+- **Generic SelectField component**: Settings dropdowns now fully type-safe with generic type parameters
+- **FileTreeNode type**: Added `handle` property to interface, removing unsafe casts for File System Access API
+- **WeakMap for editor disposables**: Replaced runtime property patching (`editor.__completionDisposables`) with a type-safe WeakMap
+- **Zustand store typing**: Properly typed cross-slice state creator and store method access
+- **Specific type assertions**: Replaced broad `as any` with precise union types for settings enums, line endings, auth types, and column editor formats
+- **Promise error handling**: All `.then()` chains now have `.catch()` handlers
+- **Empty catch blocks**: All catch blocks now have descriptive comments
+
 ## [2.1.0] - 2026
 
 ### Changed
