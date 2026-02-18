@@ -1,9 +1,10 @@
 import type { FileTab, AppSettings } from "../../Commons/Types";
+import type { ThemeColors } from "../../Configs/ThemeConfig";
 
 export interface EditorPanelViewPresenterParams
 {
     tab: FileTab;
-    theme: any;
+    theme: ThemeColors;
     settings: AppSettings;
     zoomLevel: number;
 }
