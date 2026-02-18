@@ -3,6 +3,7 @@ import { DiffEditor } from '@monaco-editor/react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetFileAtHead } from "../Controllers/GitController";
+import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 
 interface DiffViewerProps
 {
@@ -48,7 +49,7 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
     const handleClose = useCallback(() =>
     {
         setShowDiffViewer(false);
-    }, []);
+    }, [setShowDiffViewer]);
 
     return (
         <div
@@ -59,7 +60,7 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
                 right: 0,
                 bottom: 0,
                 backgroundColor: 'rgba(0,0,0,0.5)',
-                zIndex: 10000,
+                zIndex: UI_ZINDEX_MODAL,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
