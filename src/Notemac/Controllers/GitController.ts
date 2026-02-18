@@ -1,4 +1,4 @@
-import git from 'isomorphic-git';
+import git, { type FsClient } from 'isomorphic-git';
 import http from 'isomorphic-git/http/web';
 import { useNotemacStore } from "../Model/Store";
 import type { GitBranch, GitCommit, GitStatus, GitFileStatus, GitRemote, GitCredentials } from "../Commons/Types";
@@ -14,7 +14,8 @@ function GetStore()
 }
 
 // Cached filesystem and directory — invalidated when workspace changes
-let cachedFs: any = undefined;
+let cachedFs: FsClient | null = null;
+let cachedFsInitialized = false;
 let cachedDir: string | null = null;
 let cachedWorkspacePath: string | null = null;
 
@@ -23,18 +24,19 @@ let cachedWorkspacePath: string | null = null;
  */
 export function InvalidateFsCache(): void
 {
-    cachedFs = undefined;
+    cachedFs = null;
+    cachedFsInitialized = false;
     cachedDir = null;
     cachedWorkspacePath = null;
 }
 
-function GetFs(): any
+function GetFs(): FsClient | null
 {
     const store = GetStore();
     const currentPath = store.workspacePath || '';
 
     // Return cached if workspace hasn't changed
-    if (undefined !== cachedFs && currentPath === cachedWorkspacePath)
+    if (cachedFsInitialized && currentPath === cachedWorkspacePath)
         return cachedFs;
 
     cachedWorkspacePath = currentPath;
@@ -43,6 +45,7 @@ function GetFs(): any
     if ('electron' === backend)
     {
         cachedFs = null;
+        cachedFsInitialized = true;
         return null;
     }
 
@@ -52,12 +55,14 @@ function GetFs(): any
         if (handle)
         {
             cachedFs = GetFsForGit(currentPath, handle);
+            cachedFsInitialized = true;
             return cachedFs;
         }
     }
 
     // Fallback: lightning-fs
     cachedFs = CreateLightningFsAdapter(currentPath || 'notemac-default');
+    cachedFsInitialized = true;
     return cachedFs;
 }
 
@@ -66,7 +71,7 @@ function GetCorsProxy(): string
     return GetStore().gitSettings.corsProxy || GIT_DEFAULT_CORS_PROXY;
 }
 
-function BuildOnAuth(credentials?: GitCredentials | null): any
+function BuildOnAuth(credentials?: GitCredentials | null): (() => { username: string; password: string }) | undefined
 {
     const creds = credentials || GetStore().gitCredentials;
     if (null === creds || undefined === creds)
@@ -266,9 +271,9 @@ export async function InitializeRepository(): Promise<void>
         await RefreshGitStatus();
         Dispatch(NOTEMAC_EVENTS.GIT_STATUS_CHANGED);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -281,7 +286,7 @@ export async function InitializeRepository(): Promise<void>
  */
 export async function CloneRepository(
     repoUrl: string,
-    fs: any,
+    fs: FsClient,
     dir: string,
     credentials?: GitCredentials | null,
 ): Promise<void>
@@ -314,9 +319,9 @@ export async function CloneRepository(
         store.SetRepoInitialized(true);
         Dispatch(NOTEMAC_EVENTS.GIT_OPERATION_COMPLETE, { operation: 'clone' });
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
         throw error;
     }
     finally
@@ -360,7 +365,7 @@ export async function RefreshGitStatus(): Promise<void>
         store.SetGitStatus(status);
         Dispatch(NOTEMAC_EVENTS.GIT_STATUS_CHANGED);
     }
-    catch (error: any)
+    catch (error: unknown)
     {
         store.SetGitStatus(null);
     }
@@ -380,9 +385,9 @@ export async function StageFile(filepath: string): Promise<void>
         await git.add({ fs, dir: GetDir(), filepath });
         await RefreshGitStatus();
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        GetStore().SetGitOperationError(error.message);
+        GetStore().SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -428,9 +433,9 @@ export async function UnstageFile(filepath: string): Promise<void>
         await git.resetIndex({ fs, dir: GetDir(), filepath });
         await RefreshGitStatus();
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        GetStore().SetGitOperationError(error.message);
+        GetStore().SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -448,9 +453,9 @@ export async function DiscardFileChanges(filepath: string): Promise<void>
         await git.checkout({ fs, dir: GetDir(), filepaths: [filepath], force: true });
         await RefreshGitStatus();
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        GetStore().SetGitOperationError(error.message);
+        GetStore().SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -487,9 +492,9 @@ export async function CreateCommit(message: string): Promise<string>
 
         return oid;
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
         throw error;
     }
     finally
@@ -533,9 +538,9 @@ export async function PushToRemote(remote: string = 'origin'): Promise<void>
         await RefreshGitStatus();
         Dispatch(NOTEMAC_EVENTS.GIT_OPERATION_COMPLETE, { operation: 'push' });
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
         throw error;
     }
     finally
@@ -580,9 +585,9 @@ export async function PullFromRemote(remote: string = 'origin'): Promise<void>
         await FetchCommitLog();
         Dispatch(NOTEMAC_EVENTS.GIT_OPERATION_COMPLETE, { operation: 'pull' });
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
         throw error;
     }
     finally
@@ -621,9 +626,9 @@ export async function FetchFromRemote(remote: string = 'origin'): Promise<void>
         await RefreshBranches();
         Dispatch(NOTEMAC_EVENTS.GIT_OPERATION_COMPLETE, { operation: 'fetch' });
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
     finally
     {
@@ -653,9 +658,9 @@ export async function CheckoutBranch(branchName: string): Promise<void>
         await FetchCommitLog();
         Dispatch(NOTEMAC_EVENTS.GIT_BRANCH_CHANGED, { branch: branchName });
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -680,9 +685,9 @@ export async function CreateBranch(branchName: string, checkout: boolean = true)
         else
             await RefreshBranches();
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -703,9 +708,9 @@ export async function DeleteBranch(branchName: string): Promise<void>
         await git.deleteBranch({ fs, dir: GetDir(), ref: branchName });
         await RefreshBranches();
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        store.SetGitOperationError(error.message);
+        store.SetGitOperationError(error instanceof Error ? error.message : String(error));
     }
 }
 
