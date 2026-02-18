@@ -85,6 +85,11 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
         e.preventDefault();
         store.setShowTerminalPanel(!store.showTerminalPanel);
     }
+    else if (e.ctrlKey && e.shiftKey && 'G' === e.key)
+    {
+        e.preventDefault();
+        store.setSidebarPanel(store.sidebarPanel === 'git' ? null : 'git');
+    }
     else if ('Escape' === e.key)
     {
         store.setShowFindReplace(false);
@@ -100,5 +105,7 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
         store.setShowQuickOpen(false);
         store.setShowDiffViewer(false);
         store.setShowSnippetManager(false);
+        store.setShowCloneDialog(false);
+        store.setShowGitSettings(false);
     }
 }

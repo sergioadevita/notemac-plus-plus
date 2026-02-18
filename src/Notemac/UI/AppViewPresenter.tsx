@@ -28,6 +28,8 @@ const QuickOpenViewPresenter = lazy(() => import('./QuickOpenViewPresenter').the
 const DiffViewerViewPresenter = lazy(() => import('./DiffViewerViewPresenter').then(m => ({ default: m.DiffViewerViewPresenter })));
 const SnippetManagerViewPresenter = lazy(() => import('./SnippetManagerViewPresenter').then(m => ({ default: m.SnippetManagerViewPresenter })));
 const TerminalPanelViewPresenter = lazy(() => import('./TerminalPanelViewPresenter').then(m => ({ default: m.TerminalPanelViewPresenter })));
+const CloneRepositoryViewPresenter = lazy(() => import('./CloneRepositoryViewPresenter').then(m => ({ default: m.CloneRepositoryViewPresenter })));
+const GitSettingsViewPresenter = lazy(() => import('./GitSettingsViewPresenter').then(m => ({ default: m.GitSettingsViewPresenter })));
 
 export default function App()
 {
@@ -51,6 +53,8 @@ export default function App()
   const showDiffViewer = useNotemacStore(s => s.showDiffViewer);
   const showSnippetManager = useNotemacStore(s => s.showSnippetManager);
   const showTerminalPanel = useNotemacStore(s => s.showTerminalPanel);
+  const showCloneDialog = useNotemacStore(s => s.showCloneDialog);
+  const showGitSettings = useNotemacStore(s => s.showGitSettings);
   const splitView = useNotemacStore(s => s.splitView);
   const splitTabId = useNotemacStore(s => s.splitTabId);
   const addTab = useNotemacStore(s => s.addTab);
@@ -219,6 +223,8 @@ export default function App()
         {showQuickOpen && <QuickOpenViewPresenter theme={theme} />}
         {showDiffViewer && <DiffViewerViewPresenter theme={theme} />}
         {showSnippetManager && <SnippetManagerViewPresenter theme={theme} />}
+        {showCloneDialog && <CloneRepositoryViewPresenter theme={theme} />}
+        {showGitSettings && <GitSettingsViewPresenter theme={theme} />}
       </Suspense>
       <FeedbackPopup theme={theme} />
     </div>

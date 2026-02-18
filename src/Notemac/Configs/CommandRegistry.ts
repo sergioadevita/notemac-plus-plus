@@ -80,6 +80,11 @@ export function GetAllCommands(): CommandDefinition[]
         { id: 'base64-decode', label: 'Base64 Decode', category: 'Edit', action: 'base64-decode' },
         { id: 'url-encode', label: 'URL Encode', category: 'Edit', action: 'url-encode' },
         { id: 'url-decode', label: 'URL Decode', category: 'Edit', action: 'url-decode' },
+
+        // Git commands
+        { id: 'show-git-panel', label: 'Source Control Panel', category: 'Git', action: 'show-git-panel' },
+        { id: 'clone-repository', label: 'Clone Repository', category: 'Git', action: 'clone-repository' },
+        { id: 'git-settings', label: 'Git Settings', category: 'Git', action: 'git-settings' },
     ];
 
     // Deduplicate: only add extra commands whose action isn't already in the list

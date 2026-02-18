@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { FileTreeNode } from "../Commons/Types";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
+
+const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 
 interface SidebarProps {
   theme: ThemeColors;
@@ -22,6 +24,7 @@ export function Sidebar({ theme }: SidebarProps) {
     setActiveTab,
     setFileTree,
     setWorkspacePath,
+    GetChangedFileCount,
   } = useNotemacStore();
 
   const [isResizing, setIsResizing] = useState(false);
@@ -206,27 +209,44 @@ export function Sidebar({ theme }: SidebarProps) {
           { panel: 'project' as const, icon: '\ud83d\udcc8', title: 'Project' },
           { panel: 'clipboardHistory' as const, icon: '\ud83d\udccb', title: 'Clipboard History' },
           { panel: 'charPanel' as const, icon: '\ud83d\udd24', title: 'Character Panel' },
-        ] as const).map(({ panel, icon, title }) => (
-          <div
-            key={panel}
-            title={title}
-            onClick={() => setSidebarPanel(sidebarPanel === panel ? null : panel)}
-            style={{
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              borderRadius: 6,
-              fontSize: 16,
-              backgroundColor: sidebarPanel === panel ? theme.bgHover : 'transparent',
-              borderLeft: sidebarPanel === panel ? `2px solid ${theme.accent}` : '2px solid transparent',
-            }}
-          >
-            {icon}
-          </div>
-        ))}
+          { panel: 'git' as const, icon: '\ud83d\udd00', title: 'Source Control' },
+        ] as const).map(({ panel, icon, title }) => {
+          const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
+          return (
+            <div
+              key={panel}
+              title={title}
+              onClick={() => setSidebarPanel(sidebarPanel === panel ? null : panel)}
+              style={{
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                borderRadius: 6,
+                fontSize: 16,
+                backgroundColor: sidebarPanel === panel ? theme.bgHover : 'transparent',
+                borderLeft: sidebarPanel === panel ? `2px solid ${theme.accent}` : '2px solid transparent',
+                position: 'relative',
+              }}
+            >
+              {icon}
+              {gitChangeCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: 2, right: 2,
+                  minWidth: 14, height: 14, borderRadius: 7,
+                  backgroundColor: theme.accent, color: theme.accentText,
+                  fontSize: 9, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 3px',
+                }}>
+                  {gitChangeCount}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Panel content */}
@@ -251,7 +271,7 @@ export function Sidebar({ theme }: SidebarProps) {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : ''}
+          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : ''}
         </div>
 
         {/* Panel body */}
@@ -338,6 +358,12 @@ export function Sidebar({ theme }: SidebarProps) {
 
           {sidebarPanel === 'charPanel' && (
             <CharacterPanel theme={theme} />
+          )}
+
+          {sidebarPanel === 'git' && (
+            <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
+              <GitPanelViewPresenter theme={theme} />
+            </Suspense>
           )}
         </div>
       </div>

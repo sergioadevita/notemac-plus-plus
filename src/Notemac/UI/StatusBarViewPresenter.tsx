@@ -11,6 +11,7 @@ export function StatusBar({ theme }: StatusBarProps) {
   const {
     tabs, activeTabId, settings, zoomLevel, isRecordingMacro,
     updateTab, updateSettings,
+    isRepoInitialized, currentBranch, gitStatus, setSidebarPanel,
   } = useNotemacStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId);
@@ -116,6 +117,17 @@ export function StatusBar({ theme }: StatusBarProps) {
       padding: '0 4px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        {isRepoInitialized && (
+          <StatusItem title={`Branch: ${currentBranch}${gitStatus?.aheadBy ? ` ↑${gitStatus.aheadBy}` : ''}${gitStatus?.behindBy ? ` ↓${gitStatus.behindBy}` : ''}`} onClick={() => setSidebarPanel('git')}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11 }}>{'\ud83d\udd00'}</span>
+              {currentBranch}
+              {gitStatus && gitStatus.aheadBy > 0 && <span style={{ fontSize: 10 }}>{'\u2191'}{gitStatus.aheadBy}</span>}
+              {gitStatus && gitStatus.behindBy > 0 && <span style={{ fontSize: 10 }}>{'\u2193'}{gitStatus.behindBy}</span>}
+              {gitStatus && gitStatus.isRepoDirty && <span style={{ fontSize: 10, color: '#f9e2af' }}>{'\u2022'}</span>}
+            </span>
+          </StatusItem>
+        )}
         {isRecordingMacro && (
           <StatusItem>
             <span className="recording-indicator" style={{ color: '#ff4444' }}>

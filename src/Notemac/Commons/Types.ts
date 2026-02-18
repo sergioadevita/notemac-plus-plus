@@ -151,3 +151,69 @@ export interface DiffSession
     originalTabId: string;
     modifiedTabId: string;
 }
+
+// Git types
+
+export interface GitBranch
+{
+    name: string;
+    isRemote: boolean;
+    isCurrentBranch: boolean;
+    lastCommitOid: string;
+}
+
+export interface GitCommit
+{
+    oid: string;
+    message: string;
+    author: { name: string; email: string };
+    timestamp: number;
+}
+
+export interface GitFileStatus
+{
+    path: string;
+    status: 'modified' | 'added' | 'deleted' | 'untracked' | 'unmerged';
+    isStaged: boolean;
+}
+
+export interface GitStatus
+{
+    branch: string;
+    isRepoDirty: boolean;
+    stagedFiles: GitFileStatus[];
+    unstagedFiles: GitFileStatus[];
+    untrackedFiles: GitFileStatus[];
+    aheadBy: number;
+    behindBy: number;
+    mergeInProgress: boolean;
+}
+
+export interface GitRemote
+{
+    name: string;
+    url: string;
+}
+
+export interface GitCredentials
+{
+    type: 'token' | 'ssh' | 'oauth';
+    username: string;
+    token?: string;
+    sshPrivateKey?: string;
+}
+
+export interface GitAuthor
+{
+    name: string;
+    email: string;
+}
+
+export interface BrowserWorkspace
+{
+    id: string;
+    name: string;
+    repoUrl?: string;
+    createdAt: number;
+    lastOpenedAt: number;
+}

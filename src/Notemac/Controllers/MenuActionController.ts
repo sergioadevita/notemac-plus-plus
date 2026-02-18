@@ -237,6 +237,17 @@ export function HandleMenuAction(
             store.setShowTerminalPanel(!store.showTerminalPanel);
             break;
 
+        // Git actions
+        case 'clone-repository':
+            store.setShowCloneDialog(true);
+            break;
+        case 'git-settings':
+            store.setShowGitSettings(true);
+            break;
+        case 'show-git-panel':
+            store.setSidebarPanel('git');
+            break;
+
         // Dialogs
         case 'preferences':
             store.setShowSettings(true);

@@ -258,6 +258,15 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Run Macro Multiple Times...', action: 'macro-run-multiple' },
       { label: 'Save Recorded Macro...', action: 'macro-save' },
     ],
+    Git: [
+      { label: 'Source Control Panel', action: 'show-git-panel' },
+      { type: 'separator', label: '' },
+      { label: 'Clone Repository...', action: 'clone-repository' },
+      { type: 'separator', label: '' },
+      { label: 'Compare with HEAD', action: 'compare-files' },
+      { type: 'separator', label: '' },
+      { label: 'Git Settings...', action: 'git-settings' },
+    ],
     Run: [
       { label: 'Run Command...', action: 'run-command' },
       { type: 'separator', label: '' },

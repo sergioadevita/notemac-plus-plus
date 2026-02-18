@@ -33,6 +33,8 @@ export interface NotemacUISlice
     showSnippetManager: boolean;
     showTerminalPanel: boolean;
     terminalHeight: number;
+    showCloneDialog: boolean;
+    showGitSettings: boolean;
 
     setSidebarPanel: (panel: SidebarPanel) => void;
     toggleSidebar: () => void;
@@ -54,6 +56,8 @@ export interface NotemacUISlice
     setShowSnippetManager: (show: boolean) => void;
     setShowTerminalPanel: (show: boolean) => void;
     setTerminalHeight: (height: number) => void;
+    setShowCloneDialog: (show: boolean) => void;
+    setShowGitSettings: (show: boolean) => void;
 
     saveSession: () => SessionData;
     loadSession: (session: SessionData) => void;
@@ -85,6 +89,8 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     showSnippetManager: false,
     showTerminalPanel: false,
     terminalHeight: TERMINAL_DEFAULT_HEIGHT,
+    showCloneDialog: false,
+    showGitSettings: false,
 
     setSidebarPanel: (panel) => set({ sidebarPanel: panel }),
 
@@ -129,6 +135,8 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     setShowDiffViewer: (show) => set({ showDiffViewer: show }),
     setShowSnippetManager: (show) => set({ showSnippetManager: show }),
     setShowTerminalPanel: (show) => set({ showTerminalPanel: show }),
+    setShowCloneDialog: (show) => set({ showCloneDialog: show }),
+    setShowGitSettings: (show) => set({ showGitSettings: show }),
     setTerminalHeight: (height) => set({ terminalHeight: Math.max(TERMINAL_MIN_HEIGHT, Math.min(TERMINAL_MAX_HEIGHT, height)) }),
 
     saveSession: () =>

@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { GetFileAtHead } from "../Controllers/GitController";
 
 interface DiffViewerProps
 {
@@ -10,18 +11,39 @@ interface DiffViewerProps
 
 export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
 {
-    const { setShowDiffViewer, tabs, settings } = useNotemacStore();
+    const { setShowDiffViewer, tabs, settings, activeTabId, isRepoInitialized } = useNotemacStore();
+    const [mode, setMode] = useState<'files' | 'git'>(isRepoInitialized ? 'git' : 'files');
     const [originalTabId, setOriginalTabId] = useState<string>(tabs[0]?.id || '');
     const [modifiedTabId, setModifiedTabId] = useState<string>(tabs[1]?.id || tabs[0]?.id || '');
     const [renderSideBySide, setRenderSideBySide] = useState(true);
+    const [gitHeadContent, setGitHeadContent] = useState<string>('');
+    const [gitFilePath, setGitFilePath] = useState<string>('');
 
     const originalTab = useMemo(() => tabs.find(t => t.id === originalTabId), [tabs, originalTabId]);
     const modifiedTab = useMemo(() => tabs.find(t => t.id === modifiedTabId), [tabs, modifiedTabId]);
 
-    const originalContent = originalTab?.content || '';
-    const modifiedContent = modifiedTab?.content || '';
+    const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId), [tabs, activeTabId]);
 
-    const originalLang = originalTab?.language || 'plaintext';
+    // Load HEAD version for git diff mode
+    useEffect(() =>
+    {
+        if ('git' !== mode || !activeTab?.path)
+            return;
+
+        const filePath = activeTab.path;
+        setGitFilePath(filePath);
+        GetFileAtHead(filePath).then(content =>
+        {
+            setGitHeadContent(content || '');
+        }).catch(() =>
+        {
+            setGitHeadContent('');
+        });
+    }, [mode, activeTab?.path]);
+
+    const originalContent = 'git' === mode ? gitHeadContent : (originalTab?.content || '');
+    const modifiedContent = 'git' === mode ? (activeTab?.content || '') : (modifiedTab?.content || '');
+    const diffLanguage = 'git' === mode ? (activeTab?.language || 'plaintext') : (originalTab?.language || 'plaintext');
 
     const handleClose = useCallback(() =>
     {
@@ -69,47 +91,77 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
                 }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>Compare Files</span>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                        <label style={{ fontSize: 12, color: theme.textSecondary }}>Original:</label>
-                        <select
-                            value={originalTabId}
-                            onChange={(e) => setOriginalTabId(e.target.value)}
-                            style={{
-                                flex: 1,
-                                padding: '4px 8px',
-                                fontSize: 12,
-                                backgroundColor: theme.bg,
-                                color: theme.text,
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: 4,
-                            }}
-                        >
-                            {tabs.map(tab => (
-                                <option key={tab.id} value={tab.id}>{tab.name}</option>
+                    {/* Mode toggle */}
+                    {isRepoInitialized && (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                            {(['files', 'git'] as const).map(m => (
+                                <button
+                                    key={m}
+                                    onClick={() => setMode(m)}
+                                    style={{
+                                        padding: '3px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer',
+                                        backgroundColor: mode === m ? theme.accent : theme.bg,
+                                        color: mode === m ? theme.accentText : theme.text,
+                                        border: `1px solid ${mode === m ? theme.accent : theme.border}`,
+                                        fontWeight: mode === m ? 600 : 400,
+                                    }}
+                                >
+                                    {'files' === m ? 'Files' : 'Git HEAD'}
+                                </button>
                             ))}
-                        </select>
+                        </div>
+                    )}
 
-                        <span style={{ color: theme.textSecondary }}>vs</span>
+                    {'files' === mode ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+                            <label style={{ fontSize: 12, color: theme.textSecondary }}>Original:</label>
+                            <select
+                                value={originalTabId}
+                                onChange={(e) => setOriginalTabId(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '4px 8px',
+                                    fontSize: 12,
+                                    backgroundColor: theme.bg,
+                                    color: theme.text,
+                                    border: `1px solid ${theme.border}`,
+                                    borderRadius: 4,
+                                }}
+                            >
+                                {tabs.map(tab => (
+                                    <option key={tab.id} value={tab.id}>{tab.name}</option>
+                                ))}
+                            </select>
 
-                        <label style={{ fontSize: 12, color: theme.textSecondary }}>Modified:</label>
-                        <select
-                            value={modifiedTabId}
-                            onChange={(e) => setModifiedTabId(e.target.value)}
-                            style={{
-                                flex: 1,
-                                padding: '4px 8px',
-                                fontSize: 12,
-                                backgroundColor: theme.bg,
-                                color: theme.text,
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: 4,
-                            }}
-                        >
-                            {tabs.map(tab => (
-                                <option key={tab.id} value={tab.id}>{tab.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                            <span style={{ color: theme.textSecondary }}>vs</span>
+
+                            <label style={{ fontSize: 12, color: theme.textSecondary }}>Modified:</label>
+                            <select
+                                value={modifiedTabId}
+                                onChange={(e) => setModifiedTabId(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '4px 8px',
+                                    fontSize: 12,
+                                    backgroundColor: theme.bg,
+                                    color: theme.text,
+                                    border: `1px solid ${theme.border}`,
+                                    borderRadius: 4,
+                                }}
+                            >
+                                {tabs.map(tab => (
+                                    <option key={tab.id} value={tab.id}>{tab.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, fontSize: 12, color: theme.textSecondary }}>
+                            <span>HEAD</span>
+                            <span style={{ color: theme.textMuted }}>vs</span>
+                            <span style={{ color: theme.text, fontWeight: 600 }}>{activeTab?.name || 'No file'}</span>
+                            {gitFilePath && <span style={{ color: theme.textMuted, fontSize: 10 }}>({gitFilePath})</span>}
+                        </div>
+                    )}
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: theme.textSecondary, cursor: 'pointer' }}>
                         <input
@@ -141,7 +193,7 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
                     <DiffEditor
                         original={originalContent}
                         modified={modifiedContent}
-                        language={originalLang}
+                        language={diffLanguage}
                         theme={theme.editorMonacoTheme}
                         options={{
                             readOnly: true,

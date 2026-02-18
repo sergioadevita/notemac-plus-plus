@@ -62,6 +62,11 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'View', name: 'Toggle Terminal', shortcut: 'Ctrl+`', action: 'toggle-terminal' },
     { category: 'Edit', name: 'Compare Files', shortcut: '', action: 'compare-files' },
     { category: 'Edit', name: 'Snippet Manager', shortcut: '', action: 'snippet-manager' },
+
+    // Git
+    { category: 'Git', name: 'Source Control Panel', shortcut: 'Ctrl+Shift+G', action: 'show-git-panel' },
+    { category: 'Git', name: 'Clone Repository', shortcut: '', action: 'clone-repository' },
+    { category: 'Git', name: 'Git Settings', shortcut: '', action: 'git-settings' },
 ] as const;
 
 export function GetDefaultShortcuts(): readonly ShortcutItem[]

@@ -49,4 +49,7 @@ export const NOTEMAC_EVENTS =
     EDITOR_ACTION: 'notemac-editor-action',
     INSERT_SNIPPET: 'notemac-insert-snippet',
     EXECUTE_COMMAND: 'notemac-execute-command',
+    GIT_STATUS_CHANGED: 'notemac-git-status-changed',
+    GIT_BRANCH_CHANGED: 'notemac-git-branch-changed',
+    GIT_OPERATION_COMPLETE: 'notemac-git-operation-complete',
 } as const;

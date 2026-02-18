@@ -75,3 +75,21 @@ export const LIMIT_QUICK_OPEN_RESULTS = 50;
 export const TERMINAL_DEFAULT_HEIGHT = 200;
 export const TERMINAL_MIN_HEIGHT = 100;
 export const TERMINAL_MAX_HEIGHT = 600;
+
+// DB - Git
+export const DB_GIT_CREDENTIALS = "GitCredentials";
+export const DB_GIT_AUTHOR = "GitAuthor";
+export const DB_GIT_SETTINGS = "GitSettings";
+export const DB_BROWSER_WORKSPACES = "BrowserWorkspaces";
+
+// UI - Git
+export const UI_GIT_PANEL = "SourceControl";
+export const UI_CLONE_DIALOG = "CloneRepository";
+export const UI_GIT_SETTINGS_DIALOG = "GitSettings";
+
+// GIT
+export const GIT_COMMIT_FETCH_LIMIT = 50;
+export const GIT_STATUS_POLL_INTERVAL = 3000;
+export const GIT_DEFAULT_CORS_PROXY = "https://cors.isomorphic-git.org";
+export const GIT_DEFAULT_AUTHOR_NAME = "Notemac++ User";
+export const GIT_DEFAULT_AUTHOR_EMAIL = "user@notemac.app";
