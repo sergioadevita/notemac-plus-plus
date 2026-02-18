@@ -44,7 +44,7 @@ export interface FileTreeNode
 export interface MacroAction
 {
     type: 'type' | 'delete' | 'move' | 'select' | 'command';
-    data: any;
+    data: string | Record<string, unknown>;
     timestamp: number;
 }
 
