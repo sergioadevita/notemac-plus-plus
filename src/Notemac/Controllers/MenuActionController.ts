@@ -2,6 +2,7 @@ import { useNotemacStore } from "../Model/Store";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import type { FileTab } from "../Commons/Types";
+import type { LineEnding } from "../Commons/Enums";
 
 /**
  * Routes menu actions to the appropriate store mutations and side effects.
@@ -12,7 +13,7 @@ export function HandleMenuAction(
     activeTabId: string | null,
     tabs: FileTab[],
     zoomLevel: number,
-    value?: any,
+    value?: boolean | string | number,
 ): void
 {
     const store = useNotemacStore.getState();
@@ -114,28 +115,28 @@ export function HandleMenuAction(
 
         // View actions
         case 'word-wrap':
-            store.updateSettings({ wordWrap: value });
+            store.updateSettings({ wordWrap: value as boolean | undefined });
             break;
         case 'show-whitespace':
-            store.updateSettings({ showWhitespace: value, renderWhitespace: value ? 'all' : 'none' });
+            store.updateSettings({ showWhitespace: value as boolean | undefined, renderWhitespace: value ? 'all' : 'none' });
             break;
         case 'show-eol':
-            store.updateSettings({ showEOL: value });
+            store.updateSettings({ showEOL: value as boolean | undefined });
             break;
         case 'show-non-printable':
-            store.updateSettings({ showNonPrintable: value });
+            store.updateSettings({ showNonPrintable: value as boolean | undefined });
             break;
         case 'show-wrap-symbol':
-            store.updateSettings({ showWrapSymbol: value });
+            store.updateSettings({ showWrapSymbol: value as boolean | undefined });
             break;
         case 'indent-guide':
-            store.updateSettings({ showIndentGuides: value });
+            store.updateSettings({ showIndentGuides: value as boolean | undefined });
             break;
         case 'show-line-numbers':
-            store.updateSettings({ showLineNumbers: value });
+            store.updateSettings({ showLineNumbers: value as boolean | undefined });
             break;
         case 'toggle-minimap':
-            store.updateSettings({ showMinimap: value });
+            store.updateSettings({ showMinimap: value as boolean | undefined });
             break;
         case 'zoom-in':
             store.setZoomLevel(zoomLevel + 1);
@@ -159,20 +160,20 @@ export function HandleMenuAction(
             store.setSidebarPanel('project');
             break;
         case 'distraction-free':
-            store.updateSettings({ distractionFreeMode: value });
+            store.updateSettings({ distractionFreeMode: value as boolean | undefined });
             break;
         case 'always-on-top':
         {
-            store.updateSettings({ alwaysOnTop: value });
+            store.updateSettings({ alwaysOnTop: value as boolean | undefined });
             if (window.electronAPI)
-                window.electronAPI.setAlwaysOnTop?.(value);
+                window.electronAPI.setAlwaysOnTop?.(value as boolean);
             break;
         }
         case 'sync-scroll-v':
-            store.updateSettings({ syncScrollVertical: value });
+            store.updateSettings({ syncScrollVertical: value as boolean | undefined });
             break;
         case 'sync-scroll-h':
-            store.updateSettings({ syncScrollHorizontal: value });
+            store.updateSettings({ syncScrollHorizontal: value as boolean | undefined });
             break;
         case 'split-right':
             if (null !== activeTabId)
@@ -202,15 +203,15 @@ export function HandleMenuAction(
         // Language / Encoding
         case 'language':
             if (null !== activeTabId)
-                store.updateTab(activeTabId, { language: value });
+                store.updateTab(activeTabId, { language: value as string | undefined });
             break;
         case 'encoding':
             if (null !== activeTabId)
-                store.updateTab(activeTabId, { encoding: value });
+                store.updateTab(activeTabId, { encoding: value as string | undefined });
             break;
         case 'line-ending':
             if (null !== activeTabId)
-                store.updateTab(activeTabId, { lineEnding: value });
+                store.updateTab(activeTabId, { lineEnding: value as LineEnding | undefined });
             break;
 
         // Macro
