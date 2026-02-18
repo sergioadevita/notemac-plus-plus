@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface RunCommandDialogProps {
   theme: ThemeColors;
@@ -12,10 +13,13 @@ export function RunCommandDialog({ theme }: RunCommandDialogProps) {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useFocusTrap(dialogRef, true, () => setShowRunCommand(false));
 
   const handleRun = async () => {
     if (!command.trim()) return;
@@ -39,6 +43,7 @@ export function RunCommandDialog({ theme }: RunCommandDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowRunCommand(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="run-command-title"
