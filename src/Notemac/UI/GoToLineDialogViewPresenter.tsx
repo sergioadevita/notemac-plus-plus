@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface GoToLineDialogProps {
   theme: ThemeColors;
@@ -10,6 +11,7 @@ export function GoToLineDialog({ theme }: GoToLineDialogProps) {
   const { setShowGoToLine, tabs, activeTabId } = useNotemacStore();
   const [lineNumber, setLineNumber] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const activeTab = tabs.find(t => t.id === activeTabId);
   const totalLines = activeTab ? activeTab.content.split('\n').length : 0;
@@ -17,6 +19,8 @@ export function GoToLineDialog({ theme }: GoToLineDialogProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useFocusTrap(dialogRef, true, () => setShowGoToLine(false));
 
   const handleGo = () => {
     const line = parseInt(lineNumber);
@@ -29,6 +33,7 @@ export function GoToLineDialog({ theme }: GoToLineDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowGoToLine(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="goto-line-title"
