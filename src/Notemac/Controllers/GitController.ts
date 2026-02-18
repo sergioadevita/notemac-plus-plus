@@ -4,7 +4,7 @@ import { useNotemacStore } from "../Model/Store";
 import type { GitBranch, GitCommit, GitStatus, GitFileStatus, GitRemote, GitCredentials } from "../Commons/Types";
 import { GIT_COMMIT_FETCH_LIMIT, GIT_DEFAULT_CORS_PROXY } from "../Commons/Constants";
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
-import { DetectFsBackend, GetFsForGit, GetDirHandle, CreateLightningFsAdapter } from '../../Shared/Git/GitFileSystemAdapter';
+import { DetectFsBackend, GetFsForGit, GetDirHandle, RegisterDirHandle, CreateLightningFsAdapter } from '../../Shared/Git/GitFileSystemAdapter';
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -204,10 +204,24 @@ export async function DetectGitRepo(): Promise<boolean>
 /**
  * Initializes the git integration for the current workspace.
  * Detects repo, loads branches, status, and commit log.
+ *
+ * @param dirHandle - Optional FileSystemDirectoryHandle for web File System Access API.
+ *                    When provided, registers the handle so the git fs adapter can access real files.
  */
-export async function InitGitForWorkspace(): Promise<void>
+export async function InitGitForWorkspace(dirHandle?: FileSystemDirectoryHandle): Promise<void>
 {
     const store = GetStore();
+
+    // Register directory handle for web FS if provided
+    if (dirHandle)
+    {
+        const workspacePath = store.workspacePath || dirHandle.name;
+        RegisterDirHandle(workspacePath, dirHandle);
+    }
+
+    // Always invalidate cache when (re)initializing
+    InvalidateFsCache();
+
     const fs = GetFs();
     if (null === fs)
         return;
