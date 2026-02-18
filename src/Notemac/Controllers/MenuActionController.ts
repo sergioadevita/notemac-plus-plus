@@ -513,7 +513,10 @@ function HandleReloadFromDisk(activeTabId: string | null, tabs: FileTab[]): void
         {
             useNotemacStore.getState().updateTabContent(activeTabId, content);
             useNotemacStore.getState().updateTab(activeTabId, { isModified: false });
-        }).catch(err => console.error('Failed to reload file from disk:', err));
+        }).catch((err: unknown) => {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            window.alert(`Failed to reload file from disk: ${errorMessage}`);
+        });
         return;
     }
 
