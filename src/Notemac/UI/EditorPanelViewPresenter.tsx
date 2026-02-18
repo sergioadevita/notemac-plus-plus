@@ -11,6 +11,12 @@ import { ExplainCode, RefactorCode, GenerateTests, GenerateDocumentation, FixErr
 import { Subscribe, Unsubscribe, NOTEMAC_EVENTS } from "../../Shared/EventDispatcher/EventDispatcher";
 import { SetMonacoEditor, ClearMonacoEditor, SetEditorAction, ClearEditorAction } from '../../Shared/Helpers/EditorGlobals';
 
+interface IDisposable {
+  dispose: () => void;
+}
+
+const completionDisposablesMap = new WeakMap<editor.IStandaloneCodeEditor, IDisposable[]>();
+
 interface EditorPanelProps {
   tab: FileTab;
   theme: ThemeColors;
@@ -188,7 +194,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
 
     // Register custom completion providers (IntelliSense)
     const completionDisposables = RegisterCompletionProviders(monaco, editor);
-    (editor as any).__completionDisposables = completionDisposables;
+    completionDisposablesMap.set(editor, completionDisposables);
 
     // Focus the editor
     editor.focus();
@@ -223,8 +229,9 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
   useEffect(() => {
     return () => {
       const editor = editorRef.current;
-      if (editor && (editor as any).__completionDisposables) {
-        for (const d of (editor as any).__completionDisposables) {
+      const disposables = editor ? completionDisposablesMap.get(editor) : undefined;
+      if (disposables) {
+        for (const d of disposables) {
           d?.dispose?.();
         }
       }
@@ -951,7 +958,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
             scale: 1,
             showSlider: 'mouseover',
           },
-          renderWhitespace: settings.renderWhitespace as any,
+          renderWhitespace: settings.renderWhitespace,
           guides: {
             indentation: settings.showIndentGuides,
             bracketPairs: true,
