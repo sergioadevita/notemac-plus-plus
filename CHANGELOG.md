@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2026
+## [2.0.0] - 2026
 
 ### Added
 - **Git Integration**: Clone, commit, push, pull, branch management, visual diff viewer, GitHub OAuth Device Flow
@@ -183,5 +183,5 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
-[1.1.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v1.1.0
+[2.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.0.0
 [1.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v1.0.0
