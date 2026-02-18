@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026
+
+### Fixed
+- **DiffViewerViewPresenter**: Fixed missing `setShowDiffViewer` in `useCallback` dependency array (could cause stale closure)
+- **AIModel**: Added missing `.catch()` handler on credential retrieval promise in `LoadAIState`
+
+### Improved
+- **Error typing**: Replaced all `catch (error: any)` with `catch (error: unknown)` across AIActionController, LLMController, GitController, and AuthController (14 instances)
+- **EditorGlobals typing**: Properly typed with `editor.IStandaloneCodeEditor` and typed action function instead of `any`
+- **CompletionController typing**: Full Monaco type imports (`MonacoNamespace`, `editor.IStandaloneCodeEditor`, `editor.ITextModel`, `IDisposable`, `FileTreeNode`) replacing all `any` params
+- **GitController typing**: `FsClient` from isomorphic-git replaces `any` for filesystem cache and parameters; typed `BuildOnAuth` return
+- **LLMController typing**: `Record<string, unknown>` for request body builders and variables instead of `any`
+- **Magic number extraction**: Replaced hardcoded `zIndex: 10000` with `UI_ZINDEX_MODAL` constant across 5 ViewPresenters; replaced dimension magic numbers in QuickOpenViewPresenter with `UI_COMMAND_PALETTE_*` constants
+
 ## [2.2.0] - 2026
 
 ### Improved
