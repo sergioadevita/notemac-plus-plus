@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import type { FileTab, FileTreeNode, MacroAction, SavedMacro, SearchOptions, AppSettings, SidebarPanel, ClipboardEntry, SessionData, TabColor } from '../types';
+import type { FileTab, FileTreeNode, MacroAction, SavedMacro, SearchOptions, AppSettings, SidebarPanel, ClipboardEntry, SessionData, TabColor, FindResult } from '../types';
 import { detectLanguage, generateId } from '../utils/helpers';
 
 interface EditorState {
@@ -21,7 +21,7 @@ interface EditorState {
   showFindReplace: boolean;
   findReplaceMode: 'find' | 'replace' | 'findInFiles' | 'mark';
   searchOptions: SearchOptions;
-  searchResults: any[];
+  searchResults: FindResult[];
   showIncrementalSearch: boolean;
 
   // Macros
