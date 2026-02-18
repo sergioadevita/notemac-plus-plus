@@ -2,6 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 
+interface ColumnEditDetail {
+  mode: string;
+  text?: string;
+  initial?: number;
+  increase?: number;
+  repeat?: number;
+  leadingZeros?: boolean;
+  format?: string;
+}
+
 interface ColumnEditorDialogProps {
   theme: ThemeColors;
 }
@@ -22,7 +32,7 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
   }, []);
 
   const handleInsert = () => {
-    const detail: any = { mode };
+    const detail: ColumnEditDetail = { mode };
     if (mode === 'text') {
       detail.text = textToInsert;
     } else {
@@ -50,6 +60,9 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowColumnEditor(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="column-editor-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.bgSecondary,
@@ -60,7 +73,7 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}
       >
-        <h3 style={{ color: theme.text, fontSize: 16, marginBottom: 16, fontWeight: 600 }}>
+        <h3 id="column-editor-title" style={{ color: theme.text, fontSize: 16, marginBottom: 16, fontWeight: 600 }}>
           Column Editor
         </h3>
 
