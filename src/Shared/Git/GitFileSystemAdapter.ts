@@ -134,7 +134,7 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
         return current;
     }
 
-    return {
+    const adapter = {
         readFile: async (filepath: string, opts?: any) =>
         {
             const { dir, name } = await resolvePath(filepath);
@@ -243,10 +243,12 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
 
         lstat: async (filepath: string) =>
         {
-            // Web FS doesn't have symlinks, delegate to stat
-            return (CreateWebFsAdapter(rootHandle) as any).stat(filepath);
+            // Web FS doesn't have symlinks, delegate to our own stat
+            return adapter.stat(filepath);
         },
     };
+
+    return adapter;
 }
 
 /**

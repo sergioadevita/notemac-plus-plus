@@ -113,7 +113,12 @@ export const createGitSlice: StateCreator<NotemacGitSlice> = (set, get) => ({
     {
         set(produce((state: NotemacGitSlice) =>
         {
-            state.browserWorkspaces.push(workspace);
+            // Deduplicate: update existing workspace or add new
+            const existingIdx = state.browserWorkspaces.findIndex(w => w.id === workspace.id);
+            if (-1 !== existingIdx)
+                state.browserWorkspaces[existingIdx] = workspace;
+            else
+                state.browserWorkspaces.push(workspace);
         }));
         SetValue(DB_BROWSER_WORKSPACES, get().browserWorkspaces);
     },

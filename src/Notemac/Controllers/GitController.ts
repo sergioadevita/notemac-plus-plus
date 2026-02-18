@@ -13,23 +13,52 @@ function GetStore()
     return useNotemacStore.getState();
 }
 
+// Cached filesystem and directory — invalidated when workspace changes
+let cachedFs: any = undefined;
+let cachedDir: string | null = null;
+let cachedWorkspacePath: string | null = null;
+
+/**
+ * Invalidates the cached fs and dir. Call when workspace changes.
+ */
+export function InvalidateFsCache(): void
+{
+    cachedFs = undefined;
+    cachedDir = null;
+    cachedWorkspacePath = null;
+}
+
 function GetFs(): any
 {
     const store = GetStore();
+    const currentPath = store.workspacePath || '';
+
+    // Return cached if workspace hasn't changed
+    if (undefined !== cachedFs && currentPath === cachedWorkspacePath)
+        return cachedFs;
+
+    cachedWorkspacePath = currentPath;
     const backend = DetectFsBackend();
 
     if ('electron' === backend)
-        return null; // Electron handles fs natively
+    {
+        cachedFs = null;
+        return null;
+    }
 
     if ('webfs' === backend)
     {
-        const handle = GetDirHandle(store.workspacePath || '');
+        const handle = GetDirHandle(currentPath);
         if (handle)
-            return GetFsForGit(store.workspacePath || '', handle);
+        {
+            cachedFs = GetFsForGit(currentPath, handle);
+            return cachedFs;
+        }
     }
 
     // Fallback: lightning-fs
-    return CreateLightningFsAdapter(store.workspacePath || 'notemac-default');
+    cachedFs = CreateLightningFsAdapter(currentPath || 'notemac-default');
+    return cachedFs;
 }
 
 function GetCorsProxy(): string
@@ -51,12 +80,20 @@ function BuildOnAuth(credentials?: GitCredentials | null): any
 
 function GetDir(): string
 {
+    const currentPath = GetStore().workspacePath || '';
+    if (null !== cachedDir && currentPath === cachedWorkspacePath)
+        return cachedDir;
+
     const backend = DetectFsBackend();
     // For web fs adapter, the dir is always '/' (relative to the root handle)
     if ('webfs' === backend)
+    {
+        cachedDir = '/';
         return '/';
+    }
     // For lightning-fs, use the workspace path
-    return GetStore().workspacePath || '/';
+    cachedDir = currentPath || '/';
+    return cachedDir;
 }
 
 // ─── Status Matrix Parsing ───────────────────────────────────────
@@ -355,17 +392,10 @@ export async function StageAllFiles(): Promise<void>
         ...status.untrackedFiles.map(f => f.path),
     ];
 
-    for (const filepath of filesToStage)
-    {
-        try
-        {
-            await git.add({ fs, dir, filepath });
-        }
-        catch
-        {
-            // Skip files that can't be staged
-        }
-    }
+    // Batch stage all files concurrently
+    await Promise.allSettled(
+        filesToStage.map(filepath => git.add({ fs, dir, filepath }))
+    );
 
     await RefreshGitStatus();
 }
