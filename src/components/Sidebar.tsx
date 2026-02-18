@@ -438,7 +438,7 @@ function CharacterPanel({ theme }: { theme: ThemeColors }) {
   ];
 
   const handleInsertChar = (char: string) => {
-    const editorAction = (window as any).__editorAction;
+    const editorAction = window.__editorAction;
     if (editorAction) editorAction('insert-text', char);
   };
 
