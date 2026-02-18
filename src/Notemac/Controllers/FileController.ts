@@ -93,7 +93,7 @@ export function SetupElectronIPC(): void
         InitGitForWorkspace();
     });
 
-    window.electronAPI.onMenuAction((action: string, value: unknown) =>
+    window.electronAPI.onMenuAction((action: string, value: boolean | string | number | undefined) =>
     {
         const store = useNotemacStore.getState();
         HandleMenuAction(action, store.activeTabId, store.tabs, store.zoomLevel, value);
