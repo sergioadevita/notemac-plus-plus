@@ -17,7 +17,15 @@ interface Window {
     writeFile: (path: string, content: string) => Promise<boolean>;
     readDir: (path: string) => Promise<any[]>;
     runCommand?: (command: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
+    safeStorageEncrypt?: (plaintext: string) => Promise<string>;
+    safeStorageDecrypt?: (base64: string) => Promise<string>;
+    isSafeStorageAvailable?: () => Promise<boolean>;
   };
   showDirectoryPicker?: (options?: { mode?: string }) => Promise<FileSystemDirectoryHandle>;
   showOpenFilePicker?: (options?: { multiple?: boolean; types?: Array<{ description?: string; accept?: Record<string, string[]> }> }) => Promise<FileSystemFileHandle[]>;
+  __editorAction?: (action: string, value?: unknown) => void;
+}
+
+interface HTMLInputElement {
+  webkitdirectory: boolean;
 }
