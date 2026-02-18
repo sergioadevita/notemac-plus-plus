@@ -254,9 +254,9 @@ export function Sidebar({ theme }: SidebarProps) {
         ] as const).map(({ panel, icon, title }) => {
           const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
           return (
-            <div
+            <button
               key={panel}
-              title={title}
+              aria-label={title}
               onClick={() => setSidebarPanel(sidebarPanel === panel ? null : panel)}
               style={{
                 width: 32,
@@ -269,7 +269,10 @@ export function Sidebar({ theme }: SidebarProps) {
                 fontSize: 16,
                 backgroundColor: sidebarPanel === panel ? theme.bgHover : 'transparent',
                 borderLeft: sidebarPanel === panel ? `2px solid ${theme.accent}` : '2px solid transparent',
+                border: 'none',
+                padding: 0,
                 position: 'relative',
+                color: 'inherit',
               }}
             >
               {icon}
@@ -285,7 +288,7 @@ export function Sidebar({ theme }: SidebarProps) {
                   {gitChangeCount}
                 </span>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -314,8 +317,8 @@ export function Sidebar({ theme }: SidebarProps) {
           alignItems: 'center',
         }}>
           {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : ''}
-          <div
-            title="Collapse Panel"
+          <button
+            aria-label="Collapse panel"
             onClick={() => setSidebarPanel(null)}
             className="hover-bg-color"
             style={{
@@ -328,12 +331,15 @@ export function Sidebar({ theme }: SidebarProps) {
               borderRadius: 4,
               fontSize: 12,
               color: theme.textMuted,
+              backgroundColor: 'transparent',
+              border: 'none',
+              padding: 0,
               '--hover-bg': theme.bgHover,
               '--hover-color': theme.text,
             } as React.CSSProperties}
           >
             {'\u2715'}
-          </div>
+          </button>
         </div>
 
         {/* Panel body */}
