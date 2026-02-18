@@ -27,8 +27,9 @@ export function RunCommandDialog({ theme }: RunCommandDialogProps) {
       try {
         const result = await window.electronAPI.runCommand?.(command);
         setOutput(result ? (result.stdout || result.stderr || 'Command executed.') : 'Command executed.');
-      } catch (err: any) {
-        setOutput(`Error: ${err.message || err}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        setOutput(`Error: ${message}`);
       }
     } else {
       setOutput('Run command is only available in the desktop version.\nIn the web version, you can open a terminal separately.');
