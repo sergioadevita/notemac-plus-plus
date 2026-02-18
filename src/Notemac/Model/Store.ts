@@ -6,8 +6,9 @@ import { createUISlice, NotemacUISlice } from "./UIModel";
 import { createFileTreeSlice, NotemacFileTreeSlice } from "./FileTreeModel";
 import { createSnippetSlice, NotemacSnippetSlice } from "./SnippetModel";
 import { createGitSlice, NotemacGitSlice } from "./GitModel";
+import { createAISlice, NotemacAISlice } from "./AIModel";
 
-export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice;
+export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice;
 
 export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createTabSlice(...a),
@@ -17,4 +18,5 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createFileTreeSlice(...a),
     ...createSnippetSlice(...a),
     ...createGitSlice(...a),
+    ...createAISlice(...a),
 }));

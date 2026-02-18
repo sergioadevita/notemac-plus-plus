@@ -93,3 +93,21 @@ export const GIT_STATUS_POLL_INTERVAL = 3000;
 export const GIT_DEFAULT_CORS_PROXY = "https://cors.isomorphic-git.org";
 export const GIT_DEFAULT_AUTHOR_NAME = "Notemac++ User";
 export const GIT_DEFAULT_AUTHOR_EMAIL = "user@notemac.app";
+
+// DB - AI
+export const DB_AI_PROVIDERS = "AIProviders";
+export const DB_AI_CREDENTIALS = "AICredentials";
+export const DB_AI_SETTINGS = "AISettings";
+export const DB_AI_CONVERSATIONS = "AIConversations";
+
+// UI - AI
+export const UI_AI_PANEL = "AIAssistant";
+export const UI_AI_SETTINGS_DIALOG = "AISettings";
+
+// AI - Defaults
+export const AI_DEFAULT_DEBOUNCE_MS = 500;
+export const AI_MAX_CONTEXT_TOKENS = 8000;
+export const AI_DEFAULT_TEMPERATURE = 0.3;
+export const AI_CHAT_TEMPERATURE = 0.7;
+export const AI_MAX_CONVERSATIONS = 50;
+export const AI_MAX_INLINE_TOKENS = 256;

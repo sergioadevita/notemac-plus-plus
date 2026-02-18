@@ -85,6 +85,18 @@ export function GetAllCommands(): CommandDefinition[]
         { id: 'show-git-panel', label: 'Source Control Panel', category: 'Git', action: 'show-git-panel' },
         { id: 'clone-repository', label: 'Clone Repository', category: 'Git', action: 'clone-repository' },
         { id: 'git-settings', label: 'Git Settings', category: 'Git', action: 'git-settings' },
+
+        // AI commands
+        { id: 'ai-chat', label: 'AI Chat Panel', category: 'AI', action: 'ai-chat' },
+        { id: 'ai-explain', label: 'AI: Explain Code', category: 'AI', action: 'ai-explain' },
+        { id: 'ai-refactor', label: 'AI: Refactor Code', category: 'AI', action: 'ai-refactor' },
+        { id: 'ai-generate-tests', label: 'AI: Generate Tests', category: 'AI', action: 'ai-generate-tests' },
+        { id: 'ai-generate-docs', label: 'AI: Generate Documentation', category: 'AI', action: 'ai-generate-docs' },
+        { id: 'ai-fix-error', label: 'AI: Fix Error', category: 'AI', action: 'ai-fix-error' },
+        { id: 'ai-simplify', label: 'AI: Simplify Code', category: 'AI', action: 'ai-simplify' },
+        { id: 'ai-convert-language', label: 'AI: Convert Language', category: 'AI', action: 'ai-convert-language' },
+        { id: 'ai-settings', label: 'AI Settings', category: 'AI', action: 'ai-settings' },
+        { id: 'ai-toggle-inline', label: 'AI: Toggle Inline Completions', category: 'AI', action: 'ai-toggle-inline' },
     ];
 
     // Deduplicate: only add extra commands whose action isn't already in the list

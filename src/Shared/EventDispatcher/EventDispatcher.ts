@@ -52,4 +52,9 @@ export const NOTEMAC_EVENTS =
     GIT_STATUS_CHANGED: 'notemac-git-status-changed',
     GIT_BRANCH_CHANGED: 'notemac-git-branch-changed',
     GIT_OPERATION_COMPLETE: 'notemac-git-operation-complete',
+    AI_RESPONSE_COMPLETE: 'notemac-ai-response-complete',
+    AI_STREAM_CHUNK: 'notemac-ai-stream-chunk',
+    AI_INLINE_SUGGESTION: 'notemac-ai-inline-suggestion',
+    AI_ERROR: 'notemac-ai-error',
+    AI_ACTION: 'notemac-ai-action',
 } as const;

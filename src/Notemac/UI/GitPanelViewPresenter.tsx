@@ -6,8 +6,9 @@ import {
     RefreshGitStatus, StageFile, StageAllFiles, UnstageFile,
     DiscardFileChanges, CreateCommit, PushToRemote, PullFromRemote,
     FetchFromRemote, CheckoutBranch, CreateBranch, DeleteBranch,
-    InitializeRepository, GetFileAtHead,
+    InitializeRepository, GetFileAtHead, GetStagedDiff,
 } from "../Controllers/GitController";
+import { GenerateCommitMessage } from "../Controllers/AIActionController";
 
 interface GitPanelProps
 {
@@ -63,6 +64,7 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
     const setShowCloneDialog = useNotemacStore(s => s.setShowCloneDialog);
 
     const [commitMessage, setCommitMessage] = useState('');
+    const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
         staged: true,
         changes: true,
@@ -112,6 +114,38 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
             handleCommit();
         }
     }, [handleCommit]);
+
+    const handleGenerateCommitMessage = useCallback(async () =>
+    {
+        const stagedCount = gitStatus?.stagedFiles?.length || 0;
+        if (0 === stagedCount || isGeneratingMessage)
+            return;
+
+        setIsGeneratingMessage(true);
+        try
+        {
+            const diff = await GetStagedDiff();
+            if (0 === diff.length)
+            {
+                setIsGeneratingMessage(false);
+                return;
+            }
+
+            await GenerateCommitMessage(
+                diff,
+                (chunk) => { setCommitMessage(prev => prev + chunk); },
+                (finalMsg) => { setCommitMessage(finalMsg); },
+            );
+        }
+        catch
+        {
+            // Error handled by store
+        }
+        finally
+        {
+            setIsGeneratingMessage(false);
+        }
+    }, [gitStatus, isGeneratingMessage]);
 
     const handleCreateBranch = useCallback(async () =>
     {
@@ -249,17 +283,37 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
 
                 {/* Commit area */}
                 <div style={{ padding: '8px 8px', borderBottom: `1px solid ${theme.border}` }}>
-                    <textarea
-                        value={commitMessage}
-                        onChange={(e) => setCommitMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Commit message (Cmd+Enter to commit)"
-                        style={{
-                            width: '100%', height: 52, backgroundColor: theme.bg, color: theme.text,
-                            border: `1px solid ${theme.border}`, borderRadius: 4, padding: '6px 8px',
-                            fontSize: 12, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-                        }}
-                    />
+                    <div style={{ position: 'relative' }}>
+                        <textarea
+                            value={commitMessage}
+                            onChange={(e) => setCommitMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Commit message (Cmd+Enter to commit)"
+                            style={{
+                                width: '100%', height: 52, backgroundColor: theme.bg, color: theme.text,
+                                border: `1px solid ${theme.border}`, borderRadius: 4, padding: '6px 8px',
+                                paddingRight: 30,
+                                fontSize: 12, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+                            }}
+                        />
+                        <button
+                            onClick={handleGenerateCommitMessage}
+                            disabled={isGeneratingMessage || 0 === (gitStatus?.stagedFiles?.length || 0)}
+                            title="Generate commit message with AI"
+                            style={{
+                                position: 'absolute', top: 4, right: 4,
+                                width: 22, height: 22,
+                                background: 'none', border: 'none',
+                                cursor: isGeneratingMessage ? 'wait' : 'pointer',
+                                fontSize: 12,
+                                opacity: isGeneratingMessage || 0 === (gitStatus?.stagedFiles?.length || 0) ? 0.4 : 0.8,
+                                borderRadius: 3,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                        >
+                            {isGeneratingMessage ? '\u23f3' : '\u2728'}
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                         <button
                             onClick={handleCommit}

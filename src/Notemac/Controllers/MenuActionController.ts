@@ -248,6 +248,29 @@ export function HandleMenuAction(
             store.setSidebarPanel('git');
             break;
 
+        // AI actions
+        case 'ai-chat':
+            store.setSidebarPanel('ai');
+            break;
+        case 'ai-settings':
+            store.SetShowAiSettings(true);
+            break;
+        case 'ai-explain':
+        case 'ai-refactor':
+        case 'ai-generate-tests':
+        case 'ai-generate-docs':
+        case 'ai-fix-error':
+        case 'ai-simplify':
+        case 'ai-convert-language':
+            // These are dispatched via the editor's context menu;
+            // the actual call is handled in EditorPanelViewPresenter
+            if (editorAction)
+                editorAction(action);
+            break;
+        case 'ai-toggle-inline':
+            store.SetInlineSuggestionEnabled(!store.inlineSuggestionEnabled);
+            break;
+
         // Dialogs
         case 'preferences':
             store.setShowSettings(true);

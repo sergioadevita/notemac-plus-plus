@@ -1,5 +1,12 @@
 import { useNotemacStore } from "../Model/Store";
 import { RegisterSnippetCompletionProvider } from "./SnippetController";
+import { SendInlineCompletion, CancelActiveRequest } from "./LLMController";
+import { AI_DEFAULT_DEBOUNCE_MS } from "../Commons/Constants";
+
+// ─── Inline Completion State ────────────────────────────────────
+
+let inlineDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let lastInlineRequestId = 0;
 
 /**
  * Registers all custom completion providers for the editor.
@@ -123,5 +130,158 @@ export function RegisterCompletionProviders(monaco: any, editor: any): any[]
         })
     );
 
+    // 4. AI inline completions (ghost text)
+    disposables.push(RegisterAIInlineCompletionProvider(monaco, editor));
+
     return disposables;
+}
+
+// ─── AI Inline Completion Provider ──────────────────────────────
+
+/**
+ * Registers an inline completion provider that requests ghost-text
+ * suggestions from the configured LLM. Debounced to avoid excessive
+ * API calls while typing.
+ */
+export function RegisterAIInlineCompletionProvider(monaco: any, editor: any): any
+{
+    const provider = monaco.languages.registerInlineCompletionsProvider('*', {
+        provideInlineCompletions: async (model: any, position: any, _context: any, token: any) =>
+        {
+            const store = useNotemacStore.getState();
+
+            // Guard: AI must be enabled with a valid credential
+            if (!store.aiEnabled || !store.inlineSuggestionEnabled)
+                return { items: [] };
+
+            if (!store.aiSettings.inlineCompletionEnabled)
+                return { items: [] };
+
+            const activeProvider = store.GetActiveProvider();
+            if (null === activeProvider)
+                return { items: [] };
+
+            const credential = store.GetCredentialForProvider(activeProvider.id);
+            if (null === credential || 0 === credential.apiKey.length)
+                return { items: [] };
+
+            // Debounce: cancel previous pending request
+            if (null !== inlineDebounceTimer)
+            {
+                clearTimeout(inlineDebounceTimer);
+                inlineDebounceTimer = null;
+            }
+
+            const requestId = ++lastInlineRequestId;
+            const debounceMs = store.aiSettings.inlineDebounceMs || AI_DEFAULT_DEBOUNCE_MS;
+
+            // Wait for the debounce period
+            const shouldProceed = await new Promise<boolean>((resolve) =>
+            {
+                inlineDebounceTimer = setTimeout(() =>
+                {
+                    inlineDebounceTimer = null;
+                    // Only proceed if this is still the latest request
+                    resolve(requestId === lastInlineRequestId);
+                }, debounceMs);
+
+                // Cancel on cancellation token
+                token.onCancellationRequested(() =>
+                {
+                    if (null !== inlineDebounceTimer)
+                    {
+                        clearTimeout(inlineDebounceTimer);
+                        inlineDebounceTimer = null;
+                    }
+                    resolve(false);
+                });
+            });
+
+            if (!shouldProceed)
+                return { items: [] };
+
+            // Build prefix and suffix from the editor content
+            const offset = model.getOffsetAt(position);
+            const fullText = model.getValue();
+            const prefix = fullText.substring(0, offset);
+            const suffix = fullText.substring(offset);
+
+            // Skip if prefix is too short or ends with whitespace only
+            const trimmedPrefix = prefix.trimEnd();
+            if (trimmedPrefix.length < 5)
+                return { items: [] };
+
+            // Get language ID
+            const languageId = model.getLanguageId() || 'plaintext';
+
+            try
+            {
+                const completion = await SendInlineCompletion(
+                    prefix,
+                    suffix,
+                    languageId,
+                );
+
+                // Verify this is still the latest request
+                if (requestId !== lastInlineRequestId)
+                    return { items: [] };
+
+                if (0 === completion.length)
+                    return { items: [] };
+
+                // Clean up the completion — remove leading/trailing code fences if present
+                let cleanCompletion = completion.trim();
+                if (cleanCompletion.startsWith('```'))
+                {
+                    const lines = cleanCompletion.split('\n');
+                    lines.shift(); // Remove opening fence
+                    if (0 < lines.length && lines[lines.length - 1].startsWith('```'))
+                        lines.pop(); // Remove closing fence
+                    cleanCompletion = lines.join('\n');
+                }
+
+                if (0 === cleanCompletion.length)
+                    return { items: [] };
+
+                return {
+                    items: [
+                        {
+                            insertText: cleanCompletion,
+                            range: new monaco.Range(
+                                position.lineNumber,
+                                position.column,
+                                position.lineNumber,
+                                position.column,
+                            ),
+                        },
+                    ],
+                };
+            }
+            catch
+            {
+                return { items: [] };
+            }
+        },
+
+        freeInlineCompletions: () =>
+        {
+            // Nothing to clean up
+        },
+    });
+
+    return provider;
+}
+
+/**
+ * Cancel any pending inline completion request and debounce timer.
+ */
+export function CancelInlineCompletion(): void
+{
+    if (null !== inlineDebounceTimer)
+    {
+        clearTimeout(inlineDebounceTimer);
+        inlineDebounceTimer = null;
+    }
+    lastInlineRequestId++;
+    CancelActiveRequest();
 }

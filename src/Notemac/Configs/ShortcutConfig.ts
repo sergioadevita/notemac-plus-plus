@@ -67,6 +67,17 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'Git', name: 'Source Control Panel', shortcut: 'Ctrl+Shift+G', action: 'show-git-panel' },
     { category: 'Git', name: 'Clone Repository', shortcut: '', action: 'clone-repository' },
     { category: 'Git', name: 'Git Settings', shortcut: '', action: 'git-settings' },
+
+    // AI
+    { category: 'AI', name: 'AI Chat Panel', shortcut: 'Ctrl+Shift+A', action: 'ai-chat' },
+    { category: 'AI', name: 'Explain Code', shortcut: 'Ctrl+Shift+E', action: 'ai-explain' },
+    { category: 'AI', name: 'Refactor Code', shortcut: 'Ctrl+Shift+R', action: 'ai-refactor' },
+    { category: 'AI', name: 'Generate Tests', shortcut: '', action: 'ai-generate-tests' },
+    { category: 'AI', name: 'Generate Docs', shortcut: '', action: 'ai-generate-docs' },
+    { category: 'AI', name: 'Fix Error', shortcut: '', action: 'ai-fix-error' },
+    { category: 'AI', name: 'Simplify Code', shortcut: '', action: 'ai-simplify' },
+    { category: 'AI', name: 'AI Settings', shortcut: '', action: 'ai-settings' },
+    { category: 'AI', name: 'Toggle Inline Completions', shortcut: '', action: 'ai-toggle-inline' },
 ] as const;
 
 export function GetDefaultShortcuts(): readonly ShortcutItem[]

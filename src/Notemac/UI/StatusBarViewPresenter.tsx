@@ -12,6 +12,8 @@ export function StatusBar({ theme }: StatusBarProps) {
     tabs, activeTabId, settings, zoomLevel, isRecordingMacro,
     updateTab, updateSettings,
     isRepoInitialized, currentBranch, gitStatus, setSidebarPanel,
+    aiEnabled, isAiStreaming, activeModelId, inlineSuggestionEnabled,
+    SetShowAiSettings,
   } = useNotemacStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId);
@@ -189,6 +191,20 @@ export function StatusBar({ theme }: StatusBarProps) {
             />
           )}
         </StatusItem>
+
+        {aiEnabled && (
+          <StatusItem
+            title={`AI: ${activeModelId}${inlineSuggestionEnabled ? ' (Inline On)' : ''}`}
+            onClick={() => SetShowAiSettings(true)}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {isAiStreaming
+                ? <span style={{ color: '#a6e3a1', animation: 'pulse 1s infinite' }}>{'\u2728'} Generating...</span>
+                : <span style={{ color: theme.statusBarText, opacity: 0.8 }}>{'\u2728'} {activeModelId || 'No Model'}</span>
+              }
+            </span>
+          </StatusItem>
+        )}
 
         {zoomLevel !== 0 && (
           <StatusItem title="Zoom Level">

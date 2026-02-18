@@ -7,6 +7,7 @@ import { defineMonacoThemes } from "../Configs/ThemeConfig";
 import type { FileTab, AppSettings } from "../Commons/Types";
 import { RegisterCompletionProviders } from "../Controllers/CompletionController";
 import { InsertSnippet } from "../Controllers/SnippetController";
+import { ExplainCode, RefactorCode, GenerateTests, GenerateDocumentation, FixError, SimplifyCode } from "../Controllers/AIActionController";
 import { Subscribe, Unsubscribe, NOTEMAC_EVENTS } from "../../Shared/EventDispatcher/EventDispatcher";
 
 interface EditorPanelProps {
@@ -72,6 +73,117 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     if (tab.scrollTop) {
       editor.setScrollTop(tab.scrollTop);
     }
+
+    // Register AI context menu actions
+    editor.addAction({
+      id: 'ai-explain',
+      label: 'AI: Explain Code',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 1,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          ExplainCode(code, model.getLanguageId() || 'plaintext');
+        }
+      },
+    });
+
+    editor.addAction({
+      id: 'ai-refactor',
+      label: 'AI: Refactor Code',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 2,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          RefactorCode(code, model.getLanguageId() || 'plaintext', (refactored) => {
+            ed.executeEdits('ai-refactor', [{ range: sel, text: refactored }]);
+          });
+        }
+      },
+    });
+
+    editor.addAction({
+      id: 'ai-generate-tests',
+      label: 'AI: Generate Tests',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 3,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          GenerateTests(code, model.getLanguageId() || 'plaintext', (tests) => {
+            // Insert tests at end of document
+            const lastLine = model.getLineCount();
+            const lastCol = model.getLineMaxColumn(lastLine);
+            ed.executeEdits('ai-tests', [{
+              range: new monaco.Range(lastLine, lastCol, lastLine, lastCol),
+              text: '\n\n' + tests,
+            }]);
+          });
+        }
+      },
+    });
+
+    editor.addAction({
+      id: 'ai-generate-docs',
+      label: 'AI: Generate Documentation',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 4,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          GenerateDocumentation(code, model.getLanguageId() || 'plaintext', (documented) => {
+            ed.executeEdits('ai-docs', [{ range: sel, text: documented }]);
+          });
+        }
+      },
+    });
+
+    editor.addAction({
+      id: 'ai-fix-error',
+      label: 'AI: Fix Error',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 5,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          const errorMsg = prompt('Describe the error (or paste error message):') || 'Fix any issues';
+          FixError(code, model.getLanguageId() || 'plaintext', errorMsg, (fixed) => {
+            ed.executeEdits('ai-fix', [{ range: sel, text: fixed }]);
+          });
+        }
+      },
+    });
+
+    editor.addAction({
+      id: 'ai-simplify',
+      label: 'AI: Simplify Code',
+      contextMenuGroupId: '9_ai',
+      contextMenuOrder: 6,
+      run: (ed: any) => {
+        const sel = ed.getSelection();
+        const model = ed.getModel();
+        if (sel && !sel.isEmpty() && model) {
+          const code = model.getValueInRange(sel);
+          SimplifyCode(code, model.getLanguageId() || 'plaintext', (simplified) => {
+            ed.executeEdits('ai-simplify', [{ range: sel, text: simplified }]);
+          });
+        }
+      },
+    });
+
+    // Expose editor reference for AI chat "Insert" button
+    (window as any).__monacoEditor = editor;
 
     // Register custom completion providers (IntelliSense)
     const completionDisposables = RegisterCompletionProviders(monaco, editor);
@@ -539,6 +651,53 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
         case 'copy-file-name': { navigator.clipboard.writeText(tab.name); break; }
         case 'copy-file-dir': { if (tab.path) navigator.clipboard.writeText(tab.path.substring(0, tab.path.lastIndexOf('/'))); break; }
         case 'toggle-readonly': { updateTab(tab.id, { isReadOnly: !tab.isReadOnly }); break; }
+
+        // AI actions (dispatched from MenuActionController)
+        case 'ai-explain': {
+          const aiSel = editor.getSelection();
+          if (aiSel && !aiSel.isEmpty()) {
+            ExplainCode(model.getValueInRange(aiSel), model.getLanguageId() || 'plaintext');
+          }
+          break;
+        }
+        case 'ai-refactor': {
+          const aiSel2 = editor.getSelection();
+          if (aiSel2 && !aiSel2.isEmpty()) {
+            RefactorCode(model.getValueInRange(aiSel2), model.getLanguageId() || 'plaintext', (refactored) => {
+              editor.executeEdits('ai-refactor', [{ range: aiSel2, text: refactored }]);
+            });
+          }
+          break;
+        }
+        case 'ai-generate-tests': {
+          const aiSel3 = editor.getSelection();
+          if (aiSel3 && !aiSel3.isEmpty()) {
+            GenerateTests(model.getValueInRange(aiSel3), model.getLanguageId() || 'plaintext', (tests) => {
+              const lastLine = model.getLineCount();
+              const lastCol = model.getLineMaxColumn(lastLine);
+              editor.executeEdits('ai-tests', [{ range: new monaco.Range(lastLine, lastCol, lastLine, lastCol), text: '\n\n' + tests }]);
+            });
+          }
+          break;
+        }
+        case 'ai-generate-docs': {
+          const aiSel4 = editor.getSelection();
+          if (aiSel4 && !aiSel4.isEmpty()) {
+            GenerateDocumentation(model.getValueInRange(aiSel4), model.getLanguageId() || 'plaintext', (documented) => {
+              editor.executeEdits('ai-docs', [{ range: aiSel4, text: documented }]);
+            });
+          }
+          break;
+        }
+        case 'ai-simplify': {
+          const aiSel5 = editor.getSelection();
+          if (aiSel5 && !aiSel5.isEmpty()) {
+            SimplifyCode(model.getValueInRange(aiSel5), model.getLanguageId() || 'plaintext', (simplified) => {
+              editor.executeEdits('ai-simplify', [{ range: aiSel5, text: simplified }]);
+            });
+          }
+          break;
+        }
       }
     };
 
@@ -733,6 +892,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
 
     return () => {
       delete (window as any).__editorAction;
+      delete (window as any).__monacoEditor;
       document.removeEventListener('notemac-find', handleFind);
       document.removeEventListener('notemac-replace', handleReplace);
       document.removeEventListener('notemac-mark', handleMark);
@@ -812,6 +972,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
           dragAndDrop: true,
           links: true,
           multiCursorModifier: 'alt',
+          inlineSuggest: { enabled: true },
           snippetSuggestions: 'top',
           suggestOnTriggerCharacters: true,
           wordBasedSuggestions: 'currentDocument',

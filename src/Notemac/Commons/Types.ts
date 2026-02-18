@@ -217,3 +217,78 @@ export interface BrowserWorkspace
     createdAt: number;
     lastOpenedAt: number;
 }
+
+// AI types
+
+export type AIProviderType = 'openai' | 'anthropic' | 'google' | 'custom';
+
+export interface AIProvider
+{
+    id: string;
+    name: string;
+    type: AIProviderType;
+    baseUrl: string;
+    models: AIModelDefinition[];
+    isBuiltIn: boolean;
+}
+
+export interface AIModelDefinition
+{
+    id: string;
+    name: string;
+    providerId: string;
+    contextWindow: number;
+    supportsStreaming: boolean;
+    supportsFIM: boolean;
+}
+
+export interface AICredential
+{
+    providerId: string;
+    apiKey: string;
+    rememberKey: boolean;
+}
+
+export interface AIMessage
+{
+    id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    timestamp: number;
+    codeBlocks: AICodeBlock[];
+}
+
+export interface AIConversation
+{
+    id: string;
+    title: string;
+    messages: AIMessage[];
+    modelId: string;
+    providerId: string;
+    createdAt: number;
+}
+
+export interface AICodeBlock
+{
+    language: string;
+    code: string;
+    startLine?: number;
+    endLine?: number;
+    action: 'insert' | 'replace' | 'new-file';
+}
+
+export interface AIInlineSuggestion
+{
+    text: string;
+    range: { startLine: number; startColumn: number; endLine: number; endColumn: number };
+    requestId: string;
+    status: 'pending' | 'active' | 'accepted' | 'dismissed';
+}
+
+export interface AIContextItem
+{
+    type: 'file' | 'selection' | 'error' | 'diff';
+    content: string;
+    label: string;
+    language?: string;
+}

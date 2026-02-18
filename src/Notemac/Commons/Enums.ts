@@ -1,6 +1,6 @@
 export type TabColor = 'none' | 'color1' | 'color2' | 'color3' | 'color4' | 'color5';
 
-export type SidebarPanel = 'explorer' | 'search' | 'functions' | 'project' | 'clipboardHistory' | 'charPanel' | 'docList' | 'terminal' | 'git' | null;
+export type SidebarPanel = 'explorer' | 'search' | 'functions' | 'project' | 'clipboardHistory' | 'charPanel' | 'docList' | 'terminal' | 'git' | 'ai' | null;
 
 export type GitFileStatusType = 'modified' | 'added' | 'deleted' | 'untracked' | 'unmerged';
 

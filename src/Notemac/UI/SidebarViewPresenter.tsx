@@ -5,6 +5,7 @@ import type { FileTreeNode } from "../Commons/Types";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
+const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
 
 interface SidebarProps {
   theme: ThemeColors;
@@ -210,6 +211,7 @@ export function Sidebar({ theme }: SidebarProps) {
           { panel: 'clipboardHistory' as const, icon: '\ud83d\udccb', title: 'Clipboard History' },
           { panel: 'charPanel' as const, icon: '\ud83d\udd24', title: 'Character Panel' },
           { panel: 'git' as const, icon: '\ud83d\udd00', title: 'Source Control' },
+          { panel: 'ai' as const, icon: '\u2728', title: 'AI Assistant' },
         ] as const).map(({ panel, icon, title }) => {
           const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
           return (
@@ -271,7 +273,7 @@ export function Sidebar({ theme }: SidebarProps) {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : ''}
+          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : ''}
         </div>
 
         {/* Panel body */}
@@ -363,6 +365,12 @@ export function Sidebar({ theme }: SidebarProps) {
           {sidebarPanel === 'git' && (
             <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
               <GitPanelViewPresenter theme={theme} />
+            </Suspense>
+          )}
+
+          {sidebarPanel === 'ai' && (
+            <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
+              <AIChatPanelViewPresenter theme={theme} />
             </Suspense>
           )}
         </div>

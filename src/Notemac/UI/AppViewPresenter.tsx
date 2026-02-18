@@ -30,6 +30,7 @@ const SnippetManagerViewPresenter = lazy(() => import('./SnippetManagerViewPrese
 const TerminalPanelViewPresenter = lazy(() => import('./TerminalPanelViewPresenter').then(m => ({ default: m.TerminalPanelViewPresenter })));
 const CloneRepositoryViewPresenter = lazy(() => import('./CloneRepositoryViewPresenter').then(m => ({ default: m.CloneRepositoryViewPresenter })));
 const GitSettingsViewPresenter = lazy(() => import('./GitSettingsViewPresenter').then(m => ({ default: m.GitSettingsViewPresenter })));
+const AISettingsViewPresenter = lazy(() => import('./AISettingsViewPresenter').then(m => ({ default: m.AISettingsViewPresenter })));
 
 export default function App()
 {
@@ -55,6 +56,7 @@ export default function App()
   const showTerminalPanel = useNotemacStore(s => s.showTerminalPanel);
   const showCloneDialog = useNotemacStore(s => s.showCloneDialog);
   const showGitSettings = useNotemacStore(s => s.showGitSettings);
+  const showAiSettings = useNotemacStore(s => s.showAiSettings);
   const splitView = useNotemacStore(s => s.splitView);
   const splitTabId = useNotemacStore(s => s.splitTabId);
   const addTab = useNotemacStore(s => s.addTab);
@@ -103,6 +105,12 @@ export default function App()
   {
     if (0 === tabs.length)
       addTab({ name: 'new 1', content: '' });
+  }, []);
+
+  // Load AI state from persistence
+  useEffect(() =>
+  {
+    useNotemacStore.getState().LoadAIState();
   }, []);
 
   const activeTab = tabs.find(t => t.id === activeTabId);
@@ -225,6 +233,7 @@ export default function App()
         {showSnippetManager && <SnippetManagerViewPresenter theme={theme} />}
         {showCloneDialog && <CloneRepositoryViewPresenter theme={theme} />}
         {showGitSettings && <GitSettingsViewPresenter theme={theme} />}
+        {showAiSettings && <AISettingsViewPresenter theme={theme} />}
       </Suspense>
       <FeedbackPopup theme={theme} />
     </div>

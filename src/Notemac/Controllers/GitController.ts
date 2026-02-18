@@ -821,6 +821,44 @@ export async function GetFileAtHead(filepath: string): Promise<string | null>
     }
 }
 
+/**
+ * Build a summary of staged changes suitable for AI commit message generation.
+ */
+export async function GetStagedDiff(): Promise<string>
+{
+    const store = GetStore();
+    const gitStatus = store.gitStatus;
+    if (null === gitStatus || 0 === gitStatus.stagedFiles.length)
+        return '';
+
+    const parts: string[] = [];
+    const maxFiles = gitStatus.stagedFiles.length;
+
+    for (let i = 0; i < maxFiles; i++)
+    {
+        const file = gitStatus.stagedFiles[i];
+        parts.push(`${file.status}: ${file.path}`);
+
+        // Try to get a diff for modified files
+        if ('modified' === file.status)
+        {
+            const headContent = await GetFileAtHead(file.path);
+            if (null !== headContent)
+            {
+                // Simple line-based diff summary (not full unified diff)
+                const headLines = headContent.split('\n');
+                const currentLines = (store.tabs.find(t => t.path?.endsWith(file.path))?.content || '').split('\n');
+
+                const added = currentLines.length - headLines.length;
+                if (0 !== added)
+                    parts.push(`  (${0 < added ? '+' : ''}${added} lines)`);
+            }
+        }
+    }
+
+    return parts.join('\n');
+}
+
 // ─── Auto-fetch Timer ────────────────────────────────────────────
 
 let autoFetchTimer: ReturnType<typeof setInterval> | null = null;
