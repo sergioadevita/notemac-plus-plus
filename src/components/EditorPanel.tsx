@@ -93,7 +93,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     const monaco = monacoRef.current;
     if (!editor || !monaco) return;
 
-    const actionHandler = (action: string, value?: any) => {
+    const actionHandler = (action: string, value?: boolean | string | number) => {
       const model = editor.getModel();
       if (!model) return;
 
