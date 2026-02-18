@@ -38,6 +38,7 @@ export interface FileTreeNode
     isDirectory: boolean;
     children?: FileTreeNode[];
     isExpanded?: boolean;
+    handle?: FileSystemFileHandle;
 }
 
 export interface MacroAction
