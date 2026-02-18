@@ -1,15 +1,15 @@
-type EventCallback<T = any> = (data: T) => void;
+type EventCallback<T = unknown> = (data: T) => void;
 
 const listeners = new Map<string, Set<EventCallback>>();
 
-export function Subscribe<T = any>(eventName: string, callback: EventCallback<T>): void
+export function Subscribe<T = unknown>(eventName: string, callback: EventCallback<T>): void
 {
     if (!listeners.has(eventName))
         listeners.set(eventName, new Set());
     listeners.get(eventName)!.add(callback as EventCallback);
 }
 
-export function Unsubscribe<T = any>(eventName: string, callback: EventCallback<T>): void
+export function Unsubscribe<T = unknown>(eventName: string, callback: EventCallback<T>): void
 {
     const set = listeners.get(eventName);
     if (set)
@@ -20,7 +20,7 @@ export function Unsubscribe<T = any>(eventName: string, callback: EventCallback<
     }
 }
 
-export function Dispatch<T = any>(eventName: string, data?: T): void
+export function Dispatch<T = unknown>(eventName: string, data?: T): void
 {
     const set = listeners.get(eventName);
     if (set)
