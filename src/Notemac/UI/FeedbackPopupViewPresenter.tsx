@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 
 interface FeedbackPopupProps
 {
@@ -8,7 +9,7 @@ interface FeedbackPopupProps
 
 const FEEDBACK_TIMER_MS = 20 * 60 * 1000;
 const FEEDBACK_STORAGE_KEY = 'notemac_feedback_shown_version';
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.2.1';
 
 export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {
@@ -101,7 +102,7 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
         <div
             className="dialog-overlay"
             onClick={() => setVisible(false)}
-            style={{ zIndex: 10000 }}
+            style={{ zIndex: UI_ZINDEX_MODAL }}
         >
             <div
                 onClick={(e) => e.stopPropagation()}
