@@ -147,7 +147,12 @@ export async function EncryptValue(plaintext: string): Promise<string>
         combined.set(new Uint8Array(encrypted), IV_LENGTH);
 
         // Return as base64
-        return btoa(String.fromCharCode(...combined));
+        // Build base64 in chunks to avoid call-stack overflow on large data
+        let binary = '';
+        const len = combined.byteLength;
+        for (let i = 0; i < len; i++)
+            binary += String.fromCharCode(combined[i]);
+        return btoa(binary);
     }
     catch (err)
     {
