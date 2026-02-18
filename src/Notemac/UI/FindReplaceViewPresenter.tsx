@@ -79,6 +79,7 @@ export function FindReplace({ theme }: FindReplaceProps) {
   }) => (
     <button
       title={title}
+      aria-label={title}
       onClick={onClick}
       style={{
         background: active ? theme.accent : 'transparent',
@@ -108,6 +109,7 @@ export function FindReplace({ theme }: FindReplaceProps) {
   }) => (
     <button
       title={title}
+      aria-label={title}
       onClick={onClick}
       style={{
         background: primary ? theme.accent : 'transparent',
@@ -165,17 +167,23 @@ export function FindReplace({ theme }: FindReplaceProps) {
 
         <div style={{ flex: 1 }} />
 
-        <span
+        <button
+          aria-label="Close find and replace"
           onClick={() => setShowFindReplace(false)}
           style={{
             cursor: 'pointer',
             color: theme.textMuted,
             fontSize: 16,
             padding: '0 4px',
+            backgroundColor: 'transparent',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           {'\u00d7'}
-        </span>
+        </button>
       </div>
 
       {/* Find row */}
