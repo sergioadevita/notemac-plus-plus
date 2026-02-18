@@ -165,7 +165,7 @@ export function HandleMenuAction(
         {
             store.updateSettings({ alwaysOnTop: value });
             if (window.electronAPI)
-                (window.electronAPI as any).setAlwaysOnTop?.(value);
+                window.electronAPI.setAlwaysOnTop?.(value);
             break;
         }
         case 'sync-scroll-v':
@@ -341,12 +341,12 @@ export function HandleMenuAction(
                 const file = (e.target as HTMLInputElement).files?.[0];
                 if (file)
                 {
-                    const text = await file.text();
                     try
                     {
+                        const text = await file.text();
                         useNotemacStore.getState().loadSession(JSON.parse(text));
                     }
-                    catch {}
+                    catch { /* Invalid session file — silently ignore */ }
                 }
             };
             input.click();
@@ -380,17 +380,21 @@ function HandleOpenFile(): void
         if (!input.files)
             return;
 
-        const store = useNotemacStore.getState();
-        for (const file of Array.from(input.files))
+        try
         {
-            const content = await file.text();
-            store.addTab({
-                name: file.name,
-                content,
-                language: detectLanguage(file.name),
-                lineEnding: detectLineEnding(content),
-            });
+            const store = useNotemacStore.getState();
+            for (const file of Array.from(input.files))
+            {
+                const content = await file.text();
+                store.addTab({
+                    name: file.name,
+                    content,
+                    language: detectLanguage(file.name),
+                    lineEnding: detectLineEnding(content),
+                });
+            }
         }
+        catch { /* File read failed — user can retry from menu */ }
     };
     input.click();
 }
@@ -412,17 +416,21 @@ function HandleOpenFolder(): void
         if (!input.files || 0 === input.files.length)
             return;
 
-        const store = useNotemacStore.getState();
-        for (const file of Array.from(input.files))
+        try
         {
-            const content = await file.text();
-            store.addTab({
-                name: file.name,
-                content,
-                language: detectLanguage(file.name),
-                lineEnding: detectLineEnding(content),
-            });
+            const store = useNotemacStore.getState();
+            for (const file of Array.from(input.files))
+            {
+                const content = await file.text();
+                store.addTab({
+                    name: file.name,
+                    content,
+                    language: detectLanguage(file.name),
+                    lineEnding: detectLineEnding(content),
+                });
+            }
         }
+        catch { /* File read failed — user can retry from menu */ }
     };
     input.click();
 }
@@ -513,13 +521,17 @@ function HandleReloadFromDisk(activeTabId: string | null, tabs: FileTab[]): void
     input.type = 'file';
     input.onchange = async () =>
     {
-        const file = input.files?.[0];
-        if (file)
+        try
         {
-            const content = await file.text();
-            useNotemacStore.getState().updateTabContent(activeTabId, content);
-            useNotemacStore.getState().updateTab(activeTabId, { isModified: false, name: file.name });
+            const file = input.files?.[0];
+            if (file)
+            {
+                const content = await file.text();
+                useNotemacStore.getState().updateTabContent(activeTabId, content);
+                useNotemacStore.getState().updateTab(activeTabId, { isModified: false, name: file.name });
+            }
         }
+        catch { /* File read failed — user can retry */ }
     };
     input.click();
 }

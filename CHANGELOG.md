@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026
+
+### Changed
+- **New App Icon**: Octopus mascot with notepad design, replacing previous icon across all platforms
+- All icon variants regenerated (1024, 512, 256, 128, 64, 32, 16) plus macOS .icns
+
+### Fixed
+- **Git auto-detection**: Opening a folder now automatically detects if it's a git repository (web and Electron)
+- Directory handle was not registered with the git filesystem adapter when opening folders via file picker
+- Electron `onFolderOpened` handler now initializes git workspace detection
+- Filesystem cache is properly invalidated when switching workspaces
+
+### Improved
+- **Type safety**: Added proper Window interface declarations for `showDirectoryPicker`, `showOpenFilePicker`, and `runCommand`, eliminating 7 unnecessary `as any` casts
+- **Error handling**: Added try/catch blocks to all async file input handlers in MenuActionController and ViewPresenters
+- **Error handling**: Added error handling to OAuth flow and git authentication test in GitSettingsViewPresenter
+- **Code quality**: Empty catch blocks now have descriptive comments explaining why errors are suppressed
+- **RunCommand dialog**: Fixed type mismatch — properly extracts stdout/stderr from command result object
+- **Documentation**: Updated test count from 450+ to accurate 463, updated all docs pages
+
 ## [2.0.0] - 2026
 
 ### Added

@@ -3,6 +3,7 @@ import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
 import type { FileTreeNode } from '../types';
 import { detectLanguage, detectLineEnding } from '../utils/helpers';
+import { InitGitForWorkspace } from '../Notemac/Controllers/GitController';
 
 interface SidebarProps {
   theme: ThemeColors;
@@ -52,10 +53,13 @@ export function Sidebar({ theme }: SidebarProps) {
   const handleOpenFolder = async () => {
     if ('showDirectoryPicker' in window) {
       try {
-        const dirHandle = await (window as any).showDirectoryPicker();
+        const dirHandle = await window.showDirectoryPicker!();
         const tree = await buildWebFileTree(dirHandle);
         setFileTree(tree);
         setWorkspacePath(dirHandle.name);
+
+        // Detect git repo in the opened folder
+        await InitGitForWorkspace(dirHandle);
       } catch {
         // User cancelled
       }

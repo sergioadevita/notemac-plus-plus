@@ -134,7 +134,7 @@ export function SnippetManagerViewPresenter({ theme }: SnippetManagerProps)
                         });
                     }
                 }
-                catch {}
+                catch { /* Invalid JSON in snippet file — silently ignore */ }
             }
         };
         input.click();

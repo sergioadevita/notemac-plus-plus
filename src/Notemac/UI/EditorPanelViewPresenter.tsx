@@ -579,18 +579,20 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
           const input = document.createElement('input');
           input.type = 'file';
           input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return;
-            const content = await file.text();
-            const algo = action === 'hash-md5-file' ? 'md5' : 'sha256';
-            const hash = await computeHash(algo, content);
-            const pos = editor.getPosition();
-            if (pos) {
-              editor.executeEdits('hash-file', [{
-                range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
-                text: `\n// ${algo.toUpperCase()} (${file.name}): ${hash}\n`,
-              }]);
-            }
+            try {
+              const file = input.files?.[0];
+              if (!file) return;
+              const content = await file.text();
+              const algo = action === 'hash-md5-file' ? 'md5' : 'sha256';
+              const hash = await computeHash(algo, content);
+              const pos = editor.getPosition();
+              if (pos) {
+                editor.executeEdits('hash-file', [{
+                  range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+                  text: `\n// ${algo.toUpperCase()} (${file.name}): ${hash}\n`,
+                }]);
+              }
+            } catch { /* File read failed — user can retry */ }
           };
           input.click();
           break;

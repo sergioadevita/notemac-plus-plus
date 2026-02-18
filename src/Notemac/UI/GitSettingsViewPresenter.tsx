@@ -47,6 +47,8 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
 
     const handleStartOAuth = useCallback(async () =>
     {
+        try
+        {
         setOauthStatus('waiting');
         setOauthError('');
         const state = await StartGitHubOAuth();
@@ -86,6 +88,12 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
             }
         };
         setTimeout(poll, pollInterval);
+        }
+        catch
+        {
+            setOauthStatus('error');
+            setOauthError('OAuth authentication failed. Please try again.');
+        }
     }, [oauthStatus]);
 
     const handleSaveAuthor = useCallback(() =>
@@ -107,8 +115,15 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
         if (0 === testUrl.trim().length || 0 === token.trim().length)
             return;
         setTestResult(null);
-        const result = await TestAuthentication(testUrl.trim(), { type: 'token', username, token });
-        setTestResult(result);
+        try
+        {
+            const result = await TestAuthentication(testUrl.trim(), { type: 'token', username, token });
+            setTestResult(result);
+        }
+        catch
+        {
+            setTestResult({ success: false, error: 'Authentication test failed unexpectedly.' });
+        }
     }, [testUrl, username, token]);
 
     const inputStyle = {

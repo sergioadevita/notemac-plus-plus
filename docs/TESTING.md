@@ -12,7 +12,7 @@ npx vitest run --reporter=verbose   # Detailed output
 
 ## Test Summary
 
-450+ tests across 22 test suites:
+463 tests across 22 test suites:
 
 | Suite | File | Tests | Covers |
 |---|---|---|---|

@@ -381,7 +381,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                   checked={settings.alwaysOnTop}
                   onChange={(v) => {
                     updateSettings({ alwaysOnTop: v });
-                    if (window.electronAPI) (window.electronAPI as any).setAlwaysOnTop?.(v);
+                    if (window.electronAPI) window.electronAPI.setAlwaysOnTop?.(v);
                   }}
                   description="Keep window above all other windows"
                 />

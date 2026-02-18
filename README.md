@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.1.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-463%20passing-brightgreen" alt="Tests">
@@ -412,7 +412,7 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
-Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions.
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality and type safety improvements.
 
 Planned for future releases:
 

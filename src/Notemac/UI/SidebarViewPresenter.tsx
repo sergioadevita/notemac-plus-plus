@@ -9,6 +9,7 @@ import {
 } from "../Commons/Constants";
 import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
+import { InitGitForWorkspace } from '../Controllers/GitController';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
@@ -88,10 +89,13 @@ export function Sidebar({ theme }: SidebarProps) {
   const handleOpenFolder = async () => {
     if ('showDirectoryPicker' in window) {
       try {
-        const dirHandle = await window.showDirectoryPicker();
+        const dirHandle = await window.showDirectoryPicker!();
         const tree = await buildWebFileTree(dirHandle);
         setFileTree(tree);
         setWorkspacePath(dirHandle.name);
+
+        // Detect git repo in the opened folder
+        await InitGitForWorkspace(dirHandle);
       } catch {
         // User cancelled
       }

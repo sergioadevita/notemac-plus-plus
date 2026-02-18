@@ -25,8 +25,8 @@ export function RunCommandDialog({ theme }: RunCommandDialogProps) {
     // In Electron, we could use child_process
     if (window.electronAPI) {
       try {
-        const result = await (window.electronAPI as any).runCommand?.(command);
-        setOutput(result || 'Command executed.');
+        const result = await window.electronAPI.runCommand?.(command);
+        setOutput(result ? (result.stdout || result.stderr || 'Command executed.') : 'Command executed.');
       } catch (err: any) {
         setOutput(`Error: ${err.message || err}`);
       }

@@ -19,6 +19,7 @@ import { CharInRangeDialog } from './components/CharInRangeDialog';
 import { ShortcutMapperDialog } from './components/ShortcutMapperDialog';
 import { FeedbackPopup } from './components/FeedbackPopup';
 import { detectLanguage, detectLineEnding } from './utils/helpers';
+import { InitGitForWorkspace } from './Notemac/Controllers/GitController';
 
 export default function App() {
   const {
@@ -190,6 +191,9 @@ export default function App() {
         setFileTree(data.tree);
         setWorkspacePath(data.path);
         setSidebarPanel('explorer');
+
+        // Detect git repo in the opened folder
+        InitGitForWorkspace();
       });
 
       window.electronAPI.onMenuAction((action: string, value: any) => {
@@ -243,7 +247,7 @@ export default function App() {
       case 'distraction-free': updateSettings({ distractionFreeMode: value }); break;
       case 'always-on-top': {
         updateSettings({ alwaysOnTop: value });
-        if (window.electronAPI) (window.electronAPI as any).setAlwaysOnTop?.(value);
+        if (window.electronAPI) window.electronAPI.setAlwaysOnTop?.(value);
         break;
       }
       case 'sync-scroll-v': updateSettings({ syncScrollVertical: value }); break;

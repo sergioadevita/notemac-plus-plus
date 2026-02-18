@@ -86,7 +86,7 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
           onClick={async () => {
             if ('showDirectoryPicker' in window) {
               try {
-                const dirHandle = await (window as any).showDirectoryPicker();
+                const dirHandle = await window.showDirectoryPicker!();
                 // This would be handled by the sidebar
                 useEditorStore.getState().setSidebarPanel('explorer');
               } catch { /* cancelled */ }
@@ -241,7 +241,7 @@ function WelcomeButton({ theme, label, shortcut, onClick }: {
 async function openFileWeb(): Promise<{ name: string; content: string } | null> {
   if ('showOpenFilePicker' in window) {
     try {
-      const [fileHandle] = await (window as any).showOpenFilePicker({
+      const [fileHandle] = await window.showOpenFilePicker!({
         multiple: false,
       });
       const file = await fileHandle.getFile();

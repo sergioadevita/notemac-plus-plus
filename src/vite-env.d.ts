@@ -16,5 +16,8 @@ interface Window {
     readFile: (path: string) => Promise<string>;
     writeFile: (path: string, content: string) => Promise<boolean>;
     readDir: (path: string) => Promise<any[]>;
+    runCommand?: (command: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
   };
+  showDirectoryPicker?: (options?: { mode?: string }) => Promise<FileSystemDirectoryHandle>;
+  showOpenFilePicker?: (options?: { multiple?: boolean; types?: Array<{ description?: string; accept?: Record<string, string[]> }> }) => Promise<FileSystemFileHandle[]>;
 }
