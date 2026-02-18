@@ -1,7 +1,12 @@
+import type { editor, languages, IDisposable } from 'monaco-editor';
+import type { FileTreeNode } from '../Commons/Types';
 import { useNotemacStore } from "../Model/Store";
 import { RegisterSnippetCompletionProvider } from "./SnippetController";
 import { SendInlineCompletion, CancelActiveRequest } from "./LLMController";
 import { AI_DEFAULT_DEBOUNCE_MS } from "../Commons/Constants";
+
+/** The Monaco namespace object passed at runtime from @monaco-editor/react. */
+type MonacoNamespace = typeof import('monaco-editor');
 
 // ─── Inline Completion State ────────────────────────────────────
 
@@ -12,14 +17,14 @@ let lastInlineRequestId = 0;
  * Registers all custom completion providers for the editor.
  * Returns an array of disposables that should be cleaned up on unmount.
  */
-export function RegisterCompletionProviders(monaco: any, editor: any): any[]
+export function RegisterCompletionProviders(monaco: MonacoNamespace, editorInstance: editor.IStandaloneCodeEditor): IDisposable[]
 {
-    const disposables: any[] = [];
+    const disposables: IDisposable[] = [];
 
     // 1. Cross-tab word completions (words from all open tabs)
     disposables.push(
         monaco.languages.registerCompletionItemProvider('*', {
-            provideCompletionItems: (model: any, position: any) =>
+            provideCompletionItems: (model: editor.ITextModel, position: { lineNumber: number; column: number }) =>
             {
                 const { tabs } = useNotemacStore.getState();
                 const currentTabContent = model.getValue();
@@ -75,7 +80,7 @@ export function RegisterCompletionProviders(monaco: any, editor: any): any[]
     disposables.push(
         monaco.languages.registerCompletionItemProvider('*', {
             triggerCharacters: ['/'],
-            provideCompletionItems: (model: any, position: any) =>
+            provideCompletionItems: (model: editor.ITextModel, position: { lineNumber: number; column: number }) =>
             {
                 const lineContent = model.getLineContent(position.lineNumber);
                 const beforeCursor = lineContent.substring(0, position.column - 1);
@@ -105,7 +110,7 @@ export function RegisterCompletionProviders(monaco: any, editor: any): any[]
                 // Add file tree entries if available
                 if (fileTree)
                 {
-                    const addTreeEntries = (nodes: any[], prefix: string) =>
+                    const addTreeEntries = (nodes: FileTreeNode[], prefix: string) =>
                     {
                         for (const node of nodes)
                         {
@@ -131,7 +136,7 @@ export function RegisterCompletionProviders(monaco: any, editor: any): any[]
     );
 
     // 4. AI inline completions (ghost text)
-    disposables.push(RegisterAIInlineCompletionProvider(monaco, editor));
+    disposables.push(RegisterAIInlineCompletionProvider(monaco, editorInstance));
 
     return disposables;
 }
@@ -143,10 +148,10 @@ export function RegisterCompletionProviders(monaco: any, editor: any): any[]
  * suggestions from the configured LLM. Debounced to avoid excessive
  * API calls while typing.
  */
-export function RegisterAIInlineCompletionProvider(monaco: any, editor: any): any
+export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, editorInstance: editor.IStandaloneCodeEditor): IDisposable
 {
     const provider = monaco.languages.registerInlineCompletionsProvider('*', {
-        provideInlineCompletions: async (model: any, position: any, _context: any, token: any) =>
+        provideInlineCompletions: async (model: editor.ITextModel, position: { lineNumber: number; column: number }, _context: languages.InlineCompletionContext, token: { onCancellationRequested: (fn: () => void) => void }) =>
         {
             const store = useNotemacStore.getState();
 
