@@ -106,7 +106,7 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
               </div>
               <div>
                 <label style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 4, display: 'block' }}>Format:</label>
-                <select value={format} onChange={(e) => setFormat(e.target.value as any)} style={{ ...inputStyle, height: 30 }}>
+                <select value={format} onChange={(e) => setFormat(e.target.value as 'dec' | 'hex' | 'oct' | 'bin')} style={{ ...inputStyle, height: 30 }}>
                   <option value="dec">Decimal</option>
                   <option value="hex">Hexadecimal</option>
                   <option value="oct">Octal</option>
