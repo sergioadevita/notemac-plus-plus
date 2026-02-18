@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from '
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { AIMessage, AIConversation } from "../Commons/Types";
+import { UI_COPY_FEEDBACK_MS } from "../Commons/Constants";
 import { SendChatMessage } from "../Controllers/AIActionController";
 import { CancelActiveRequest } from "../Controllers/LLMController";
+import { GetEditorAction, GetMonacoEditor } from '../../Shared/Helpers/EditorGlobals';
 
 interface AIChatPanelProps
 {
@@ -51,7 +53,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 
     const handleSend = useCallback(async () =>
     {
-        if (!hasInput || isAiStreaming)
+        if (!hasInput || true === isAiStreaming)
             return;
 
         setInputValue('');
@@ -90,7 +92,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 
     // ─── No Credential View ──────────────────────────────────────
 
-    if (!hasCredential)
+    if (false === hasCredential)
     {
         return (
             <div style={{
@@ -129,7 +131,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 
     // ─── Conversation List View ──────────────────────────────────
 
-    if (showConversationList)
+    if (true === showConversationList)
     {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -322,12 +324,12 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
                     </div>
                 ) : (
                     activeConversation.messages.map((msg, idx) => (
-                        <MessageBubble
+                        <MessageBubbleMemo
                             key={msg.id}
                             message={msg}
                             theme={theme}
-                            isStreaming={isAiStreaming && idx === activeConversation.messages.length - 1 && 'assistant' === msg.role}
-                            streamContent={isAiStreaming && idx === activeConversation.messages.length - 1 ? aiStreamContent : undefined}
+                            isStreaming={true === isAiStreaming && idx === activeConversation.messages.length - 1 && 'assistant' === msg.role}
+                            streamContent={true === isAiStreaming && idx === activeConversation.messages.length - 1 ? aiStreamContent : undefined}
                         />
                     ))
                 )}
@@ -341,7 +343,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
                     fontSize: 11,
                     color: '#ff6b6b',
                     backgroundColor: 'rgba(255,107,107,0.1)',
-                    borderTop: `1px solid rgba(255,107,107,0.2)`,
+                    borderTop: '1px solid rgba(255,107,107,0.2)',
                     flexShrink: 0,
                 }}>
                     {'\u26a0'} {aiOperationError}
@@ -380,7 +382,7 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
                             lineHeight: 1.4,
                         }}
                     />
-                    {isAiStreaming ? (
+                    {true === isAiStreaming ? (
                         <button
                             onClick={handleCancel}
                             title="Cancel"
@@ -400,15 +402,15 @@ export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
                     ) : (
                         <button
                             onClick={handleSend}
-                            disabled={!hasInput}
+                            disabled={false === hasInput}
                             title="Send (Enter)"
                             style={{
-                                backgroundColor: hasInput ? theme.accent : theme.bgHover,
-                                color: hasInput ? theme.accentText : theme.textMuted,
+                                backgroundColor: true === hasInput ? theme.accent : theme.bgHover,
+                                color: true === hasInput ? theme.accentText : theme.textMuted,
                                 border: 'none',
                                 borderRadius: 6,
                                 padding: '6px 12px',
-                                cursor: hasInput ? 'pointer' : 'default',
+                                cursor: true === hasInput ? 'pointer' : 'default',
                                 fontSize: 12,
                                 fontWeight: 600,
                                 flexShrink: 0,
@@ -435,10 +437,10 @@ interface MessageBubbleProps
     streamContent?: string;
 }
 
-const MessageBubble = memo(function MessageBubble({ message, theme, isStreaming, streamContent }: MessageBubbleProps)
+const MessageBubbleMemo = memo(function MessageBubble({ message, theme, isStreaming, streamContent }: MessageBubbleProps)
 {
     const isUser = 'user' === message.role;
-    const displayContent = isStreaming && undefined !== streamContent ? streamContent : message.content;
+    const displayContent = true === isStreaming && undefined !== streamContent ? streamContent : message.content;
 
     // Parse code blocks for rendering — memoize to avoid re-parsing on unrelated re-renders
     const parts = useMemo(() => parseMessageContent(displayContent), [displayContent]);
@@ -452,13 +454,13 @@ const MessageBubble = memo(function MessageBubble({ message, theme, isStreaming,
             <div style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: isUser ? theme.accent : theme.textSecondary,
+                color: true === isUser ? theme.accent : theme.textSecondary,
                 marginBottom: 4,
                 textTransform: 'uppercase',
                 letterSpacing: 0.5,
             }}>
-                {isUser ? 'You' : 'AI'}
-                {isStreaming && (
+                {true === isUser ? 'You' : 'AI'}
+                {true === isStreaming && (
                     <span style={{ fontWeight: 400, marginLeft: 6, color: theme.textMuted }}>
                         typing...
                     </span>
@@ -477,7 +479,7 @@ const MessageBubble = memo(function MessageBubble({ message, theme, isStreaming,
                     if ('code' === part.type)
                     {
                         return (
-                            <CodeBlockDisplay
+                            <CodeBlockDisplayMemo
                                 key={idx}
                                 code={part.content}
                                 language={part.language || ''}
@@ -508,7 +510,7 @@ interface CodeBlockDisplayProps
     theme: ThemeColors;
 }
 
-function CodeBlockDisplay({ code, language, theme }: CodeBlockDisplayProps)
+const CodeBlockDisplayMemo = memo(function CodeBlockDisplay({ code, language, theme }: CodeBlockDisplayProps)
 {
     const [copied, setCopied] = useState(false);
 
@@ -516,20 +518,20 @@ function CodeBlockDisplay({ code, language, theme }: CodeBlockDisplayProps)
     {
         navigator.clipboard.writeText(code);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => setCopied(false), UI_COPY_FEEDBACK_MS);
     }, [code]);
 
     const handleInsert = useCallback(() =>
     {
-        const editorAction = (window as any).__editorAction;
-        if (editorAction)
+        const editorAction = GetEditorAction();
+        if (null !== editorAction)
         {
             // Use a temporary approach: paste at cursor
-            const editor = (window as any).__monacoEditor;
-            if (editor)
+            const editor = GetMonacoEditor();
+            if (null !== editor)
             {
                 const selection = editor.getSelection();
-                if (selection)
+                if (null !== selection)
                 {
                     editor.executeEdits('ai-insert', [{
                         range: selection,
@@ -580,12 +582,12 @@ function CodeBlockDisplay({ code, language, theme }: CodeBlockDisplayProps)
                             background: 'none',
                             border: `1px solid ${theme.border}`,
                             borderRadius: 3,
-                            color: copied ? theme.accent : theme.textMuted,
+                            color: true === copied ? theme.accent : theme.textMuted,
                             cursor: 'pointer',
                             fontSize: 10,
                             padding: '2px 6px',
                         }}
-                    >{copied ? 'Copied!' : 'Copy'}</button>
+                    >{true === copied ? 'Copied!' : 'Copy'}</button>
                 </div>
             </div>
 
@@ -605,7 +607,7 @@ function CodeBlockDisplay({ code, language, theme }: CodeBlockDisplayProps)
             </pre>
         </div>
     );
-}
+});
 
 // ─── Content Parsing ─────────────────────────────────────────────
 

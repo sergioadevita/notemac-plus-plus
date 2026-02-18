@@ -121,3 +121,32 @@ export const CRED_ENCRYPTION_KEY_ID = "NotemacCryptoKey_v1";
 // GitHub OAuth
 export const GITHUB_OAUTH_CLIENT_ID = 'Iv1.CONFIGURE_YOUR_APP';
 export const GITHUB_OAUTH_SCOPE = "repo";
+
+// UI - Layout
+export const UI_SIDEBAR_MIN_WIDTH = 150;
+export const UI_SIDEBAR_MAX_WIDTH = 500;
+export const UI_TAB_BAR_HEIGHT = 36;
+export const UI_TAB_MIN_WIDTH = 100;
+export const UI_TAB_MAX_WIDTH = 200;
+export const UI_TAB_CLOSE_BUTTON_SIZE = 18;
+export const UI_NEW_TAB_BUTTON_WIDTH = 32;
+export const UI_STATUS_PICKER_MAX_HEIGHT = 300;
+export const UI_COMMAND_PALETTE_WIDTH = 560;
+export const UI_COMMAND_PALETTE_MAX_HEIGHT = 420;
+export const UI_COMMAND_PALETTE_TOP_OFFSET = 80;
+export const UI_FILE_TREE_MAX_DEPTH = 4;
+
+// UI - Z-Index
+export const UI_ZINDEX_OVERLAY = 9998;
+export const UI_ZINDEX_DROPDOWN = 9999;
+export const UI_ZINDEX_MODAL = 10000;
+
+// UI - Timing
+export const UI_COPY_FEEDBACK_MS = 2000;
+export const UI_OAUTH_DEFAULT_POLL_INTERVAL = 5;
+
+// TIME - Seconds
+export const TIME_SECONDS_PER_MINUTE = 60;
+export const TIME_SECONDS_PER_HOUR = 3600;
+export const TIME_SECONDS_PER_DAY = 86400;
+export const TIME_SECONDS_PER_WEEK = 604800;

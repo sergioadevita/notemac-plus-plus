@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-163%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-450%2B%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -300,18 +300,19 @@ src/
 │   ├── Commons/                # Constants, enums, shared types
 │   ├── Configs/                # EditorConfig, ThemeConfig
 │   ├── Controllers/            # Business logic controllers
-│   ├── Model/                  # TabModel, SearchModel, MacroModel, UIModel, FileTreeModel
+│   ├── Model/                  # TabModel, SearchModel, MacroModel, UIModel, FileTreeModel, SnippetModel, GitModel, AIModel
 │   └── UI/                     # ViewPresenter components
 │       └── Params/             # Parameter/DTO classes
 ├── Shared/                     # Reusable framework library
 │   ├── DependencyInjection/    # Service locator
 │   ├── EventDispatcher/        # Typed pub/sub events
 │   ├── Helpers/                # FileHelpers, IdHelpers
-│   ├── Persistence/            # Save/load services
-│   └── Pooling/                # Object pool management
+│   ├── Persistence/            # Save/load + credential encryption
+│   ├── Pooling/                # Object pool management
+│   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 163 unit tests (Vitest)
+└── __tests__/                  # 450+ unit tests (Vitest)
 ```
 
 ## Testing
@@ -320,7 +321,7 @@ src/
 npx vitest run
 ```
 
-163 unit tests across 7 test suites covering tab management, search, macros, UI state, file tree, configurations, and helper utilities.
+450+ unit tests across 22 test suites covering tab management, search, macros, UI state, file tree, configurations, git operations, AI integration, snippets, and helper utilities.
 
 See [docs/TESTING.md](docs/TESTING.md) for details.
 

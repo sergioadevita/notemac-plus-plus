@@ -72,7 +72,7 @@ export function CloneRepositoryViewPresenter({ theme }: CloneRepositoryProps)
             else if ('webfs' === backend)
             {
                 // Clone to real folder via File System Access API
-                const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+                const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 const { CreateWebFsAdapter } = await import('../../Shared/Git/GitFileSystemAdapter');
                 const fs = CreateWebFsAdapter(dirHandle);
 

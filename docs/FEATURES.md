@@ -4,6 +4,11 @@ Complete reference of every feature in Notemac++.
 
 ## Table of Contents
 
+- [Git Integration](#git-integration)
+- [AI Assistant](#ai-assistant)
+- [Terminal](#terminal)
+- [Snippets](#snippets)
+- [Credential Security](#credential-security)
 - [Menu Reference](#menu-reference)
 - [Editor Capabilities](#editor-capabilities)
 - [Tab Management](#tab-management)
@@ -20,6 +25,74 @@ Complete reference of every feature in Notemac++.
 - [Status Bar](#status-bar)
 - [Settings & Preferences](#settings--preferences)
 - [Dialogs](#dialogs)
+
+---
+
+## Git Integration
+
+Clone repositories from URLs, stage and commit changes, push/pull with remote tracking, create and switch branches, view visual diffs of changed files. Status indicators show repository state in the sidebar and status bar. Supports HTTPS authentication and GitHub OAuth Device Flow for secure authentication without storing credentials.
+
+**Features:**
+- Clone with HTTPS authentication
+- Commit with staging/unstaging
+- Push and pull operations
+- Branch creation, switching, deletion
+- Visual diff viewer for changed files
+- GitHub OAuth Device Flow authentication
+- Status indicators in sidebar and status bar
+
+---
+
+## AI Assistant
+
+Multi-provider LLM integration supporting OpenAI, Anthropic, Google Gemini, Mistral, Groq, and custom providers. Use the AI chat panel for interactive code discussion, get inline code completions with ghost text, and leverage code actions (explain, refactor, fix bugs, add documentation, write tests). Credentials are securely encrypted and auto-expire (24 hours for AI keys).
+
+**Features:**
+- Support for 6+ LLM providers
+- AI chat panel for interactive discussion
+- Inline code completions with ghost text
+- Code actions: explain, refactor, fix, document, test
+- Configurable model, temperature, token limits
+- Secure credential storage with auto-expiry
+
+---
+
+## Terminal
+
+Integrated terminal panel for executing shell commands directly from within the editor. View command output with error highlighting, access command history (last 100 commands), and resize the panel to suit your workflow.
+
+**Features:**
+- Execute shell commands without leaving editor
+- Command history (last 100 commands)
+- Resizable panel with configurable height
+- Error highlighting in output
+
+---
+
+## Snippets
+
+Save frequently used code snippets with language and description metadata. Create, edit, delete, and quickly insert snippets into the active editor. Snippets persist across sessions for easy reuse.
+
+**Features:**
+- Create, edit, delete code snippets
+- Assign language and description
+- Quick insertion into active editor
+- Persistent storage across sessions
+- Search and filter by language
+
+---
+
+## Credential Security
+
+AES-GCM encryption for web-based storage and Electron safeStorage for desktop (uses OS keychain). Session-only mode is the default (credentials never touch disk), with optional encrypted persistence. Credentials automatically expire: AI keys after 24 hours, Git tokens after 8 hours. Automatic silent migration from plaintext storage.
+
+**Features:**
+- AES-GCM encryption (web)
+- Electron safeStorage (desktop OS keychain)
+- Session-only mode by default
+- Auto-expiry: AI keys (24h), Git tokens (8h)
+- Silent migration from plaintext storage
+- Secure erasure of sensitive data
 
 ---
 

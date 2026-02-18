@@ -1,7 +1,13 @@
-import React, { useState, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { FileTreeNode } from "../Commons/Types";
+import {
+  UI_SIDEBAR_MIN_WIDTH,
+  UI_SIDEBAR_MAX_WIDTH,
+  UI_FILE_TREE_MAX_DEPTH,
+} from "../Commons/Constants";
+import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
@@ -30,6 +36,8 @@ export function Sidebar({ theme }: SidebarProps) {
 
   const [isResizing, setIsResizing] = useState(false);
   const [width, setWidth] = useState(sidebarWidth);
+  const handleMouseMoveRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const handleMouseUpRef = useRef<(() => void) | null>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,24 +47,48 @@ export function Sidebar({ theme }: SidebarProps) {
     const startWidth = width;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newWidth = Math.max(150, Math.min(500, startWidth + e.clientX - startX));
+      const newWidth = Math.max(UI_SIDEBAR_MIN_WIDTH, Math.min(UI_SIDEBAR_MAX_WIDTH, startWidth + e.clientX - startX));
       setWidth(newWidth);
     };
 
     const handleMouseUp = () => {
       setIsResizing(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      if (null !== handleMouseMoveRef.current)
+      {
+        document.removeEventListener('mousemove', handleMouseMoveRef.current);
+      }
+      if (null !== handleMouseUpRef.current)
+      {
+        document.removeEventListener('mouseup', handleMouseUpRef.current);
+      }
+      handleMouseMoveRef.current = null;
+      handleMouseUpRef.current = null;
     };
+
+    handleMouseMoveRef.current = handleMouseMove;
+    handleMouseUpRef.current = handleMouseUp;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [width]);
 
+  useEffect(() => {
+    return () => {
+      if (null !== handleMouseMoveRef.current)
+      {
+        document.removeEventListener('mousemove', handleMouseMoveRef.current);
+      }
+      if (null !== handleMouseUpRef.current)
+      {
+        document.removeEventListener('mouseup', handleMouseUpRef.current);
+      }
+    };
+  }, []);
+
   const handleOpenFolder = async () => {
     if ('showDirectoryPicker' in window) {
       try {
-        const dirHandle = await (window as any).showDirectoryPicker();
+        const dirHandle = await window.showDirectoryPicker();
         const tree = await buildWebFileTree(dirHandle);
         setFileTree(tree);
         setWorkspacePath(dirHandle.name);
@@ -106,7 +138,7 @@ export function Sidebar({ theme }: SidebarProps) {
     }
   };
 
-  const TreeNode = ({ node, depth = 0 }: { node: FileTreeNode; depth?: number }) => {
+  const TreeNodeMemo = React.memo(({ node, depth = 0 }: { node: FileTreeNode; depth?: number }) => {
     const [hovered, setHovered] = useState(false);
     const isOpen = node.isExpanded;
     const isActive = tabs.find(t => t.id === activeTabId)?.path === node.path;
@@ -143,15 +175,16 @@ export function Sidebar({ theme }: SidebarProps) {
           </span>
         </div>
         {node.isDirectory && isOpen && node.children?.map((child, i) => (
-          <TreeNode key={child.path || i} node={child} depth={depth + 1} />
+          <TreeNodeMemo key={child.path || i} node={child} depth={depth + 1} />
         ))}
       </div>
     );
-  };
+  });
+  TreeNodeMemo.displayName = 'TreeNode';
 
-  const FunctionListPanel = () => {
+  const FunctionListPanelMemo = React.memo(() => {
     const activeTab = tabs.find(t => t.id === activeTabId);
-    if (!activeTab) return null;
+    if (undefined === activeTab) return null;
 
     const functions = extractFunctions(activeTab.content, activeTab.language);
 
@@ -160,7 +193,7 @@ export function Sidebar({ theme }: SidebarProps) {
         <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
           Functions
         </div>
-        {functions.length === 0 ? (
+        {0 === functions.length ? (
           <div style={{ color: theme.textMuted, fontSize: 12, padding: 8 }}>No functions found</div>
         ) : (
           functions.map((fn, i) => (
@@ -187,7 +220,8 @@ export function Sidebar({ theme }: SidebarProps) {
         )}
       </div>
     );
-  };
+  });
+  FunctionListPanelMemo.displayName = 'FunctionListPanel';
 
   return (
     <div style={{ display: 'flex', flexShrink: 0 }}>
@@ -317,7 +351,7 @@ export function Sidebar({ theme }: SidebarProps) {
                     </div>
                   )}
                   {fileTree.map((node, i) => (
-                    <TreeNode key={node.path || i} node={node} />
+                    <TreeNodeMemo key={node.path || i} node={node} />
                   ))}
                 </div>
               ) : (
@@ -357,7 +391,7 @@ export function Sidebar({ theme }: SidebarProps) {
             </div>
           )}
 
-          {sidebarPanel === 'functions' && <FunctionListPanel />}
+          {sidebarPanel === 'functions' && <FunctionListPanelMemo />}
 
           {sidebarPanel === 'docList' && (
             <DocListPanel theme={theme} />
@@ -407,7 +441,8 @@ export function Sidebar({ theme }: SidebarProps) {
   );
 }
 
-function DocListPanel({ theme }: { theme: ThemeColors }) {
+const DocListPanel = React.memo(function DocListPanel({ theme }: { theme: ThemeColors })
+{
   const { tabs, activeTabId, setActiveTab } = useNotemacStore();
   return (
     <div style={{ padding: 4 }}>
@@ -435,16 +470,17 @@ function DocListPanel({ theme }: { theme: ThemeColors }) {
       ))}
     </div>
   );
-}
+});
 
-function ClipboardHistoryPanel({ theme }: { theme: ThemeColors }) {
+const ClipboardHistoryPanel = React.memo(function ClipboardHistoryPanel({ theme }: { theme: ThemeColors })
+{
   const { clipboardHistory } = useNotemacStore();
   return (
     <div style={{ padding: 8 }}>
       <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
         Clipboard History
       </div>
-      {clipboardHistory.length === 0 ? (
+      {0 === clipboardHistory.length ? (
         <div style={{ color: theme.textMuted, fontSize: 12, padding: 8 }}>No clipboard entries yet</div>
       ) : (
         clipboardHistory.map((entry, i) => (
@@ -473,9 +509,10 @@ function ClipboardHistoryPanel({ theme }: { theme: ThemeColors }) {
       )}
     </div>
   );
-}
+});
 
-function CharacterPanel({ theme }: { theme: ThemeColors }) {
+const CharacterPanel = React.memo(function CharacterPanel({ theme }: { theme: ThemeColors })
+{
   const { tabs, activeTabId } = useNotemacStore();
   const activeTab = tabs.find(t => t.id === activeTabId);
   const [charCode, setCharCode] = useState(65);
@@ -489,8 +526,8 @@ function CharacterPanel({ theme }: { theme: ThemeColors }) {
   ];
 
   const handleInsertChar = (char: string) => {
-    const editorAction = (window as any).__editorAction;
-    if (editorAction) editorAction('insert-text', char);
+    const editorAction = GetEditorAction();
+    if (null !== editorAction) editorAction('insert-text', char);
   };
 
   return (
@@ -498,7 +535,7 @@ function CharacterPanel({ theme }: { theme: ThemeColors }) {
       <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
         Character Panel
       </div>
-      {activeTab && (
+      {undefined !== activeTab && (
         <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 8, padding: '4px 0', borderBottom: `1px solid ${theme.border}` }}>
           Cursor pos: Ln {activeTab.cursorLine}, Col {activeTab.cursorColumn}
         </div>
@@ -545,9 +582,10 @@ function CharacterPanel({ theme }: { theme: ThemeColors }) {
       ))}
     </div>
   );
-}
+});
 
-function SearchPanel({ theme }: { theme: ThemeColors }) {
+const SearchPanel = React.memo(function SearchPanel({ theme }: { theme: ThemeColors })
+{
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ file: string; line: number; text: string }[]>([]);
 
@@ -576,7 +614,7 @@ function SearchPanel({ theme }: { theme: ThemeColors }) {
           placeholder="Search in files..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onKeyDown={(e) => 'Enter' === e.key && handleSearch()}
           style={{
             flex: 1,
             height: 28,
@@ -589,7 +627,7 @@ function SearchPanel({ theme }: { theme: ThemeColors }) {
           }}
         />
       </div>
-      {results.length > 0 && (
+      {0 < results.length && (
         <div style={{ marginTop: 8 }}>
           <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>
             {results.length} results
@@ -615,7 +653,7 @@ function SearchPanel({ theme }: { theme: ThemeColors }) {
       )}
     </div>
   );
-}
+});
 
 function getFileIcon(name: string): string {
   const ext = name.split('.').pop()?.toLowerCase();
@@ -667,7 +705,7 @@ function extractFunctions(content: string, language: string): { name: string; li
 }
 
 async function buildWebFileTree(dirHandle: any, depth = 0): Promise<FileTreeNode[]> {
-  if (depth > 4) return [];
+  if (depth > UI_FILE_TREE_MAX_DEPTH) return [];
 
   const entries: FileTreeNode[] = [];
 

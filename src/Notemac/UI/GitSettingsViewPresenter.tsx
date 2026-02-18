@@ -3,7 +3,11 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { SaveCredentialsWithToken, ClearCredentials, TestAuthentication, StartGitHubOAuth, PollGitHubOAuthToken } from "../Controllers/AuthController";
 import type { OAuthState } from "../Controllers/AuthController";
-import { GIT_DEFAULT_CORS_PROXY, CRED_DEFAULT_GIT_EXPIRY_HOURS } from "../Commons/Constants";
+import {
+  GIT_DEFAULT_CORS_PROXY,
+  CRED_DEFAULT_GIT_EXPIRY_HOURS,
+  UI_OAUTH_DEFAULT_POLL_INTERVAL,
+} from "../Commons/Constants";
 
 interface GitSettingsProps
 {
@@ -55,8 +59,8 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
         setOauthState(state);
 
         // Poll for token
-        const pollInterval = (state.interval || 5) * 1000;
-        const maxAttempts = Math.ceil(state.expiresIn / (state.interval || 5));
+        const pollInterval = (state.interval || UI_OAUTH_DEFAULT_POLL_INTERVAL) * 1000;
+        const maxAttempts = Math.ceil(state.expiresIn / (state.interval || UI_OAUTH_DEFAULT_POLL_INTERVAL));
         let attempts = 0;
 
         const poll = async () =>

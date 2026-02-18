@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026
+
+### Added
+- **Git Integration**: Clone, commit, push, pull, branch management, visual diff viewer, GitHub OAuth Device Flow
+- **AI Assistant**: Multi-provider LLM support (OpenAI, Anthropic, Google, Mistral, Groq, custom), chat panel, inline completions, code actions (explain, refactor, fix, document, test)
+- **Terminal Panel**: Integrated command execution with history and resizable panel
+- **Snippet Manager**: Create, edit, delete, and insert code snippets with persistence
+- **Credential Security**: AES-GCM encryption (web), Electron safeStorage (desktop), session-only defaults, auto-expiry (AI 24h, Git 8h), silent migration from plaintext
+- **GitHub OAuth Device Flow** for Git authentication
+- **280+ new unit tests** (450+ total, up from 163)
+
+### Changed
+- Session-only credential storage by default (opt-in to persist with encryption)
+- Sidebar icons always visible; panel expands on click
+- Improved performance with React.memo on sub-components and memoized computations
+- All hardcoded UI values extracted to named constants
+- Window globals replaced with module-level EditorGlobals accessors
+- CI workflow now includes linting step
+
+### Fixed
+- Memory leak in sidebar resize handler (event listeners not cleaned up on unmount)
+- Missing error handling in async file operations
+- File System Access API calls now properly typed (eliminated `as any` casts)
+
 ## [1.0.0] - 2025
 
 Initial release of Notemac++: A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++.
@@ -159,4 +183,5 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[1.1.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v1.1.0
 [1.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v1.0.0

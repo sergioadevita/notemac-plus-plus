@@ -12,8 +12,28 @@
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
     "electron:build": "vite build && electron-builder --mac",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
+  "homepage": "https://sergioadevita.github.io/notemac-plus-plus/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sergioadevita/notemac-plus-plus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sergioadevita/notemac-plus-plus/issues"
+  },
+  "keywords": [
+    "text-editor",
+    "notepad++",
+    "monaco-editor",
+    "electron",
+    "react",
+    "typescript",
+    "code-editor",
+    "macos"
+  ],
   "dependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.2",
     "@monaco-editor/react": "^4.6.0",

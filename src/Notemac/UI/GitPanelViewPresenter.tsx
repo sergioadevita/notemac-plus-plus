@@ -3,6 +3,12 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { GitFileStatus } from "../Commons/Types";
 import {
+  TIME_SECONDS_PER_MINUTE,
+  TIME_SECONDS_PER_HOUR,
+  TIME_SECONDS_PER_DAY,
+  TIME_SECONDS_PER_WEEK,
+} from "../Commons/Constants";
+import {
     RefreshGitStatus, StageFile, StageAllFiles, UnstageFile,
     DiscardFileChanges, CreateCommit, PushToRemote, PullFromRemote,
     FetchFromRemote, CheckoutBranch, CreateBranch, DeleteBranch,
@@ -38,14 +44,14 @@ function TimeAgo(timestamp: number): string
     const now = Date.now() / 1000;
     const diff = now - timestamp;
 
-    if (60 > diff)
+    if (TIME_SECONDS_PER_MINUTE > diff)
         return 'just now';
-    if (3600 > diff)
-        return `${Math.floor(diff / 60)}m ago`;
-    if (86400 > diff)
-        return `${Math.floor(diff / 3600)}h ago`;
-    if (604800 > diff)
-        return `${Math.floor(diff / 86400)}d ago`;
+    if (TIME_SECONDS_PER_HOUR > diff)
+        return `${Math.floor(diff / TIME_SECONDS_PER_MINUTE)}m ago`;
+    if (TIME_SECONDS_PER_DAY > diff)
+        return `${Math.floor(diff / TIME_SECONDS_PER_HOUR)}h ago`;
+    if (TIME_SECONDS_PER_WEEK > diff)
+        return `${Math.floor(diff / TIME_SECONDS_PER_DAY)}d ago`;
     return new Date(timestamp * 1000).toLocaleDateString();
 }
 

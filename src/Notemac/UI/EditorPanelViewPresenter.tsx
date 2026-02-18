@@ -9,6 +9,7 @@ import { RegisterCompletionProviders } from "../Controllers/CompletionController
 import { InsertSnippet } from "../Controllers/SnippetController";
 import { ExplainCode, RefactorCode, GenerateTests, GenerateDocumentation, FixError, SimplifyCode } from "../Controllers/AIActionController";
 import { Subscribe, Unsubscribe, NOTEMAC_EVENTS } from "../../Shared/EventDispatcher/EventDispatcher";
+import { SetMonacoEditor, ClearMonacoEditor, SetEditorAction, ClearEditorAction } from '../../Shared/Helpers/EditorGlobals';
 
 interface EditorPanelProps {
   tab: FileTab;
@@ -183,7 +184,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     });
 
     // Expose editor reference for AI chat "Insert" button
-    (window as any).__monacoEditor = editor;
+    SetMonacoEditor(editor);
 
     // Register custom completion providers (IntelliSense)
     const completionDisposables = RegisterCompletionProviders(monaco, editor);
@@ -702,7 +703,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     };
 
     // Expose action handler globally for menu actions
-    (window as any).__editorAction = actionHandler;
+    SetEditorAction(actionHandler);
 
     // ── Custom Event Listeners (Find, Replace, Mark, GoToLine, ColumnEdit) ──
 
@@ -891,8 +892,8 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     document.addEventListener('notemac-column-edit', handleColumnEdit);
 
     return () => {
-      delete (window as any).__editorAction;
-      delete (window as any).__monacoEditor;
+      ClearEditorAction();
+      ClearMonacoEditor();
       document.removeEventListener('notemac-find', handleFind);
       document.removeEventListener('notemac-replace', handleReplace);
       document.removeEventListener('notemac-mark', handleMark);

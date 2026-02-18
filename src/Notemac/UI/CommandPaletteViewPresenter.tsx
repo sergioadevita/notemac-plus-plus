@@ -5,6 +5,12 @@ import { GetAllCommands } from "../Configs/CommandRegistry";
 import { FuzzyMatch, FuzzyFilter } from "../../Shared/Helpers/FuzzySearchHelpers";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { CommandDefinition } from "../Commons/Types";
+import {
+  UI_COMMAND_PALETTE_WIDTH,
+  UI_COMMAND_PALETTE_MAX_HEIGHT,
+  UI_COMMAND_PALETTE_TOP_OFFSET,
+  UI_ZINDEX_MODAL,
+} from "../Commons/Constants";
 
 interface CommandPaletteProps
 {
@@ -110,17 +116,17 @@ export function CommandPaletteViewPresenter({ theme }: CommandPaletteProps)
                 right: 0,
                 bottom: 0,
                 backgroundColor: 'rgba(0,0,0,0.4)',
-                zIndex: 10000,
+                zIndex: UI_ZINDEX_MODAL,
                 display: 'flex',
                 justifyContent: 'center',
-                paddingTop: 80,
+                paddingTop: UI_COMMAND_PALETTE_TOP_OFFSET,
             }}
             onClick={() => setShowCommandPalette(false)}
         >
             <div
                 style={{
-                    width: 560,
-                    maxHeight: 420,
+                    width: UI_COMMAND_PALETTE_WIDTH,
+                    maxHeight: UI_COMMAND_PALETTE_MAX_HEIGHT,
                     backgroundColor: theme.bgSecondary,
                     border: `1px solid ${theme.border}`,
                     borderRadius: 8,

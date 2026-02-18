@@ -82,7 +82,8 @@ src/Shared/
 ├── EventDispatcher/      # Typed pub/sub event system
 ├── Helpers/              # FileHelpers, IdHelpers
 ├── Persistence/          # Save/load services
-└── Pooling/              # Object pool management
+├── Pooling/              # Object pool management
+└── Git/                  # Git integration adapter
 ```
 
 The `Shared/` library is reusable infrastructure. Project-specific logic never goes here.
@@ -113,6 +114,41 @@ The `Shared/` library is reusable infrastructure. Project-specific logic never g
 - **Collections**: prefer native methods (`Find`, `filter`, `map`) over heavy query frameworks.
 - **Tuples**: use value tuples for lightweight groupings.
 
+## Credential Storage Architecture
+
+A three-tier encryption system provides platform-specific and secure credential handling:
+
+**Layer 1: SecureEncryptionService**
+- Core AES-GCM encryption for web (via `crypto.subtle`)
+- Supports key derivation and secure erasure
+
+**Layer 2: SafeStorageService**
+- Uses Electron's `safeStorage` on desktop (OS keychain)
+- Falls back to in-memory storage on web
+
+**Layer 3: CredentialStorageService**
+- Session-only mode by default (no disk persistence)
+- Opt-in encrypted persistence with auto-expiry
+- Silent migration from plaintext storage
+- Credentials: AI keys (24h), Git tokens (8h)
+
+## AI/LLM Integration Layer
+
+**LLMController** coordinates with provider adapters:
+- OpenAI, Anthropic, Google Gemini, Mistral, Groq, custom
+- Configurable models, temperature, token limits
+- Chat panel for interactive discussion
+- Inline completions with ghost text
+- Code actions: explain, refactor, fix, document, test
+
+## Git Integration Layer
+
+**GitController** uses `isomorphic-git` for cross-platform operations:
+- Clone, commit, push, pull, branch management
+- Visual diff viewer
+- GitHub OAuth Device Flow authentication
+- Status indicators in sidebar and status bar
+
 ## Dependencies
 
 | Package | Version | Purpose |
@@ -124,6 +160,7 @@ The `Shared/` library is reusable infrastructure. Project-specific logic never g
 | Electron | 28.1 | Desktop shell |
 | TypeScript | 5.6 | Type safety |
 | Vite | 6.0 | Build tooling |
+| isomorphic-git | 1.37 | Git operations |
 | iconv-lite | 0.6 | Character encoding |
 | jschardet | 3.1 | Charset detection |
 | js-md5/sha1/sha256/sha512 | — | Hash generation |

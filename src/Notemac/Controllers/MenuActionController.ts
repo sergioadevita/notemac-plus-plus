@@ -1,5 +1,6 @@
 import { useNotemacStore } from "../Model/Store";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
+import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import type { FileTab } from "../Commons/Types";
 
 /**
@@ -15,7 +16,7 @@ export function HandleMenuAction(
 ): void
 {
     const store = useNotemacStore.getState();
-    const editorAction = (window as any).__editorAction;
+    const editorAction = GetEditorAction();
 
     switch (action)
     {
@@ -503,7 +504,7 @@ function HandleReloadFromDisk(activeTabId: string | null, tabs: FileTab[]): void
         {
             useNotemacStore.getState().updateTabContent(activeTabId, content);
             useNotemacStore.getState().updateTab(activeTabId, { isModified: false });
-        });
+        }).catch(err => console.error('Failed to reload file from disk:', err));
         return;
     }
 

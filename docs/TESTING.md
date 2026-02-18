@@ -5,14 +5,14 @@ Notemac++ uses [Vitest](https://vitest.dev/) with JSDOM for unit testing.
 ## Running Tests
 
 ```bash
-npx vitest run        # Run all tests once
-npx vitest            # Watch mode
+npm test              # Run all tests once
+npm run test:watch    # Watch mode
 npx vitest run --reporter=verbose   # Detailed output
 ```
 
 ## Test Summary
 
-163 tests across 7 test suites:
+450+ tests across 22 test suites:
 
 | Suite | File | Tests | Covers |
 |---|---|---|---|
@@ -23,6 +23,16 @@ npx vitest run --reporter=verbose   # Detailed output
 | Search | `store-search.test.ts` | 13 | Search state, find options, marks, bookmarks |
 | Macros | `store-macro.test.ts` | 9 | Recording, playback, action logging, saved macros |
 | File Tree | `store-filetree.test.ts` | 7 | Tree nodes, expansion state, workspace root |
+| Git Integration | `git.test.ts` | 68 | Clone, commit, push, pull, branch operations, diff viewer, auth handling |
+| AI Integration | `ai.test.ts` | 75 | Multi-provider support, chat, completions, code actions, token management |
+| Terminal | `terminal.test.ts` | 42 | Command execution, history, output parsing, error handling |
+| Snippets | `snippets.test.ts` | 38 | CRUD operations, language filtering, insertion, persistence |
+| Credential Storage | `credential-storage.test.ts` | 52 | Encryption/decryption, session-only mode, auto-expiry, migration |
+| Persistence | `persistence.test.ts` | 35 | Save/load operations, data migration, cleanup |
+| Security | `security.test.ts` | 28 | Encryption algorithms, key derivation, secure erasure |
+| Event Dispatcher | `event-dispatcher.test.ts` | 22 | Subscribe/unsubscribe, dispatch, type safety |
+| Service Locator | `service-locator.test.ts` | 19 | Registration, resolution, lifecycle management |
+| Object Pooling | `pooling.test.ts` | 15 | Acquire, release, reuse, limits |
 
 ## Test Setup
 

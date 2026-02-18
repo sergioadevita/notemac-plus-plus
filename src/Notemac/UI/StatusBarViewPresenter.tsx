@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import {
+  UI_ZINDEX_OVERLAY,
+  UI_ZINDEX_DROPDOWN,
+  UI_STATUS_PICKER_MAX_HEIGHT,
+} from "../Commons/Constants";
 import { getLanguageDisplayName, countWords, countLines } from '../../Shared/Helpers/TextHelpers';
 
 interface StatusBarProps {
@@ -22,7 +27,7 @@ export function StatusBar({ theme }: StatusBarProps) {
   const [showEncodingPicker, setShowEncodingPicker] = useState(false);
   const [showEOLPicker, setShowEOLPicker] = useState(false);
 
-  if (!activeTab) return null;
+  if (undefined === activeTab) return null;
 
   const lineCount = countLines(activeTab.content);
   const charCount = activeTab.content.length;
@@ -42,7 +47,7 @@ export function StatusBar({ theme }: StatusBarProps) {
     { value: 'CR', label: 'CR (Old Mac)' },
   ];
 
-  const StatusItem = ({ children, onClick, title }: { children: React.ReactNode; onClick?: () => void; title?: string }) => {
+  const StatusItem = React.memo(({ children, onClick, title }: { children: React.ReactNode; onClick?: () => void; title?: string }) => {
     const [hovered, setHovered] = useState(false);
     return (
       <div
@@ -52,8 +57,8 @@ export function StatusBar({ theme }: StatusBarProps) {
         onMouseLeave={() => setHovered(false)}
         style={{
           padding: '0 8px',
-          cursor: onClick ? 'pointer' : 'default',
-          backgroundColor: hovered && onClick ? 'rgba(255,255,255,0.1)' : 'transparent',
+          cursor: null !== onClick ? 'pointer' : 'default',
+          backgroundColor: hovered && null !== onClick ? 'rgba(255,255,255,0.1)' : 'transparent',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -64,12 +69,13 @@ export function StatusBar({ theme }: StatusBarProps) {
         {children}
       </div>
     );
-  };
+  });
+  StatusItem.displayName = 'StatusItem';
 
-  const Picker = ({ items, onSelect, onClose }: { items: { value: string; label: string }[]; onSelect: (value: string) => void; onClose: () => void }) => (
+  const Picker = React.memo(({ items, onSelect, onClose }: { items: { value: string; label: string }[]; onSelect: (value: string) => void; onClose: () => void }) => (
     <>
       <div
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9998 }}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: UI_ZINDEX_OVERLAY }}
         onClick={onClose}
       />
       <div style={{
@@ -77,13 +83,13 @@ export function StatusBar({ theme }: StatusBarProps) {
         bottom: '100%',
         left: 0,
         minWidth: 180,
-        maxHeight: 300,
+        maxHeight: UI_STATUS_PICKER_MAX_HEIGHT,
         overflowY: 'auto',
         backgroundColor: theme.menuBg,
         border: `1px solid ${theme.border}`,
         borderRadius: 6,
         padding: '4px 0',
-        zIndex: 9999,
+        zIndex: UI_ZINDEX_DROPDOWN,
         boxShadow: '0 -4px 16px rgba(0,0,0,0.3)',
       }}>
         {items.map(item => (
@@ -104,7 +110,8 @@ export function StatusBar({ theme }: StatusBarProps) {
         ))}
       </div>
     </>
-  );
+  ));
+  Picker.displayName = 'Picker';
 
   return (
     <div style={{
@@ -119,18 +126,18 @@ export function StatusBar({ theme }: StatusBarProps) {
       padding: '0 4px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-        {isRepoInitialized && (
-          <StatusItem title={`Branch: ${currentBranch}${gitStatus?.aheadBy ? ` ↑${gitStatus.aheadBy}` : ''}${gitStatus?.behindBy ? ` ↓${gitStatus.behindBy}` : ''}`} onClick={() => setSidebarPanel('git')}>
+        {true === isRepoInitialized && (
+          <StatusItem title={`Branch: ${currentBranch}${null !== gitStatus && undefined !== gitStatus.aheadBy ? ` ↑${gitStatus.aheadBy}` : ''}${null !== gitStatus && undefined !== gitStatus.behindBy ? ` ↓${gitStatus.behindBy}` : ''}`} onClick={() => setSidebarPanel('git')}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ fontSize: 11 }}>{'\ud83d\udd00'}</span>
               {currentBranch}
-              {gitStatus && gitStatus.aheadBy > 0 && <span style={{ fontSize: 10 }}>{'\u2191'}{gitStatus.aheadBy}</span>}
-              {gitStatus && gitStatus.behindBy > 0 && <span style={{ fontSize: 10 }}>{'\u2193'}{gitStatus.behindBy}</span>}
-              {gitStatus && gitStatus.isRepoDirty && <span style={{ fontSize: 10, color: '#f9e2af' }}>{'\u2022'}</span>}
+              {null !== gitStatus && 0 < gitStatus.aheadBy && <span style={{ fontSize: 10 }}>{'\u2191'}{gitStatus.aheadBy}</span>}
+              {null !== gitStatus && 0 < gitStatus.behindBy && <span style={{ fontSize: 10 }}>{'\u2193'}{gitStatus.behindBy}</span>}
+              {null !== gitStatus && true === gitStatus.isRepoDirty && <span style={{ fontSize: 10, color: '#f9e2af' }}>{'\u2022'}</span>}
             </span>
           </StatusItem>
         )}
-        {isRecordingMacro && (
+        {true === isRecordingMacro && (
           <StatusItem>
             <span className="recording-indicator" style={{ color: '#ff4444' }}>
               {'\u23fa'} Recording
@@ -192,13 +199,13 @@ export function StatusBar({ theme }: StatusBarProps) {
           )}
         </StatusItem>
 
-        {aiEnabled && (
+        {true === aiEnabled && (
           <StatusItem
-            title={`AI: ${activeModelId}${inlineSuggestionEnabled ? ' (Inline On)' : ''}`}
+            title={`AI: ${activeModelId}${true === inlineSuggestionEnabled ? ' (Inline On)' : ''}`}
             onClick={() => SetShowAiSettings(true)}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              {isAiStreaming
+              {true === isAiStreaming
                 ? <span style={{ color: '#a6e3a1', animation: 'pulse 1s infinite' }}>{'\u2728'} Generating...</span>
                 : <span style={{ color: theme.statusBarText, opacity: 0.8 }}>{'\u2728'} {activeModelId || 'No Model'}</span>
               }
@@ -206,9 +213,9 @@ export function StatusBar({ theme }: StatusBarProps) {
           </StatusItem>
         )}
 
-        {zoomLevel !== 0 && (
+        {0 !== zoomLevel && (
           <StatusItem title="Zoom Level">
-            {zoomLevel > 0 ? '+' : ''}{zoomLevel}
+            {0 < zoomLevel ? '+' : ''}{zoomLevel}
           </StatusItem>
         )}
       </div>

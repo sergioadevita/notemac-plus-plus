@@ -2,7 +2,14 @@ import type { TabColor } from "../Commons/Enums";
 import React, { useState, useCallback } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { TAB_COLORS } from '../Commons/Constants';
+import {
+  UI_TAB_BAR_HEIGHT,
+  UI_TAB_MIN_WIDTH,
+  UI_TAB_MAX_WIDTH,
+  UI_TAB_CLOSE_BUTTON_SIZE,
+  UI_NEW_TAB_BUTTON_WIDTH,
+  TAB_COLORS,
+} from '../Commons/Constants';
 
 interface TabBarProps {
   theme: ThemeColors;
@@ -71,7 +78,7 @@ export function TabBar({ theme }: TabBarProps) {
         overflowY: 'hidden',
         scrollbarWidth: 'thin',
         flexShrink: 0,
-        height: 36,
+        height: UI_TAB_BAR_HEIGHT,
       }}>
         {tabs.map((tab, index) => {
           const isActive = tab.id === activeTabId;
@@ -100,9 +107,9 @@ export function TabBar({ theme }: TabBarProps) {
                   ? `3px solid ${tabColorValue}`
                   : isActive ? `2px solid ${theme.accent}` : '2px solid transparent',
                 borderBottom: isActive ? 'none' : `1px solid ${theme.border}`,
-                minWidth: 100,
-                maxWidth: 200,
-                height: 36,
+                minWidth: UI_TAB_MIN_WIDTH,
+                maxWidth: UI_TAB_MAX_WIDTH,
+                height: UI_TAB_BAR_HEIGHT,
                 position: 'relative',
                 opacity: dragIndex === index ? 0.5 : 1,
                 borderLeft: dragOverIndex === index ? `2px solid ${theme.accent}` : 'none',
@@ -137,8 +144,8 @@ export function TabBar({ theme }: TabBarProps) {
                     closeTab(tab.id);
                   }}
                   style={{
-                    width: 18,
-                    height: 18,
+                    width: UI_TAB_CLOSE_BUTTON_SIZE,
+                    height: UI_TAB_CLOSE_BUTTON_SIZE,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -170,8 +177,8 @@ export function TabBar({ theme }: TabBarProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 32,
-            height: 36,
+            width: UI_NEW_TAB_BUTTON_WIDTH,
+            height: UI_TAB_BAR_HEIGHT,
             cursor: 'pointer',
             color: theme.textMuted,
             fontSize: 18,
