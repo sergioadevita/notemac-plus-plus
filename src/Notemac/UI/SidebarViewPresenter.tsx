@@ -125,9 +125,9 @@ export function Sidebar({ theme }: SidebarProps) {
         language: detectLanguage(node.name),
         lineEnding: detectLineEnding(content),
       });
-    } else if ((node as any).handle) {
+    } else if (node.handle) {
       try {
-        const file = await (node as any).handle.getFile();
+        const file = await node.handle.getFile();
         const content = await file.text();
         addTab({
           name: node.name,
