@@ -28,7 +28,7 @@ export type FsBackendType = 'electron' | 'webfs' | 'lightningfs';
 
 export function DetectFsBackend(): FsBackendType
 {
-    if (null !== typeof window && (window as any).electronAPI)
+    if (null !== typeof window && window.electronAPI)
         return 'electron';
     if ('showDirectoryPicker' in window)
         return 'webfs';
@@ -159,7 +159,7 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
             }
 
             const fileHandle = await current.getFileHandle(fileName, { create: true });
-            const writable = await (fileHandle as any).createWritable();
+            const writable = await fileHandle.createWritable();
             await writable.write(data);
             await writable.close();
         },
@@ -176,7 +176,7 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
                 ? rootHandle
                 : await resolveDir(filepath);
             const entries: string[] = [];
-            for await (const entry of (dir as any).values())
+            for await (const entry of dir.values())
             {
                 entries.push(entry.name);
             }
