@@ -47,6 +47,9 @@ export function CharInRangeDialog({ theme }: CharInRangeDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowCharInRange(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="char-range-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.bgSecondary,
@@ -60,7 +63,7 @@ export function CharInRangeDialog({ theme }: CharInRangeDialogProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}
       >
-        <h3 style={{ color: theme.text, fontSize: 16, marginBottom: 12, fontWeight: 600 }}>
+        <h3 id="char-range-title" style={{ color: theme.text, fontSize: 16, marginBottom: 12, fontWeight: 600 }}>
           Find Characters in Range
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
