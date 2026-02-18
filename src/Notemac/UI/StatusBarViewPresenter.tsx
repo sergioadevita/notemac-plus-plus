@@ -6,6 +6,7 @@ import {
   UI_ZINDEX_DROPDOWN,
   UI_STATUS_PICKER_MAX_HEIGHT,
 } from "../Commons/Constants";
+import type { LineEnding } from "../Commons/Enums";
 import { getLanguageDisplayName, countWords, countLines } from '../../Shared/Helpers/TextHelpers';
 
 interface StatusBarProps {
@@ -171,7 +172,7 @@ export function StatusBar({ theme }: StatusBarProps) {
           {showEOLPicker && (
             <Picker
               items={eolOptions.map(o => ({ value: o.value, label: o.label }))}
-              onSelect={(val) => updateTab(activeTab.id, { lineEnding: val as any })}
+              onSelect={(val) => updateTab(activeTab.id, { lineEnding: val as LineEnding })}
               onClose={() => setShowEOLPicker(false)}
             />
           )}
