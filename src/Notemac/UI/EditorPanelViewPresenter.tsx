@@ -546,7 +546,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
             if ('type' === macroAction.type) {
               editor.trigger('keyboard', 'type', { text: macroAction.data });
             } else if ('command' === macroAction.type) {
-              editor.trigger('keyboard', macroAction.data, null);
+              editor.trigger('keyboard', String(macroAction.data), null);
             }
           }
           break;
@@ -564,7 +564,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
               if ('type' === macroAction.type) {
                 editor.trigger('keyboard', 'type', { text: macroAction.data });
               } else if ('command' === macroAction.type) {
-                editor.trigger('keyboard', macroAction.data, null);
+                editor.trigger('keyboard', String(macroAction.data), null);
               }
             }
           }
