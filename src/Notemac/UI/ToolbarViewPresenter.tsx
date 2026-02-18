@@ -132,6 +132,7 @@ function ToolbarButton({ icon, title, onClick, theme, active, danger }: {
   return (
     <button
       title={title}
+      aria-label={title}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
