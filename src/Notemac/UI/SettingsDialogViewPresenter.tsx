@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import type { AppSettings } from "../Commons/Types";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface SettingsDialogProps {
   theme: ThemeColors;
@@ -10,6 +11,9 @@ interface SettingsDialogProps {
 export function SettingsDialog({ theme }: SettingsDialogProps) {
   const { settings, updateSettings, setShowSettings } = useNotemacStore();
   const [activeSection, setActiveSection] = useState('general');
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(dialogRef, true, () => setShowSettings(false));
 
   const sections = [
     { id: 'general', label: 'General' },
@@ -120,6 +124,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
