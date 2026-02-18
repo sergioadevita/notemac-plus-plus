@@ -10,16 +10,19 @@ import LightningFS from '@isomorphic-git/lightning-fs';
 
 // ─── Types ───────────────────────────────────────────────────────
 
+export interface FsReadOptions { encoding?: string; mode?: number }
+export interface FsStat { isFile(): boolean; isDirectory(): boolean; isSymbolicLink(): boolean; size: number; mode: number; mtimeMs: number }
+
 export interface FsAdapter
 {
-    readFile(filepath: string, opts?: any): Promise<Uint8Array | string>;
-    writeFile(filepath: string, data: any, opts?: any): Promise<void>;
+    readFile(filepath: string, opts?: FsReadOptions | string): Promise<Uint8Array | string>;
+    writeFile(filepath: string, data: Uint8Array | string, opts?: FsReadOptions | string): Promise<void>;
     unlink(filepath: string): Promise<void>;
     readdir(filepath: string): Promise<string[]>;
     mkdir(filepath: string): Promise<void>;
     rmdir(filepath: string): Promise<void>;
-    stat(filepath: string): Promise<{ isFile(): boolean; isDirectory(): boolean; isSymbolicLink(): boolean; size: number; mode: number; mtimeMs: number }>;
-    lstat(filepath: string): Promise<{ isFile(): boolean; isDirectory(): boolean; isSymbolicLink(): boolean; size: number; mode: number; mtimeMs: number }>;
+    stat(filepath: string): Promise<FsStat>;
+    lstat(filepath: string): Promise<FsStat>;
 }
 
 export type FsBackendType = 'electron' | 'webfs' | 'lightningfs';
@@ -28,7 +31,7 @@ export type FsBackendType = 'electron' | 'webfs' | 'lightningfs';
 
 export function DetectFsBackend(): FsBackendType
 {
-    if (null !== typeof window && window.electronAPI)
+    if ('undefined' !== typeof window && window.electronAPI)
         return 'electron';
     if ('showDirectoryPicker' in window)
         return 'webfs';
@@ -73,7 +76,7 @@ export function DeleteLightningFs(namespace: string): void
  * Creates an fs adapter for lightning-fs that isomorphic-git can use directly.
  * lightning-fs already implements the correct interface — we just return its promises property.
  */
-export function CreateLightningFsAdapter(namespace: string): any
+export function CreateLightningFsAdapter(namespace: string): FsAdapter
 {
     const lfs = GetLightningFs(namespace);
     return lfs.promises;
@@ -102,7 +105,7 @@ export function GetDirHandle(workspacePath: string): FileSystemDirectoryHandle |
  * Creates an fs adapter for the Web File System Access API.
  * This maps isomorphic-git's fs calls to the real file system via directory handles.
  */
-export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
+export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): FsAdapter
 {
     async function resolvePath(filepath: string): Promise<{ dir: FileSystemDirectoryHandle; name: string }>
     {
@@ -135,18 +138,19 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
     }
 
     const adapter = {
-        readFile: async (filepath: string, opts?: any) =>
+        readFile: async (filepath: string, opts?: FsReadOptions | string) =>
         {
             const { dir, name } = await resolvePath(filepath);
             const fileHandle = await dir.getFileHandle(name);
             const file = await fileHandle.getFile();
 
-            if (opts && 'utf8' === opts.encoding)
+            const encoding = 'string' === typeof opts ? opts : opts?.encoding;
+            if ('utf8' === encoding)
                 return await file.text();
             return new Uint8Array(await file.arrayBuffer());
         },
 
-        writeFile: async (filepath: string, data: any, _opts?: any) =>
+        writeFile: async (filepath: string, data: Uint8Array | string, _opts?: FsReadOptions | string) =>
         {
             // Ensure parent dirs exist
             const parts = filepath.split('/').filter(p => 0 < p.length);
@@ -256,7 +260,7 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): any
  * For Electron, returns a placeholder — the actual fs is provided by the main process.
  * For web, returns an adapter over the File System Access API or lightning-fs.
  */
-export function GetFsForGit(workspacePath: string, dirHandle?: FileSystemDirectoryHandle): any
+export function GetFsForGit(workspacePath: string, dirHandle?: FileSystemDirectoryHandle): FsAdapter | null
 {
     const backend = DetectFsBackend();
 
