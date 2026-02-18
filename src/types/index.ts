@@ -38,11 +38,13 @@ export interface FileTreeNode {
   handle?: FileSystemFileHandle;
 }
 
-export interface MacroAction {
-  type: 'type' | 'delete' | 'move' | 'select' | 'command';
-  data: any;
-  timestamp: number;
-}
+/** Discriminated union for macro recording actions. */
+export type MacroAction =
+  | { type: 'type'; data: string; timestamp: number }
+  | { type: 'delete'; data: null; timestamp: number }
+  | { type: 'move'; data: { line: number }; timestamp: number }
+  | { type: 'select'; data: { start: number; end: number }; timestamp: number }
+  | { type: 'command'; data: string; timestamp: number };
 
 export interface SavedMacro {
   id: string;
