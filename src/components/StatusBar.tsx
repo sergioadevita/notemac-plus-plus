@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
+import type { FileTab } from '../types';
 import { getLanguageDisplayName, countWords, countLines } from '../utils/helpers';
 
 interface StatusBarProps {
@@ -150,7 +151,7 @@ export function StatusBar({ theme }: StatusBarProps) {
           {showEOLPicker && (
             <Picker
               items={eolOptions.map(o => ({ value: o.value, label: o.label }))}
-              onSelect={(val) => updateTab(activeTab.id, { lineEnding: val as any })}
+              onSelect={(val) => updateTab(activeTab.id, { lineEnding: val as FileTab['lineEnding'] })}
               onClose={() => setShowEOLPicker(false)}
             />
           )}
