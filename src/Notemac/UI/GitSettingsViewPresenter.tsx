@@ -23,7 +23,7 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
     const browserWorkspaces = useNotemacStore(s => s.browserWorkspaces);
 
     const [activeTab, setActiveTab] = useState<'credentials' | 'author' | 'behavior' | 'workspaces'>('credentials');
-    const [authType, setAuthType] = useState(gitCredentials?.type || 'token');
+    const [authType, setAuthType] = useState<'token' | 'ssh' | 'oauth'>(gitCredentials?.type || 'token');
     const [username, setUsername] = useState(gitCredentials?.username || '');
     const [token, setToken] = useState(gitCredentials?.token || '');
     const [authorName, setAuthorName] = useState(gitAuthor.name);
@@ -42,7 +42,7 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
 
     const handleSaveCredentials = useCallback(async () =>
     {
-        await SaveCredentialsWithToken({ type: authType as any, username, token }, rememberCredentials);
+        await SaveCredentialsWithToken({ type: authType, username, token }, rememberCredentials);
     }, [authType, username, token, rememberCredentials]);
 
     const handleStartOAuth = useCallback(async () =>
@@ -192,7 +192,7 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
                                 <label style={labelStyle}>Authentication Type</label>
                                 <select
                                     value={authType}
-                                    onChange={(e) => setAuthType(e.target.value as any)}
+                                    onChange={(e) => setAuthType(e.target.value as 'token' | 'ssh' | 'oauth')}
                                     style={{ ...inputStyle, cursor: 'pointer' }}
                                 >
                                     <option value="token">Personal Access Token (PAT)</option>
