@@ -6,15 +6,19 @@
  * on mount and cleared on unmount.
  */
 
-let monacoEditor: any = null;
-let editorAction: any = null;
+import type { editor } from 'monaco-editor';
 
-export function SetMonacoEditor(editor: any): void
+type EditorActionFn = (action: string, value?: unknown) => void;
+
+let monacoEditor: editor.IStandaloneCodeEditor | null = null;
+let editorAction: EditorActionFn | null = null;
+
+export function SetMonacoEditor(instance: editor.IStandaloneCodeEditor): void
 {
-    monacoEditor = editor;
+    monacoEditor = instance;
 }
 
-export function GetMonacoEditor(): any
+export function GetMonacoEditor(): editor.IStandaloneCodeEditor | null
 {
     return monacoEditor;
 }
@@ -24,12 +28,12 @@ export function ClearMonacoEditor(): void
     monacoEditor = null;
 }
 
-export function SetEditorAction(action: any): void
+export function SetEditorAction(action: EditorActionFn): void
 {
     editorAction = action;
 }
 
-export function GetEditorAction(): any
+export function GetEditorAction(): EditorActionFn | null
 {
     return editorAction;
 }
