@@ -615,7 +615,7 @@ function extractFunctions(content: string, language: string): { name: string; li
   return functions;
 }
 
-async function buildWebFileTree(dirHandle: any, depth = 0): Promise<FileTreeNode[]> {
+async function buildWebFileTree(dirHandle: FileSystemDirectoryHandle, depth = 0): Promise<FileTreeNode[]> {
   if (depth > 4) return [];
 
   const entries: FileTreeNode[] = [];
@@ -623,16 +623,19 @@ async function buildWebFileTree(dirHandle: any, depth = 0): Promise<FileTreeNode
   for await (const entry of dirHandle.values()) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
 
-    const node: FileTreeNode & { handle?: any } = {
+    const fileHandle = entry.kind === 'file' ? entry as FileSystemFileHandle : undefined;
+    const dirEntry = entry.kind === 'directory' ? entry as FileSystemDirectoryHandle : undefined;
+
+    const node: FileTreeNode = {
       name: entry.name,
       path: entry.name,
       isDirectory: entry.kind === 'directory',
       isExpanded: false,
-      handle: entry,
+      handle: fileHandle,
     };
 
-    if (entry.kind === 'directory') {
-      node.children = await buildWebFileTree(entry, depth + 1);
+    if (dirEntry) {
+      node.children = await buildWebFileTree(dirEntry, depth + 1);
     }
 
     entries.push(node);
