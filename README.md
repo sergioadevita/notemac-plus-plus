@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-450%2B%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-463%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -27,7 +27,7 @@
 
 ---
 
-Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, and much more.
+Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, **built-in Git integration**, an **AI coding assistant** with multi-provider support, an **integrated terminal**, **code snippets**, and much more.
 
 ## Screenshots
 
@@ -277,6 +277,70 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 
 </details>
 
+<details>
+<summary><strong>Git Integration</strong> — Full version control from within the editor</summary>
+
+&nbsp;
+
+- **Repository management**: Initialize, clone (with GitHub OAuth), and open Git repositories
+- **Staging & commits**: Stage/unstage files, write commit messages, view commit history
+- **Branch management**: Create, switch, and delete branches
+- **Diff viewer**: Side-by-side diff comparison for changed files
+- **GitHub OAuth**: Secure authentication with token encryption and automatic refresh
+- **Powered by isomorphic-git** for full web and Electron compatibility
+
+</details>
+
+<details>
+<summary><strong>AI Assistant</strong> — Multi-provider AI chat and inline completions</summary>
+
+&nbsp;
+
+- **AI Chat panel**: Ask questions, get code explanations, generate code, and refactor
+- **Inline completions**: Context-aware code suggestions as you type
+- **Multi-provider support**: OpenAI (GPT-4), Anthropic (Claude), and Google (Gemini)
+- **Context actions**: Explain selection, fix errors, optimize code, add comments
+- **XSS-protected responses**: Sanitized AI output for safe rendering
+- **Configurable**: Choose your provider, model, and API key in settings
+
+</details>
+
+<details>
+<summary><strong>Integrated Terminal</strong> — Run commands without leaving the editor</summary>
+
+&nbsp;
+
+- Built-in terminal emulator powered by Xterm.js
+- Run shell commands directly from the editor
+- Terminal panel in the sidebar for quick access
+
+</details>
+
+<details>
+<summary><strong>Code Snippets</strong> — Language-aware snippet management</summary>
+
+&nbsp;
+
+- Pre-built snippets for popular languages (JavaScript, TypeScript, Python, HTML, CSS, and more)
+- Quick insertion via the snippet manager panel
+- Create and save custom snippets
+- IntelliSense-integrated snippet completion provider
+
+</details>
+
+<details>
+<summary><strong>Security</strong> — Hardened credential storage and secure flows</summary>
+
+&nbsp;
+
+- AES-GCM encrypted credential storage with Electron safeStorage integration
+- Secure OAuth flows with PKCE and state validation
+- Token expiry tracking with automatic cleanup
+- XSS protection on all AI-generated content
+- No plaintext secrets in localStorage
+
+</details>
+
 ## Architecture
 
 Notemac++ follows a **layered architecture** with clear separation of concerns:
@@ -312,7 +376,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 450+ unit tests (Vitest)
+└── __tests__/                  # 463 unit tests (Vitest)
 ```
 
 ## Testing
@@ -321,7 +385,7 @@ src/
 npx vitest run
 ```
 
-450+ unit tests across 22 test suites covering tab management, search, macros, UI state, file tree, configurations, git operations, AI integration, snippets, and helper utilities.
+463 unit tests across 22 test suites covering tab management, search, macros, UI state, file tree, configurations, git operations, AI integration, snippets, security, controllers, and helper utilities.
 
 See [docs/TESTING.md](docs/TESTING.md) for details.
 
@@ -335,6 +399,9 @@ How Notemac++ stacks up against other editors:
 | **Size** | ~50 MB | ~5 MB | ~300 MB |
 | **Startup Time** | Instant | Fast | Moderate |
 | **Syntax Languages** | 70+ | 80+ | 200+ |
+| **Built-in Git** | Yes | No | Yes |
+| **Built-in AI** | Yes (multi-provider) | No | Via Copilot |
+| **Terminal** | Yes | No | Yes |
 | **Macros** | Yes | Yes | Via Extensions |
 | **Split View** | Yes | Yes | Yes |
 | **Themes** | 6 | 30+ | 1000+ |
@@ -345,15 +412,15 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
-Planned features for future releases:
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions.
+
+Planned for future releases:
 
 - **Plugin System** — Extensibility through custom plugins
 - **Custom Theme Editor** — Create and share your own themes
-- **Integrated Terminal** — Run commands without leaving the editor
-- **Git Integration** — Built-in version control support
-- **Snippet Manager** — Save and reuse code snippets
-- **Auto-complete / IntelliSense** — Language-aware code completion
 - **Print Support** — Format and print documents
+- **Collaborative Editing** — Real-time multi-user editing
+- **Remote File Editing** — Edit files over SSH/SFTP
 
 Have a feature request? Open an [issue](https://github.com/sergioadevita/notemac-plus-plus/issues) or [discussion](https://github.com/sergioadevita/notemac-plus-plus/discussions).
 
@@ -390,6 +457,9 @@ See [docs/BUILDING.md](docs/BUILDING.md) for full build documentation.
 | [Zustand](https://zustand-demo.pmnd.rs/) + [Immer](https://immerjs.github.io/immer/) | State management |
 | [Vite](https://vitejs.dev/) | Build tooling |
 | [Electron](https://www.electronjs.org/) | Desktop shell |
+| [isomorphic-git](https://isomorphic-git.org/) | Git operations (web & desktop) |
+| [Xterm.js](https://xtermjs.org/) | Integrated terminal emulator |
+| OpenAI / Anthropic / Google AI | Multi-provider AI assistant |
 | [Vitest](https://vitest.dev/) | Testing framework |
 
 ## Author
