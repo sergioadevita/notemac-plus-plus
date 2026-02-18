@@ -95,7 +95,7 @@ export default function App()
   }, []);
 
   // Menu action handler — delegates to NotemacMenuActionController
-  const handleMenuAction = useCallback((action: string, value?: any) =>
+  const handleMenuAction = useCallback((action: string, value?: boolean | string | number) =>
   {
     HandleMenuAction(action, activeTabId, tabs, zoomLevel, value);
   }, [activeTabId, zoomLevel, tabs]);
