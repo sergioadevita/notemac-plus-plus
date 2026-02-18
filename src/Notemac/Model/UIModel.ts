@@ -181,10 +181,11 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
             isMonitoring: false,
         }));
 
-        set({
+        // Cross-slice set: tabs/activeTabId live on TabSlice, sidebarPanel on UISlice
+        (set as (partial: Record<string, unknown>) => void)({
             tabs,
             activeTabId: tabs[session.activeTabIndex]?.id || tabs[0]?.id || null,
             sidebarPanel: session.sidebarPanel,
-        } as unknown as Parameters<typeof set>[0]);
+        });
     },
 });
