@@ -19,17 +19,17 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     { id: 'keybindings', label: 'Keybindings' },
   ];
 
-  const SelectField = ({ label, value, options, onChange }: {
+  const SelectField = <T extends string>({ label, value, options, onChange }: {
     label: string;
-    value: string;
-    options: { value: string; label: string }[];
-    onChange: (value: string) => void;
+    value: T;
+    options: { value: T; label: string }[];
+    onChange: (value: T) => void;
   }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
       <label style={{ color: theme.text, fontSize: 13 }}>{label}</label>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value as T)}
         style={{
           backgroundColor: theme.bg,
           color: theme.text,
@@ -299,7 +299,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                     { value: 'trailing', label: 'Trailing' },
                     { value: 'all', label: 'All' },
                   ]}
-                  onChange={(v) => updateSettings({ renderWhitespace: v as any })}
+                  onChange={(v) => updateSettings({ renderWhitespace: v })}
                 />
                 <SelectField
                   label="Cursor Style"
@@ -309,7 +309,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                     { value: 'block', label: 'Block' },
                     { value: 'underline', label: 'Underline' },
                   ]}
-                  onChange={(v) => updateSettings({ cursorStyle: v as any })}
+                  onChange={(v) => updateSettings({ cursorStyle: v })}
                 />
                 <SelectField
                   label="Cursor Blinking"
@@ -321,7 +321,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                     { value: 'expand', label: 'Expand' },
                     { value: 'solid', label: 'Solid' },
                   ]}
-                  onChange={(v) => updateSettings({ cursorBlinking: v as any })}
+                  onChange={(v) => updateSettings({ cursorBlinking: v })}
                 />
               </>
             )}
@@ -340,7 +340,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                     { value: 'solarized-dark', label: 'Solarized Dark' },
                     { value: 'solarized-light', label: 'Solarized Light' },
                   ]}
-                  onChange={(v) => updateSettings({ theme: v as any })}
+                  onChange={(v) => updateSettings({ theme: v })}
                 />
 
                 <SectionHeader title="Font" />
