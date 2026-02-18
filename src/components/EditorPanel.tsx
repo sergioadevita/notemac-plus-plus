@@ -295,11 +295,11 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
         }
 
         case 'json-format': {
-          try { editor.executeEdits('json-fmt', [{ range: model.getFullModelRange(), text: JSON.stringify(JSON.parse(model.getValue()), null, 2) }]); } catch {}
+          try { editor.executeEdits('json-fmt', [{ range: model.getFullModelRange(), text: JSON.stringify(JSON.parse(model.getValue()), null, 2) }]); } catch { /* Content is not valid JSON — no-op */ }
           break;
         }
         case 'json-minify': {
-          try { editor.executeEdits('json-min', [{ range: model.getFullModelRange(), text: JSON.stringify(JSON.parse(model.getValue())) }]); } catch {}
+          try { editor.executeEdits('json-min', [{ range: model.getFullModelRange(), text: JSON.stringify(JSON.parse(model.getValue())) }]); } catch { /* Content is not valid JSON — no-op */ }
           break;
         }
 
@@ -332,7 +332,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
         }
         case 'base64-decode': {
           const sel5 = editor.getSelection();
-          if (sel5 && !sel5.isEmpty()) try { editor.executeEdits('b64dec', [{ range: sel5, text: atob(model.getValueInRange(sel5)) }]); } catch {}
+          if (sel5 && !sel5.isEmpty()) try { editor.executeEdits('b64dec', [{ range: sel5, text: atob(model.getValueInRange(sel5)) }]); } catch { /* Invalid base64 — no-op */ }
           break;
         }
         case 'url-encode': {
@@ -342,7 +342,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
         }
         case 'url-decode': {
           const sel7 = editor.getSelection();
-          if (sel7 && !sel7.isEmpty()) try { editor.executeEdits('urldec', [{ range: sel7, text: decodeURIComponent(model.getValueInRange(sel7)) }]); } catch {}
+          if (sel7 && !sel7.isEmpty()) try { editor.executeEdits('urldec', [{ range: sel7, text: decodeURIComponent(model.getValueInRange(sel7)) }]); } catch { /* Malformed URI component — no-op */ }
           break;
         }
 
@@ -359,11 +359,11 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     });
 
     // Expose action handler globally for menu actions
-    (window as any).__editorAction = actionHandler;
+    window.__editorAction = actionHandler;
 
     return () => {
       unsubscribe();
-      delete (window as any).__editorAction;
+      delete window.__editorAction;
     };
   }, [monacoReady, tab.id, tab.bookmarks]);
 
