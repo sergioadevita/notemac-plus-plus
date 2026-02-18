@@ -22,7 +22,7 @@ interface ChatCompletionOptions
     systemPrompt?: string;
 }
 
-function BuildOpenAIBody(messages: { role: string; content: string }[], modelId: string, options: ChatCompletionOptions): any
+function BuildOpenAIBody(messages: { role: string; content: string }[], modelId: string, options: ChatCompletionOptions): Record<string, unknown>
 {
     return {
         model: modelId,
@@ -33,7 +33,7 @@ function BuildOpenAIBody(messages: { role: string; content: string }[], modelId:
     };
 }
 
-function BuildAnthropicBody(messages: { role: string; content: string }[], modelId: string, options: ChatCompletionOptions): any
+function BuildAnthropicBody(messages: { role: string; content: string }[], modelId: string, options: ChatCompletionOptions): Record<string, unknown>
 {
     // Anthropic separates system prompt from messages — single-pass split
     const systemParts: string[] = [];
@@ -59,7 +59,7 @@ function BuildAnthropicBody(messages: { role: string; content: string }[], model
     };
 }
 
-function BuildGoogleBody(messages: { role: string; content: string }[], options: ChatCompletionOptions): any
+function BuildGoogleBody(messages: { role: string; content: string }[], options: ChatCompletionOptions): Record<string, unknown>
 {
     // Google uses a different message format
     const contents = messages
@@ -234,7 +234,7 @@ export async function SendChatCompletion(
         allMessages.unshift({ role: 'system', content: defaultSystemPrompt });
 
     // Build request
-    let body: any;
+    let body: Record<string, unknown>;
     if ('anthropic' === provider.type)
         body = BuildAnthropicBody(allMessages, modelId, { ...options, stream: shouldStream });
     else if ('google' === provider.type)
@@ -294,14 +294,15 @@ export async function SendChatCompletion(
             return content;
         }
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        if ('AbortError' === error.name)
+        if (error instanceof Error && 'AbortError' === error.name)
         {
             onDone?.('');
             return '';
         }
-        onError?.(error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        onError?.(message);
         throw error;
     }
     finally
@@ -440,7 +441,7 @@ export async function TestProviderConnection(
         const url = GetEndpointUrl(provider, modelId, false);
         const headers = GetHeaders(provider, credential);
 
-        let body: any;
+        let body: Record<string, unknown>;
         const testMessages = [{ role: 'user', content: 'Say "ok".' }];
 
         if ('anthropic' === provider.type)
@@ -470,9 +471,9 @@ export async function TestProviderConnection(
 
         return { success: false, error: errorMessage };
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        return { success: false, error: error.message };
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
 }
 
