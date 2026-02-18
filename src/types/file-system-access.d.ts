@@ -37,7 +37,7 @@ type FileSystemHandle = FileSystemFileHandle | FileSystemDirectoryHandle;
 
 interface FileSystemWritableFileStream extends WritableStream
 {
-    write(data: BufferSource | Blob | string | { type: string; data?: any; position?: number; size?: number }): Promise<void>;
+    write(data: BufferSource | Blob | string | { type: string; data?: BufferSource | Blob | string | number | undefined; position?: number; size?: number }): Promise<void>;
     seek(position: number): Promise<void>;
     truncate(size: number): Promise<void>;
 }
