@@ -413,7 +413,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
             scale: 1,
             showSlider: 'mouseover',
           },
-          renderWhitespace: settings.renderWhitespace as any,
+          renderWhitespace: settings.renderWhitespace,
           guides: {
             indentation: settings.showIndentGuides,
             bracketPairs: true,
