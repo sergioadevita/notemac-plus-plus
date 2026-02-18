@@ -314,7 +314,16 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
             providers = [...builtIn, ...customProviders];
         }
 
-        // Load credentials from secure storage (async)
+        // Set non-credential state synchronously
+        set({
+            aiSettings: savedSettings || GetDefaultAISettings(),
+            credentials: [],
+            providers,
+            conversations: savedConversations || [],
+            aiEnabled: false,
+        });
+
+        // Load credentials from secure storage (async) — overwrites credentials/aiEnabled when resolved
         RetrieveSecureValue(DB_AI_CREDENTIALS).then((credStr) =>
         {
             let credentials: AICredential[] = [];
@@ -345,15 +354,7 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
             });
         }).catch(() =>
         {
-            /* Credential retrieval failed — defaults already set above */
-        });
-
-        set({
-            aiSettings: savedSettings || GetDefaultAISettings(),
-            credentials: [],
-            providers,
-            conversations: savedConversations || [],
-            aiEnabled: false,
+            /* Credential retrieval failed — credentials remain as [] from sync set above */
         });
     },
 
