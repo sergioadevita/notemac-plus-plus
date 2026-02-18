@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { countWords, countLines, formatFileSize } from '../../Shared/Helpers/TextHelpers';
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface SummaryDialogProps {
   theme: ThemeColors;
@@ -10,6 +11,9 @@ interface SummaryDialogProps {
 export function SummaryDialog({ theme }: SummaryDialogProps) {
   const { setShowSummary, tabs, activeTabId } = useNotemacStore();
   const activeTab = tabs.find(t => t.id === activeTabId);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(dialogRef, true, () => setShowSummary(false));
 
   if (!activeTab) return null;
 
@@ -47,6 +51,7 @@ export function SummaryDialog({ theme }: SummaryDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowSummary(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="summary-title"
