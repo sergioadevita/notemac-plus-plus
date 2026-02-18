@@ -239,7 +239,7 @@ export function getTheme(name: string): ThemeColors {
   return themes[name] || themes.dark;
 }
 
-export function defineMonacoThemes(monaco: any) {
+export function defineMonacoThemes(monaco: typeof import('monaco-editor')) {
   monaco.editor.defineTheme('monokai', {
     base: 'vs-dark',
     inherit: true,
