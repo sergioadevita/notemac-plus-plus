@@ -21,6 +21,7 @@ import { ShortcutMapperDialog } from './components/ShortcutMapperDialog';
 import { FeedbackPopup } from './components/FeedbackPopup';
 import { detectLanguage, detectLineEnding } from './utils/helpers';
 import { InitGitForWorkspace } from './Notemac/Controllers/GitController';
+import { ErrorBoundary } from './Notemac/UI/ErrorBoundary';
 
 export default function App() {
   const {
@@ -401,13 +402,15 @@ export default function App() {
           }}>
             {activeTab ? (
               <>
-                <EditorPanel
-                  key={activeTab.id}
-                  tab={activeTab}
-                  theme={theme}
-                  settings={settings}
-                  zoomLevel={zoomLevel}
-                />
+                <ErrorBoundary fallbackMessage="Editor panel encountered an error">
+                  <EditorPanel
+                    key={activeTab.id}
+                    tab={activeTab}
+                    theme={theme}
+                    settings={settings}
+                    zoomLevel={zoomLevel}
+                  />
+                </ErrorBoundary>
                 {splitView !== 'none' && splitTabId && (
                   <>
                     <div style={{
@@ -416,13 +419,15 @@ export default function App() {
                       backgroundColor: theme.border,
                       cursor: splitView === 'vertical' ? 'col-resize' : 'row-resize',
                     }} />
-                    <EditorPanel
-                      key={splitTabId + '-split'}
-                      tab={tabs.find(t => t.id === splitTabId) || activeTab}
-                      theme={theme}
-                      settings={settings}
-                      zoomLevel={zoomLevel}
-                    />
+                    <ErrorBoundary fallbackMessage="Split editor panel encountered an error">
+                      <EditorPanel
+                        key={splitTabId + '-split'}
+                        tab={tabs.find(t => t.id === splitTabId) || activeTab}
+                        theme={theme}
+                        settings={settings}
+                        zoomLevel={zoomLevel}
+                      />
+                    </ErrorBoundary>
                   </>
                 )}
               </>
@@ -435,14 +440,46 @@ export default function App() {
 
       {showStatusBar && !isDistractionFree && <StatusBar theme={theme} />}
 
-      {showSettings && <SettingsDialog theme={theme} />}
-      {showGoToLine && <GoToLineDialog theme={theme} />}
-      {showAbout && <AboutDialog theme={theme} />}
-      {showRunCommand && <RunCommandDialog theme={theme} />}
-      {showColumnEditor && <ColumnEditorDialog theme={theme} />}
-      {showSummary && <SummaryDialog theme={theme} />}
-      {showCharInRange && <CharInRangeDialog theme={theme} />}
-      {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
+      {showSettings && (
+        <ErrorBoundary fallbackMessage="Settings failed to load">
+          <SettingsDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showGoToLine && (
+        <ErrorBoundary fallbackMessage="Go to Line dialog failed to load">
+          <GoToLineDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showAbout && (
+        <ErrorBoundary fallbackMessage="About dialog failed to load">
+          <AboutDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showRunCommand && (
+        <ErrorBoundary fallbackMessage="Run Command dialog failed to load">
+          <RunCommandDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showColumnEditor && (
+        <ErrorBoundary fallbackMessage="Column Editor dialog failed to load">
+          <ColumnEditorDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showSummary && (
+        <ErrorBoundary fallbackMessage="Summary dialog failed to load">
+          <SummaryDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showCharInRange && (
+        <ErrorBoundary fallbackMessage="Char in Range dialog failed to load">
+          <CharInRangeDialog theme={theme} />
+        </ErrorBoundary>
+      )}
+      {showShortcutMapper && (
+        <ErrorBoundary fallbackMessage="Shortcut Mapper dialog failed to load">
+          <ShortcutMapperDialog theme={theme} />
+        </ErrorBoundary>
+      )}
       <FeedbackPopup theme={theme} />
     </div>
   );
