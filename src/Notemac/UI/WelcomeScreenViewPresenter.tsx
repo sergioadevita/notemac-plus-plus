@@ -2,6 +2,7 @@ import React from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
+import './hover-utilities.css';
 
 interface WelcomeScreenProps {
   theme: ThemeColors;
@@ -179,15 +180,15 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
                   });
                 }
               }}
+              className="hover-bg hover-bg-reset"
               style={{
                 padding: '6px 12px',
                 cursor: 'pointer',
                 color: theme.accent,
                 fontSize: 13,
                 borderRadius: 4,
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = theme.bgHover}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+                '--hover-bg': theme.bgHover,
+              } as React.CSSProperties}
             >
               {file.name}
               <span style={{ color: theme.textMuted, fontSize: 11, marginLeft: 8 }}>
