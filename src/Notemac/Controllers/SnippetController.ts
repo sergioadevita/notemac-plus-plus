@@ -1,5 +1,9 @@
+import type { editor, IDisposable } from 'monaco-editor';
 import { useNotemacStore } from "../Model/Store";
 import type { SavedSnippet } from "../Commons/Types";
+
+/** The Monaco namespace object passed at runtime from @monaco-editor/react. */
+type MonacoNamespace = typeof import('monaco-editor');
 
 /**
  * Gets snippets filtered for the given language.
@@ -15,15 +19,15 @@ export function GetSnippetsForLanguage(language: string): SavedSnippet[]
  * Inserts a snippet body at the current cursor position using Monaco's snippet API.
  * Handles tab-stop syntax ($1, $2, $0 for final cursor position).
  */
-export function InsertSnippet(editor: any, snippetBody: string): void
+export function InsertSnippet(editor: editor.IStandaloneCodeEditor, snippetBody: string): void
 {
     if (!editor)
         return;
 
-    const contribution = editor.getContribution('snippetController2');
+    const contribution = editor.getContribution('snippetController2') as { insert(template: string): void } | null;
     if (contribution)
     {
-        // Use Monaco's built-in snippet controller
+        // Use Monaco's built-in snippet controller (internal API)
         contribution.insert(snippetBody);
     }
     else
@@ -49,10 +53,10 @@ export function InsertSnippet(editor: any, snippetBody: string): void
  * Registers a completion item provider for snippets.
  * Returns a disposable that should be cleaned up on unmount.
  */
-export function RegisterSnippetCompletionProvider(monaco: any): any
+export function RegisterSnippetCompletionProvider(monaco: MonacoNamespace): IDisposable
 {
     return monaco.languages.registerCompletionItemProvider('*', {
-        provideCompletionItems: (model: any, position: any) =>
+        provideCompletionItems: (model: editor.ITextModel, position: { lineNumber: number; column: number }) =>
         {
             const language = model.getLanguageId();
             const snippets = GetSnippetsForLanguage(language);
