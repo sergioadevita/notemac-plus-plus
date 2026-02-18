@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import './hover-utilities.css';
 import {
   UI_ZINDEX_OVERLAY,
   UI_ZINDEX_DROPDOWN,
@@ -97,14 +98,14 @@ export function StatusBar({ theme }: StatusBarProps) {
           <div
             key={item.value}
             onClick={() => { onSelect(item.value); onClose(); }}
+            className="hover-bg hover-bg-reset"
             style={{
               padding: '6px 16px',
               cursor: 'pointer',
               fontSize: 13,
               color: theme.menuText,
-            }}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = theme.bgHover}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+              '--hover-bg': theme.bgHover,
+            } as React.CSSProperties}
           >
             {item.label}
           </div>
