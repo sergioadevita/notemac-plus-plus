@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { produce } from 'immer';
+import { produce, type Draft } from 'immer';
 import type { AppSettings, ClipboardEntry, SessionData, FileTab } from "../Commons/Types";
 import type { SidebarPanel, SplitViewMode } from "../Commons/Enums";
 import { GetDefaultSettings } from "../Configs/EditorConfig";
@@ -106,7 +106,7 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
 
     addClipboardEntry: (text) =>
     {
-        set(produce((state: any) =>
+        set(produce((state: Draft<NotemacUISlice>) =>
         {
             state.clipboardHistory.unshift({ text, timestamp: Date.now() });
             if (state.clipboardHistory.length > LIMIT_CLIPBOARD_HISTORY)
@@ -116,7 +116,7 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
 
     updateSettings: (newSettings) =>
     {
-        set(produce((state: any) =>
+        set(produce((state: Draft<NotemacUISlice>) =>
         {
             Object.assign(state.settings, newSettings);
         }));
