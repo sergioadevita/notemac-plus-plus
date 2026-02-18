@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 import './hover-utilities.css';
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface FeedbackPopupProps
 {
@@ -16,6 +17,7 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {
     const [visible, setVisible] = useState(false);
     const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
 
     useEffect(() =>
     {
@@ -31,6 +33,8 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
 
         return () => clearTimeout(timer);
     }, []);
+
+    useFocusTrap(dialogRef, visible, () => setVisible(false));
 
     if (!visible)
         return null;
@@ -106,6 +110,7 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
             style={{ zIndex: UI_ZINDEX_MODAL }}
         >
             <div
+                ref={dialogRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="feedback-title"
