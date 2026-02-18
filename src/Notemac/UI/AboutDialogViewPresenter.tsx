@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import './hover-utilities.css';
 
 interface AboutDialogProps {
   theme: ThemeColors;
@@ -12,6 +13,9 @@ export function AboutDialog({ theme }: AboutDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowAbout(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="about-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.bgSecondary,
@@ -24,11 +28,11 @@ export function AboutDialog({ theme }: AboutDialogProps) {
         }}
       >
         <img src="/icon.png" alt="Notemac++" style={{ width: 72, height: 72, marginBottom: 8, borderRadius: 12 }} />
-        <h2 style={{ color: theme.text, fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
+        <h2 id="about-title" style={{ color: theme.text, fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
           Notemac++
         </h2>
         <div style={{ color: theme.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Version 2.2.2
+          Version 2.3.0
         </div>
 
         <div style={{
@@ -127,6 +131,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            className="hover-opacity"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -141,9 +146,8 @@ export function AboutDialog({ theme }: AboutDialogProps) {
               fontWeight: 600,
               textDecoration: 'none',
               transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              '--hover-opacity': '0.85',
+            } as React.CSSProperties}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
               <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/>
@@ -155,6 +159,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            className="hover-border"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -169,9 +174,8 @@ export function AboutDialog({ theme }: AboutDialogProps) {
               fontWeight: 600,
               textDecoration: 'none',
               transition: 'border-color 0.2s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.accent)}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = theme.border)}
+              '--hover-border-color': theme.accent,
+            } as React.CSSProperties}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill={theme.textSecondary}>
               <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
