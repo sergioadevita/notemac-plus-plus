@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { UI_ZINDEX_MODAL } from "../Commons/Constants";
+import './hover-utilities.css';
 
 interface FeedbackPopupProps
 {
@@ -9,7 +10,7 @@ interface FeedbackPopupProps
 
 const FEEDBACK_TIMER_MS = 20 * 60 * 1000;
 const FEEDBACK_STORAGE_KEY = 'notemac_feedback_shown_version';
-const APP_VERSION = '2.2.2';
+const APP_VERSION = '2.3.0';
 
 export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {
@@ -105,6 +106,9 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
             style={{ zIndex: UI_ZINDEX_MODAL }}
         >
             <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="feedback-title"
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     backgroundColor: theme.bgSecondary,
@@ -128,7 +132,7 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
                     🐙
                 </div>
 
-                <h2 style={{
+                <h2 id="feedback-title" style={{
                     color: theme.text,
                     fontSize: 22,
                     fontWeight: 700,
@@ -200,6 +204,7 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
 
                 <button
                     onClick={() => setVisible(false)}
+                    className="hover-color"
                     style={{
                         backgroundColor: 'transparent',
                         color: theme.textMuted,
@@ -208,9 +213,8 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
                         fontSize: 13,
                         padding: '6px 16px',
                         transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = theme.text)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = theme.textMuted)}
+                        '--hover-color': theme.text,
+                    } as React.CSSProperties}
                 >
                     Maybe later — I'm in the zone
                 </button>
