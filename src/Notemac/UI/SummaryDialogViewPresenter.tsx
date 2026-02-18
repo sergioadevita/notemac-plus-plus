@@ -47,6 +47,9 @@ export function SummaryDialog({ theme }: SummaryDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowSummary(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="summary-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.bgSecondary,
@@ -57,7 +60,7 @@ export function SummaryDialog({ theme }: SummaryDialogProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}
       >
-        <h3 style={{ color: theme.text, fontSize: 16, marginBottom: 16, fontWeight: 600 }}>
+        <h3 id="summary-title" style={{ color: theme.text, fontSize: 16, marginBottom: 16, fontWeight: 600 }}>
           Summary
         </h3>
         <div style={{
