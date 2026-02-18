@@ -1,6 +1,7 @@
 import { useNotemacStore } from "../Model/Store";
 import type { AIProvider, AIProviderType, AICredential, AIMessage, AIContextItem } from "../Commons/Types";
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
+import { ANTHROPIC_API_VERSION } from "../Commons/Constants";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ function GetHeaders(provider: AIProvider, credential: AICredential): Record<stri
     if ('anthropic' === provider.type)
     {
         headers['x-api-key'] = credential.apiKey;
-        headers['anthropic-version'] = '2023-06-01';
+        headers['anthropic-version'] = ANTHROPIC_API_VERSION;
         headers['anthropic-dangerous-direct-browser-access'] = 'true';
     }
     else if ('google' === provider.type)
