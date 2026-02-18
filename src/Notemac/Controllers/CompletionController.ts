@@ -3,7 +3,7 @@ import type { FileTreeNode } from '../Commons/Types';
 import { useNotemacStore } from "../Model/Store";
 import { RegisterSnippetCompletionProvider } from "./SnippetController";
 import { SendInlineCompletion, CancelActiveRequest } from "./LLMController";
-import { AI_DEFAULT_DEBOUNCE_MS } from "../Commons/Constants";
+import { AI_DEFAULT_DEBOUNCE_MS, AI_INLINE_MAX_CONTEXT_CHARS } from "../Commons/Constants";
 
 /** The Monaco namespace object passed at runtime from @monaco-editor/react. */
 type MonacoNamespace = typeof import('monaco-editor');
@@ -207,16 +207,15 @@ export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, edit
 
             // Build prefix and suffix from the editor content
             // Truncate to a reasonable window to avoid sending huge files
-            const MAX_CONTEXT_CHARS = 2000;
             const offset = model.getOffsetAt(position);
             const fullText = model.getValue();
             const rawPrefix = fullText.substring(0, offset);
             const rawSuffix = fullText.substring(offset);
-            const prefix = rawPrefix.length > MAX_CONTEXT_CHARS
-                ? rawPrefix.substring(rawPrefix.length - MAX_CONTEXT_CHARS)
+            const prefix = rawPrefix.length > AI_INLINE_MAX_CONTEXT_CHARS
+                ? rawPrefix.substring(rawPrefix.length - AI_INLINE_MAX_CONTEXT_CHARS)
                 : rawPrefix;
-            const suffix = rawSuffix.length > MAX_CONTEXT_CHARS
-                ? rawSuffix.substring(0, MAX_CONTEXT_CHARS)
+            const suffix = rawSuffix.length > AI_INLINE_MAX_CONTEXT_CHARS
+                ? rawSuffix.substring(0, AI_INLINE_MAX_CONTEXT_CHARS)
                 : rawSuffix;
 
             // Skip if prefix is too short or ends with whitespace only
