@@ -410,7 +410,7 @@ function HandleOpenFolder(): void
     // Web: use directory picker if available
     const input = document.createElement('input');
     input.type = 'file';
-    (input as any).webkitdirectory = true;
+    input.webkitdirectory = true;
     input.onchange = async () =>
     {
         if (!input.files || 0 === input.files.length)
