@@ -29,6 +29,9 @@ export function GoToLineDialog({ theme }: GoToLineDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowGoToLine(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="goto-line-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.bgSecondary,
@@ -39,7 +42,7 @@ export function GoToLineDialog({ theme }: GoToLineDialogProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}
       >
-        <h3 style={{ color: theme.text, fontSize: 16, marginBottom: 12, fontWeight: 600 }}>
+        <h3 id="goto-line-title" style={{ color: theme.text, fontSize: 16, marginBottom: 12, fontWeight: 600 }}>
           Go to Line
         </h3>
         <div style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 12 }}>
