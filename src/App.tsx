@@ -203,7 +203,7 @@ export default function App() {
   }, []);
 
   const handleMenuAction = useCallback((action: string, value?: any) => {
-    const editorAction = (window as any).__editorAction;
+    const editorAction = window.__editorAction;
 
     switch (action) {
       // File actions
@@ -316,7 +316,7 @@ export default function App() {
           const file = (e.target as HTMLInputElement).files?.[0];
           if (file) {
             const text = await file.text();
-            try { useEditorStore.getState().loadSession(JSON.parse(text)); } catch {}
+            try { useEditorStore.getState().loadSession(JSON.parse(text)); } catch { /* Invalid session JSON — ignore */ }
           }
         };
         input.click();
