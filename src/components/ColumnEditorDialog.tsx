@@ -22,7 +22,16 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
   }, []);
 
   const handleInsert = () => {
-    const detail: any = { mode };
+    interface ColumnEditDetail {
+      mode: 'text' | 'number';
+      text?: string;
+      initial?: number;
+      increase?: number;
+      repeat?: number;
+      leadingZeros?: boolean;
+      format?: 'dec' | 'hex' | 'oct' | 'bin';
+    }
+    const detail: ColumnEditDetail = { mode };
     if (mode === 'text') {
       detail.text = textToInsert;
     } else {
