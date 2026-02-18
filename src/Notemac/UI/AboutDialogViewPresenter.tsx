@@ -28,7 +28,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           Notemac++
         </h2>
         <div style={{ color: theme.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Version 2.2.1
+          Version 2.2.2
         </div>
 
         <div style={{
