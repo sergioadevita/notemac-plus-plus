@@ -169,11 +169,34 @@
         .hero h1 {
             font-size: 3.5rem;
             font-weight: 800;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             background: linear-gradient(135deg, var(--accent) 0%, #66d9cf 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(78, 201, 176, 0.2);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, #66d9cf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border: 1px solid var(--accent);
         }
 
         .hero p {
@@ -514,8 +537,11 @@
     <section class="hero">
         <div class="hero-content">
             <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
-            <h1>Notemac++</h1>
-            <p>A powerful text editor for macOS & Web, inspired by Notepad++</p>
+            <h1>
+                Notemac++
+                <span class="version-badge">v2.0.0</span>
+            </h1>
+            <p>A powerful text editor for macOS & Web — Now with Git integration and AI assistant</p>
             <div class="hero-buttons">
                 <a href="./app/" class="btn btn-primary">
                     Launch Web Editor
@@ -536,6 +562,7 @@
     <section id="features" class="features">
         <h2 class="section-title">Powerful <span>Features</span></h2>
         <div class="features-grid">
+            <!-- Existing Features -->
             <div class="feature-card">
                 <div class="feature-icon">🎨</div>
                 <h3>70+ Languages</h3>
@@ -581,6 +608,38 @@
                 <h3>Line Numbering</h3>
                 <p>Easy navigation and debugging with optional line numbers and guides</p>
             </div>
+
+            <!-- New Features for v2 -->
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Assistant</h3>
+                <p>Built-in AI chat with multi-provider support for code assistance, explanations, and inline completions</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔀</div>
+                <h3>Git Integration</h3>
+                <p>Full Git support with staging, commits, diffs, branch management, and GitHub OAuth authentication</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💻</div>
+                <h3>Integrated Terminal</h3>
+                <p>Run commands directly from the editor with a built-in terminal emulator</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✂️</div>
+                <h3>Code Snippets</h3>
+                <p>Language-aware snippet manager with quick insertions and custom snippet creation</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Security Hardened</h3>
+                <p>Encrypted credential storage, secure OAuth flows, and XSS-protected AI responses</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Clipboard History</h3>
+                <p>Access your clipboard history and quickly paste previous entries</p>
+            </div>
         </div>
     </section>
 
@@ -610,6 +669,9 @@
             <div class="tech-badge">Electron</div>
             <div class="tech-badge">Monaco Editor</div>
             <div class="tech-badge">CSS3</div>
+            <div class="tech-badge">isomorphic-git</div>
+            <div class="tech-badge">Xterm.js</div>
+            <div class="tech-badge">OpenAI / Anthropic / Google AI</div>
         </div>
     </section>
 
