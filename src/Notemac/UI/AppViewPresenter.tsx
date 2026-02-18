@@ -13,6 +13,7 @@ import { Sidebar } from './SidebarViewPresenter';
 import { FindReplace } from './FindReplaceViewPresenter';
 import { WelcomeScreen } from './WelcomeScreenViewPresenter';
 import { FeedbackPopup } from './FeedbackPopupViewPresenter';
+import { ErrorBoundary } from './ErrorBoundary';
 
 // Lazy-loaded dialogs (rarely shown — improves initial load time)
 const SettingsDialog = lazy(() => import('./SettingsDialogViewPresenter').then(m => ({ default: m.SettingsDialog })));
@@ -176,13 +177,15 @@ export default function App()
           }}>
             {activeTab ? (
               <>
-                <EditorPanel
-                  key={activeTab.id}
-                  tab={activeTab}
-                  theme={theme}
-                  settings={settings}
-                  zoomLevel={zoomLevel}
-                />
+                <ErrorBoundary fallbackMessage="Editor panel encountered an error">
+                  <EditorPanel
+                    key={activeTab.id}
+                    tab={activeTab}
+                    theme={theme}
+                    settings={settings}
+                    zoomLevel={zoomLevel}
+                  />
+                </ErrorBoundary>
                 {splitView !== 'none' && splitTabId && (
                   <>
                     <div style={{
@@ -191,13 +194,15 @@ export default function App()
                       backgroundColor: theme.border,
                       cursor: splitView === 'vertical' ? 'col-resize' : 'row-resize',
                     }} />
-                    <EditorPanel
-                      key={splitTabId + '-split'}
-                      tab={tabs.find(t => t.id === splitTabId) || activeTab}
-                      theme={theme}
-                      settings={settings}
-                      zoomLevel={zoomLevel}
-                    />
+                    <ErrorBoundary fallbackMessage="Split editor panel encountered an error">
+                      <EditorPanel
+                        key={splitTabId + '-split'}
+                        tab={tabs.find(t => t.id === splitTabId) || activeTab}
+                        theme={theme}
+                        settings={settings}
+                        zoomLevel={zoomLevel}
+                      />
+                    </ErrorBoundary>
                   </>
                 )}
               </>
@@ -208,9 +213,11 @@ export default function App()
 
           {/* Terminal panel — between editor and status bar */}
           {showTerminalPanel && (
-            <Suspense fallback={null}>
-              <TerminalPanelViewPresenter theme={theme} />
-            </Suspense>
+            <ErrorBoundary fallbackMessage="Terminal panel failed to load">
+              <Suspense fallback={null}>
+                <TerminalPanelViewPresenter theme={theme} />
+              </Suspense>
+            </ErrorBoundary>
           )}
         </div>
       </div>
@@ -218,23 +225,111 @@ export default function App()
       {showStatusBar && !isDistractionFree && <StatusBar theme={theme} />}
 
       {/* Lazy-loaded dialogs */}
-      <Suspense fallback={null}>
-        {showSettings && <SettingsDialog theme={theme} />}
-        {showGoToLine && <GoToLineDialog theme={theme} />}
-        {showAbout && <AboutDialog theme={theme} />}
-        {showRunCommand && <RunCommandDialog theme={theme} />}
-        {showColumnEditor && <ColumnEditorDialog theme={theme} />}
-        {showSummary && <SummaryDialog theme={theme} />}
-        {showCharInRange && <CharInRangeDialog theme={theme} />}
-        {showShortcutMapper && <ShortcutMapperDialog theme={theme} />}
-        {showCommandPalette && <CommandPaletteViewPresenter theme={theme} />}
-        {showQuickOpen && <QuickOpenViewPresenter theme={theme} />}
-        {showDiffViewer && <DiffViewerViewPresenter theme={theme} />}
-        {showSnippetManager && <SnippetManagerViewPresenter theme={theme} />}
-        {showCloneDialog && <CloneRepositoryViewPresenter theme={theme} />}
-        {showGitSettings && <GitSettingsViewPresenter theme={theme} />}
-        {showAiSettings && <AISettingsViewPresenter theme={theme} />}
-      </Suspense>
+      {showSettings && (
+        <ErrorBoundary fallbackMessage="Settings failed to load">
+          <Suspense fallback={null}>
+            <SettingsDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showGoToLine && (
+        <ErrorBoundary fallbackMessage="Go to Line dialog failed to load">
+          <Suspense fallback={null}>
+            <GoToLineDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showAbout && (
+        <ErrorBoundary fallbackMessage="About dialog failed to load">
+          <Suspense fallback={null}>
+            <AboutDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showRunCommand && (
+        <ErrorBoundary fallbackMessage="Run Command dialog failed to load">
+          <Suspense fallback={null}>
+            <RunCommandDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showColumnEditor && (
+        <ErrorBoundary fallbackMessage="Column Editor dialog failed to load">
+          <Suspense fallback={null}>
+            <ColumnEditorDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showSummary && (
+        <ErrorBoundary fallbackMessage="Summary dialog failed to load">
+          <Suspense fallback={null}>
+            <SummaryDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showCharInRange && (
+        <ErrorBoundary fallbackMessage="Char in Range dialog failed to load">
+          <Suspense fallback={null}>
+            <CharInRangeDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showShortcutMapper && (
+        <ErrorBoundary fallbackMessage="Shortcut Mapper dialog failed to load">
+          <Suspense fallback={null}>
+            <ShortcutMapperDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showCommandPalette && (
+        <ErrorBoundary fallbackMessage="Command Palette failed to load">
+          <Suspense fallback={null}>
+            <CommandPaletteViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showQuickOpen && (
+        <ErrorBoundary fallbackMessage="Quick Open failed to load">
+          <Suspense fallback={null}>
+            <QuickOpenViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showDiffViewer && (
+        <ErrorBoundary fallbackMessage="Diff Viewer failed to load">
+          <Suspense fallback={null}>
+            <DiffViewerViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showSnippetManager && (
+        <ErrorBoundary fallbackMessage="Snippet Manager failed to load">
+          <Suspense fallback={null}>
+            <SnippetManagerViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showCloneDialog && (
+        <ErrorBoundary fallbackMessage="Clone Repository dialog failed to load">
+          <Suspense fallback={null}>
+            <CloneRepositoryViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showGitSettings && (
+        <ErrorBoundary fallbackMessage="Git Settings failed to load">
+          <Suspense fallback={null}>
+            <GitSettingsViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showAiSettings && (
+        <ErrorBoundary fallbackMessage="AI Settings failed to load">
+          <Suspense fallback={null}>
+            <AISettingsViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
       <FeedbackPopup theme={theme} />
     </div>
   );
