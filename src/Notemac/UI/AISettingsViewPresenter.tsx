@@ -4,6 +4,7 @@ import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetBuiltInProviders, CreateCustomProvider, CreateCustomModel } from "../Configs/AIConfig";
 import { generateId } from "../../Shared/Helpers/IdHelpers";
 import { TestProviderConnection } from "../Controllers/LLMController";
+import { CRED_DEFAULT_AI_EXPIRY_HOURS } from "../Commons/Constants";
 
 interface AISettingsProps
 {
@@ -259,14 +260,24 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
                                         style={{ ...inputStyle, marginBottom: 6 }}
                                     />
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <label style={{ fontSize: 11, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={rememberFlags[provider.id] ?? true}
-                                                onChange={(e) => setRememberFlags(prev => ({ ...prev, [provider.id]: e.target.checked }))}
-                                            />
-                                            Remember key
-                                        </label>
+                                        <div>
+                                            <label style={{ fontSize: 11, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={rememberFlags[provider.id] ?? false}
+                                                    onChange={(e) => setRememberFlags(prev => ({ ...prev, [provider.id]: e.target.checked }))}
+                                                />
+                                                Remember key (encrypted)
+                                            </label>
+                                            {rememberFlags[provider.id] && (
+                                                <div style={{
+                                                    marginTop: 2, fontSize: 10, color: '#f9e2af',
+                                                    backgroundColor: '#f9e2af15', padding: '2px 6px', borderRadius: 3,
+                                                }}>
+                                                    Key will be encrypted and stored locally. Expires after {CRED_DEFAULT_AI_EXPIRY_HOURS}h.
+                                                </div>
+                                            )}
+                                        </div>
                                         <div style={{ flex: 1 }} />
                                         <button
                                             onClick={() => handleTestConnection(provider.id)}

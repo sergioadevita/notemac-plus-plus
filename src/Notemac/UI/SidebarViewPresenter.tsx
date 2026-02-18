@@ -252,6 +252,7 @@ export function Sidebar({ theme }: SidebarProps) {
       </div>
 
       {/* Panel content */}
+      {null !== sidebarPanel && (<>
       <div style={{
         width: width - 40,
         backgroundColor: theme.sidebarBg,
@@ -274,6 +275,25 @@ export function Sidebar({ theme }: SidebarProps) {
           alignItems: 'center',
         }}>
           {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : ''}
+          <div
+            title="Collapse Panel"
+            onClick={() => setSidebarPanel(null)}
+            style={{
+              width: 20,
+              height: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderRadius: 4,
+              fontSize: 12,
+              color: theme.textMuted,
+            }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.backgroundColor = theme.bgHover; (e.target as HTMLElement).style.color = theme.text; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.backgroundColor = 'transparent'; (e.target as HTMLElement).style.color = theme.textMuted; }}
+          >
+            {'\u2715'}
+          </div>
         </div>
 
         {/* Panel body */}
@@ -382,6 +402,7 @@ export function Sidebar({ theme }: SidebarProps) {
         onMouseDown={handleMouseDown}
         style={{ backgroundColor: isResizing ? theme.accent : theme.border }}
       />
+      </>)}
     </div>
   );
 }

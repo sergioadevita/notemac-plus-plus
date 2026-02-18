@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { SaveCredentialsWithToken, ClearCredentials, TestAuthentication } from "../Controllers/AuthController";
-import { GIT_DEFAULT_CORS_PROXY } from "../Commons/Constants";
+import { SaveCredentialsWithToken, ClearCredentials, TestAuthentication, StartGitHubOAuth, PollGitHubOAuthToken } from "../Controllers/AuthController";
+import type { OAuthState } from "../Controllers/AuthController";
+import { GIT_DEFAULT_CORS_PROXY, CRED_DEFAULT_GIT_EXPIRY_HOURS } from "../Commons/Constants";
 
 interface GitSettingsProps
 {
@@ -28,13 +29,60 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
     const [showUntracked, setShowUntracked] = useState(gitSettings.showUntracked);
     const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null);
     const [testUrl, setTestUrl] = useState('');
+    const [rememberCredentials, setRememberCredentials] = useState(false);
+    const [oauthState, setOauthState] = useState<OAuthState | null>(null);
+    const [oauthStatus, setOauthStatus] = useState<'idle' | 'waiting' | 'success' | 'error'>('idle');
+    const [oauthError, setOauthError] = useState('');
 
     const handleClose = useCallback(() => setShowGitSettings(false), [setShowGitSettings]);
 
-    const handleSaveCredentials = useCallback(() =>
+    const handleSaveCredentials = useCallback(async () =>
     {
-        SaveCredentialsWithToken({ type: authType as any, username, token });
-    }, [authType, username, token]);
+        await SaveCredentialsWithToken({ type: authType as any, username, token }, rememberCredentials);
+    }, [authType, username, token, rememberCredentials]);
+
+    const handleStartOAuth = useCallback(async () =>
+    {
+        setOauthStatus('waiting');
+        setOauthError('');
+        const state = await StartGitHubOAuth();
+        if (null === state)
+        {
+            setOauthStatus('error');
+            setOauthError('OAuth not configured. Set VITE_GITHUB_OAUTH_CLIENT_ID or use a Personal Access Token instead.');
+            return;
+        }
+        setOauthState(state);
+
+        // Poll for token
+        const pollInterval = (state.interval || 5) * 1000;
+        const maxAttempts = Math.ceil(state.expiresIn / (state.interval || 5));
+        let attempts = 0;
+
+        const poll = async () =>
+        {
+            if (attempts >= maxAttempts)
+            {
+                setOauthStatus('error');
+                setOauthError('Authorization timed out. Please try again.');
+                return;
+            }
+            attempts++;
+            const tokenResult = await PollGitHubOAuthToken(state.deviceCode);
+            if (null !== tokenResult)
+            {
+                setOauthStatus('success');
+                setToken(tokenResult);
+                setAuthType('oauth');
+                setUsername('oauth');
+            }
+            else if ('waiting' === oauthStatus)
+            {
+                setTimeout(poll, pollInterval);
+            }
+        };
+        setTimeout(poll, pollInterval);
+    }, [oauthStatus]);
 
     const handleSaveAuthor = useCallback(() =>
     {
@@ -147,6 +195,24 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
                                     style={inputStyle}
                                 />
                             </div>
+                            <div>
+                                <label style={{ fontSize: 11, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={rememberCredentials}
+                                        onChange={(e) => setRememberCredentials(e.target.checked)}
+                                    />
+                                    Remember credentials (encrypted)
+                                </label>
+                                {rememberCredentials && (
+                                    <div style={{
+                                        marginTop: 4, padding: '4px 8px', borderRadius: 4, fontSize: 10,
+                                        backgroundColor: '#f9e2af22', color: '#f9e2af',
+                                    }}>
+                                        Token will be encrypted and stored locally. Expires after {CRED_DEFAULT_GIT_EXPIRY_HOURS} hours.
+                                    </div>
+                                )}
+                            </div>
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <button onClick={handleSaveCredentials} style={{
                                     height: 28, padding: '0 12px', backgroundColor: theme.accent, color: theme.accentText,
@@ -161,6 +227,62 @@ export function GitSettingsViewPresenter({ theme }: GitSettingsProps)
                                     Clear
                                 </button>
                             </div>
+                            {/* OAuth section */}
+                            {'oauth' === authType && (
+                                <div style={{ marginTop: 8, borderTop: `1px solid ${theme.border}`, paddingTop: 12 }}>
+                                    <label style={labelStyle}>GitHub OAuth (Device Flow)</label>
+                                    {'idle' === oauthStatus && (
+                                        <button onClick={handleStartOAuth} style={{
+                                            height: 28, padding: '0 12px', backgroundColor: theme.bgHover, color: theme.text,
+                                            border: `1px solid ${theme.border}`, borderRadius: 4, fontSize: 12, cursor: 'pointer',
+                                        }}>
+                                            Connect with GitHub
+                                        </button>
+                                    )}
+                                    {'waiting' === oauthStatus && null !== oauthState && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <div style={{ fontSize: 12, color: theme.text }}>
+                                                Enter this code on GitHub:
+                                            </div>
+                                            <div style={{
+                                                fontSize: 20, fontWeight: 700, fontFamily: 'monospace',
+                                                color: theme.accent, letterSpacing: 4, textAlign: 'center',
+                                                padding: '8px 0', backgroundColor: theme.bgSecondary, borderRadius: 6,
+                                            }}>
+                                                {oauthState.userCode}
+                                            </div>
+                                            <a
+                                                href={oauthState.verificationUri}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ color: theme.accent, fontSize: 12, textDecoration: 'underline' }}
+                                            >
+                                                Open GitHub verification page
+                                            </a>
+                                            <div style={{ fontSize: 11, color: theme.textMuted }}>
+                                                Waiting for authorization...
+                                            </div>
+                                            <button onClick={() => { setOauthStatus('idle'); setOauthState(null); }} style={{
+                                                height: 24, padding: '0 8px', backgroundColor: theme.bgHover, color: theme.text,
+                                                border: `1px solid ${theme.border}`, borderRadius: 4, fontSize: 11, cursor: 'pointer',
+                                                alignSelf: 'flex-start',
+                                            }}>
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
+                                    {'success' === oauthStatus && (
+                                        <div style={{ padding: '6px 8px', borderRadius: 4, fontSize: 11, backgroundColor: '#a6e3a122', color: '#a6e3a1' }}>
+                                            Connected successfully via GitHub OAuth
+                                        </div>
+                                    )}
+                                    {'error' === oauthStatus && (
+                                        <div style={{ padding: '6px 8px', borderRadius: 4, fontSize: 11, backgroundColor: '#f38ba822', color: '#f38ba8' }}>
+                                            {oauthError}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {/* Test auth */}
                             <div style={{ marginTop: 8, borderTop: `1px solid ${theme.border}`, paddingTop: 12 }}>
                                 <label style={labelStyle}>Test Authentication</label>

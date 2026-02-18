@@ -111,3 +111,13 @@ export const AI_DEFAULT_TEMPERATURE = 0.3;
 export const AI_CHAT_TEMPERATURE = 0.7;
 export const AI_MAX_CONVERSATIONS = 50;
 export const AI_MAX_INLINE_TOKENS = 256;
+
+// Credential Security
+export const CRED_STORAGE_PREFIX = "SecureCred_";
+export const CRED_DEFAULT_AI_EXPIRY_HOURS = 24;
+export const CRED_DEFAULT_GIT_EXPIRY_HOURS = 8;
+export const CRED_ENCRYPTION_KEY_ID = "NotemacCryptoKey_v1";
+
+// GitHub OAuth
+export const GITHUB_OAUTH_CLIENT_ID = 'Iv1.CONFIGURE_YOUR_APP';
+export const GITHUB_OAUTH_SCOPE = "repo";

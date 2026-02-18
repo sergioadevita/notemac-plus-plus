@@ -163,7 +163,7 @@ export default function App()
       {!isDistractionFree && <TabBar theme={theme} />}
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {sidebarPanel && !isDistractionFree && <Sidebar theme={theme} />}
+        {!isDistractionFree && <Sidebar theme={theme} />}
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {showFindReplace && <FindReplace theme={theme} />}

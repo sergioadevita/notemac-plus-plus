@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, dialog, ipcMain, safeStorage } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -280,6 +280,31 @@ ipcMain.handle('write-file', async (_, filePath, content) => {
 
 ipcMain.handle('read-dir', async (_, dirPath) => {
   return buildFileTree(dirPath);
+});
+
+// Safe Storage — OS keychain encryption for credentials
+ipcMain.handle('safe-storage-encrypt', (_, plaintext) => {
+  try {
+    const encrypted = safeStorage.encryptString(plaintext);
+    return encrypted.toString('base64');
+  } catch (e) {
+    console.error('SafeStorage encrypt failed:', e);
+    return null;
+  }
+});
+
+ipcMain.handle('safe-storage-decrypt', (_, base64) => {
+  try {
+    const encrypted = Buffer.from(base64, 'base64');
+    return safeStorage.decryptString(encrypted);
+  } catch (e) {
+    console.error('SafeStorage decrypt failed:', e);
+    return null;
+  }
+});
+
+ipcMain.handle('safe-storage-available', () => {
+  return safeStorage.isEncryptionAvailable();
 });
 
 app.whenReady().then(createWindow);

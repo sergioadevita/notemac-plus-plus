@@ -3,8 +3,9 @@ import { produce } from 'immer';
 import type { AIProvider, AICredential, AIConversation, AIMessage, AIInlineSuggestion, AIContextItem } from "../Commons/Types";
 import type { AISettings } from "../Configs/AIConfig";
 import { GetDefaultAISettings, GetBuiltInProviders } from "../Configs/AIConfig";
-import { GetValue, SetValue } from '../../Shared/Persistence/PersistenceService';
-import { DB_AI_PROVIDERS, DB_AI_CREDENTIALS, DB_AI_SETTINGS, DB_AI_CONVERSATIONS, AI_MAX_CONVERSATIONS } from '../Commons/Constants';
+import { GetValue, SetValue, RemoveValue } from '../../Shared/Persistence/PersistenceService';
+import { StoreSecureValue, RetrieveSecureValue, RemoveSecureValue } from '../../Shared/Persistence/CredentialStorageService';
+import { DB_AI_PROVIDERS, DB_AI_CREDENTIALS, DB_AI_SETTINGS, DB_AI_CONVERSATIONS, AI_MAX_CONVERSATIONS, CRED_DEFAULT_AI_EXPIRY_HOURS } from '../Commons/Constants';
 
 export interface NotemacAISlice
 {
@@ -157,12 +158,29 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
                 state.credentials.push(cred);
         }));
 
-        // Persist only remembered keys
+        // Persist only remembered keys — encrypted with expiry
         const creds = get().credentials;
         const rememberedCreds = creds
             .filter(c => c.rememberKey)
             .map(c => ({ providerId: c.providerId, apiKey: c.apiKey, rememberKey: true }));
-        SetValue(DB_AI_CREDENTIALS, rememberedCreds);
+
+        if (0 < rememberedCreds.length)
+        {
+            StoreSecureValue(
+                DB_AI_CREDENTIALS,
+                JSON.stringify(rememberedCreds),
+                CRED_DEFAULT_AI_EXPIRY_HOURS * 3600
+            );
+        }
+        else
+        {
+            RemoveSecureValue(DB_AI_CREDENTIALS);
+        }
+
+        // Also store session-only (non-remembered) in memory via CredentialStorageService
+        const sessionCreds = creds.filter(c => !c.rememberKey);
+        if (0 < sessionCreds.length)
+            StoreSecureValue(DB_AI_CREDENTIALS + '_session', JSON.stringify(sessionCreds), 0);
     },
 
     RemoveCredentialForProvider: (providerId) =>
@@ -176,7 +194,10 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
 
         const creds = get().credentials;
         const rememberedCreds = creds.filter(c => c.rememberKey);
-        SetValue(DB_AI_CREDENTIALS, rememberedCreds);
+        if (0 < rememberedCreds.length)
+            StoreSecureValue(DB_AI_CREDENTIALS, JSON.stringify(rememberedCreds), CRED_DEFAULT_AI_EXPIRY_HOURS * 3600);
+        else
+            RemoveSecureValue(DB_AI_CREDENTIALS);
     },
 
     UpdateAISettings: (newSettings) =>
@@ -280,7 +301,6 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
     LoadAIState: () =>
     {
         const savedSettings = GetValue<AISettings>(DB_AI_SETTINGS);
-        const savedCredentials = GetValue<AICredential[]>(DB_AI_CREDENTIALS);
         const savedProviders = GetValue<AIProvider[]>(DB_AI_PROVIDERS);
         const savedConversations = GetValue<AIConversation[]>(DB_AI_CONVERSATIONS);
 
@@ -294,12 +314,43 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
             providers = [...builtIn, ...customProviders];
         }
 
+        // Load credentials from secure storage (async)
+        RetrieveSecureValue(DB_AI_CREDENTIALS).then((credStr) =>
+        {
+            let credentials: AICredential[] = [];
+
+            if (null !== credStr)
+            {
+                try { credentials = JSON.parse(credStr); }
+                catch { credentials = []; }
+            }
+            else
+            {
+                // Migration: check for old unencrypted credentials
+                const legacyCreds = GetValue<AICredential[]>(DB_AI_CREDENTIALS);
+                if (null !== legacyCreds && 0 < legacyCreds.length)
+                {
+                    credentials = legacyCreds;
+                    // Re-encrypt and remove old plaintext
+                    const remembered = legacyCreds.filter(c => c.rememberKey);
+                    if (0 < remembered.length)
+                        StoreSecureValue(DB_AI_CREDENTIALS, JSON.stringify(remembered), CRED_DEFAULT_AI_EXPIRY_HOURS * 3600);
+                    RemoveValue(DB_AI_CREDENTIALS);
+                }
+            }
+
+            set({
+                credentials,
+                aiEnabled: 0 < credentials.length,
+            });
+        });
+
         set({
             aiSettings: savedSettings || GetDefaultAISettings(),
-            credentials: savedCredentials || [],
+            credentials: [],
             providers,
             conversations: savedConversations || [],
-            aiEnabled: null !== savedCredentials && 0 < savedCredentials.length,
+            aiEnabled: false,
         });
     },
 
@@ -313,9 +364,12 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
         if (0 < customProviders.length)
             SetValue(DB_AI_PROVIDERS, customProviders);
 
-        // Only persist remembered credentials
+        // Only persist remembered credentials — encrypted
         const rememberedCreds = state.credentials.filter(c => c.rememberKey);
-        SetValue(DB_AI_CREDENTIALS, rememberedCreds);
+        if (0 < rememberedCreds.length)
+            StoreSecureValue(DB_AI_CREDENTIALS, JSON.stringify(rememberedCreds), CRED_DEFAULT_AI_EXPIRY_HOURS * 3600);
+        else
+            RemoveSecureValue(DB_AI_CREDENTIALS);
 
         // Persist conversations
         SetValue(DB_AI_CONVERSATIONS, state.conversations);

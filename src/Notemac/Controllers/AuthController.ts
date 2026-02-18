@@ -2,51 +2,96 @@ import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/web';
 import { useNotemacStore } from "../Model/Store";
 import type { GitCredentials } from "../Commons/Types";
-import { GetValue, SetValue, RemoveValue } from '../../Shared/Persistence/PersistenceService';
-import { DB_GIT_CREDENTIALS, GIT_DEFAULT_CORS_PROXY } from '../Commons/Constants';
+import { GetValue, RemoveValue } from '../../Shared/Persistence/PersistenceService';
+import { StoreSecureValue, RetrieveSecureValue, RemoveSecureValue } from '../../Shared/Persistence/CredentialStorageService';
+import { DB_GIT_CREDENTIALS, GIT_DEFAULT_CORS_PROXY, CRED_DEFAULT_GIT_EXPIRY_HOURS, GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPE } from '../Commons/Constants';
 
 // ─── Credential Management ───────────────────────────────────────
 
 /**
- * Save credentials to store and persistence.
- * NOTE: In web mode, tokens are stored in localStorage — not ideal for production.
- * In Electron, we could use safeStorage or keychain.
+ * Save credentials to store — metadata only (type, username).
+ * Token is stored in Zustand memory only (session-only, not persisted).
  */
-export function SaveCredentials(credentials: GitCredentials): void
+export async function SaveCredentials(credentials: GitCredentials): Promise<void>
 {
     const store = useNotemacStore.getState();
     store.SetGitCredentials(credentials);
 
-    // Persist — we only store type and username, not the actual token
-    // Token is stored in memory only for security (user re-enters on session start)
-    SetValue(DB_GIT_CREDENTIALS, {
+    // Persist metadata only — token stays in memory for security
+    await StoreSecureValue(DB_GIT_CREDENTIALS, JSON.stringify({
         type: credentials.type,
         username: credentials.username,
-    });
+    }), CRED_DEFAULT_GIT_EXPIRY_HOURS * 3600);
 }
 
 /**
- * Save credentials including the token (less secure, for convenience).
- * User can opt-in to this in settings.
+ * Save credentials including the token (encrypted).
+ * @param credentials — Git credentials including token
+ * @param rememberMe — If true, persist encrypted to localStorage with expiry.
+ *                       If false, store session-only (in-memory, no localStorage).
  */
-export function SaveCredentialsWithToken(credentials: GitCredentials): void
+export async function SaveCredentialsWithToken(
+    credentials: GitCredentials,
+    rememberMe: boolean = false,
+): Promise<void>
 {
     const store = useNotemacStore.getState();
     store.SetGitCredentials(credentials);
-    SetValue(DB_GIT_CREDENTIALS, credentials);
+
+    if (rememberMe)
+    {
+        // Persist encrypted with expiry
+        await StoreSecureValue(
+            DB_GIT_CREDENTIALS,
+            JSON.stringify(credentials),
+            CRED_DEFAULT_GIT_EXPIRY_HOURS * 3600
+        );
+    }
+    else
+    {
+        // Session-only: expirySeconds=0 stores in memory map only
+        await StoreSecureValue(DB_GIT_CREDENTIALS, JSON.stringify(credentials), 0);
+    }
 }
 
 /**
- * Load credentials from persistence.
+ * Load credentials from secure storage.
+ * Handles migration from old unencrypted localStorage format.
  */
-export function LoadCredentials(): GitCredentials | null
+export async function LoadCredentials(): Promise<GitCredentials | null>
 {
-    const saved = GetValue<GitCredentials>(DB_GIT_CREDENTIALS);
-    if (null !== saved && undefined !== saved)
+    // Try secure storage first
+    const credStr = await RetrieveSecureValue(DB_GIT_CREDENTIALS);
+    if (null !== credStr)
     {
-        useNotemacStore.getState().SetGitCredentials(saved);
-        return saved;
+        try
+        {
+            const cred = JSON.parse(credStr) as GitCredentials;
+            useNotemacStore.getState().SetGitCredentials(cred);
+            return cred;
+        }
+        catch
+        {
+            // Corrupted — fall through to legacy
+        }
     }
+
+    // Migration: check for old unencrypted credentials
+    const legacy = GetValue<GitCredentials>(DB_GIT_CREDENTIALS);
+    if (null !== legacy && undefined !== legacy)
+    {
+        useNotemacStore.getState().SetGitCredentials(legacy);
+
+        // Re-encrypt and remove old plaintext
+        if (legacy.token)
+            await StoreSecureValue(DB_GIT_CREDENTIALS, JSON.stringify(legacy), CRED_DEFAULT_GIT_EXPIRY_HOURS * 3600);
+        else
+            await StoreSecureValue(DB_GIT_CREDENTIALS, JSON.stringify(legacy), CRED_DEFAULT_GIT_EXPIRY_HOURS * 3600);
+
+        RemoveValue(DB_GIT_CREDENTIALS);
+        return legacy;
+    }
+
     return null;
 }
 
@@ -56,7 +101,8 @@ export function LoadCredentials(): GitCredentials | null
 export function ClearCredentials(): void
 {
     useNotemacStore.getState().SetGitCredentials(null);
-    RemoveValue(DB_GIT_CREDENTIALS);
+    RemoveSecureValue(DB_GIT_CREDENTIALS);
+    RemoveValue(DB_GIT_CREDENTIALS); // Also clean up any legacy plaintext
 }
 
 /**
@@ -88,8 +134,6 @@ export async function TestAuthentication(repoUrl: string, credentials: GitCreden
 
 // ─── OAuth Flow (GitHub Device Flow) ─────────────────────────────
 
-const GITHUB_CLIENT_ID = 'Iv1.notemac_placeholder'; // Users should register their own OAuth app
-
 export interface OAuthState
 {
     deviceCode: string;
@@ -103,11 +147,17 @@ export interface OAuthState
  * Start GitHub Device Flow OAuth.
  * Returns the user code and verification URL for the user to complete in their browser.
  *
- * Note: This requires a registered GitHub OAuth App client ID.
- * For now, this is a placeholder — users should use PAT tokens instead.
+ * Requires GITHUB_OAUTH_CLIENT_ID to be configured (not the placeholder value).
+ * Set the env var VITE_GITHUB_OAUTH_CLIENT_ID or update Constants.ts.
  */
 export async function StartGitHubOAuth(): Promise<OAuthState | null>
 {
+    if ('Iv1.CONFIGURE_YOUR_APP' === GITHUB_OAUTH_CLIENT_ID)
+    {
+        console.warn('[OAuth] GitHub OAuth client ID not configured. Set VITE_GITHUB_OAUTH_CLIENT_ID or update Constants.ts.');
+        return null;
+    }
+
     try
     {
         const response = await fetch('https://github.com/login/device/code', {
@@ -117,8 +167,8 @@ export async function StartGitHubOAuth(): Promise<OAuthState | null>
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                client_id: GITHUB_CLIENT_ID,
-                scope: 'repo',
+                client_id: GITHUB_OAUTH_CLIENT_ID,
+                scope: GITHUB_OAUTH_SCOPE,
             }),
         });
 
@@ -142,6 +192,7 @@ export async function StartGitHubOAuth(): Promise<OAuthState | null>
 
 /**
  * Poll for OAuth token after user has authorized.
+ * On success, saves credential as session-only (not persisted by default).
  */
 export async function PollGitHubOAuthToken(deviceCode: string): Promise<string | null>
 {
@@ -154,7 +205,7 @@ export async function PollGitHubOAuthToken(deviceCode: string): Promise<string |
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                client_id: GITHUB_CLIENT_ID,
+                client_id: GITHUB_OAUTH_CLIENT_ID,
                 device_code: deviceCode,
                 grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
             }),
@@ -166,13 +217,13 @@ export async function PollGitHubOAuthToken(deviceCode: string): Promise<string |
         const data = await response.json();
         if (data.access_token)
         {
-            // Save as credential
+            // Save as session-only credential (not persisted by default)
             const creds: GitCredentials = {
                 type: 'oauth',
                 username: 'oauth',
                 token: data.access_token,
             };
-            SaveCredentials(creds);
+            await SaveCredentialsWithToken(creds, false);
             return data.access_token;
         }
 
