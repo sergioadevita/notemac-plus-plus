@@ -3,6 +3,7 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetEncodings } from "../Configs/EncodingConfig";
 import { GetLanguages } from "../Configs/LanguageConfig";
+import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 
 interface MenuBarProps {
   theme: ThemeColors;
@@ -385,7 +386,7 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
               border: `1px solid ${theme.border}`,
               borderRadius: 6,
               padding: '4px 0',
-              zIndex: 10000,
+              zIndex: UI_ZINDEX_MODAL,
               boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             }}>
               {items.map((item, i) => {
