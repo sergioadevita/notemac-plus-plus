@@ -4,21 +4,22 @@
  * through the electronAPI bridge exposed by preload.js.
  */
 
-interface ElectronSafeStorageAPI
+/** Subset of electronAPI with safe-storage methods confirmed present. */
+interface SafeStorageAPI
 {
     safeStorageEncrypt: (plaintext: string) => Promise<string>;
     safeStorageDecrypt: (base64: string) => Promise<string>;
     isSafeStorageAvailable: () => Promise<boolean>;
 }
 
-function GetElectronAPI(): ElectronSafeStorageAPI | null
+function GetElectronAPI(): SafeStorageAPI | null
 {
-    const api = (window as any).electronAPI;
-    if (null === api || undefined === api)
+    const api = window.electronAPI;
+    if (null == api)
         return null;
     if ('function' !== typeof api.safeStorageEncrypt)
         return null;
-    return api as ElectronSafeStorageAPI;
+    return api as SafeStorageAPI;
 }
 
 export function IsElectronAvailable(): boolean
