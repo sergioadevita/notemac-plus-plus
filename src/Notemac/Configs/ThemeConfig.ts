@@ -253,7 +253,7 @@ export function GetThemeNames(): string[]
     return Object.keys(themes);
 }
 
-export function defineMonacoThemes(monaco: any): void
+export function defineMonacoThemes(monaco: typeof import('monaco-editor')): void
 {
     monaco.editor.defineTheme('monokai', {
         base: 'vs-dark',
