@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface ColumnEditDetail {
   mode: string;
@@ -26,10 +27,13 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
   const [leadingZeros, setLeadingZeros] = useState(false);
   const [format, setFormat] = useState<'dec' | 'hex' | 'oct' | 'bin'>('dec');
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useFocusTrap(dialogRef, true, () => setShowColumnEditor(false));
 
   const handleInsert = () => {
     const detail: ColumnEditDetail = { mode };
@@ -60,6 +64,7 @@ export function ColumnEditorDialog({ theme }: ColumnEditorDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowColumnEditor(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="column-editor-title"
