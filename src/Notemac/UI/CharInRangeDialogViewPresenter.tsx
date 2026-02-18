@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
+import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface CharInRangeDialogProps {
   theme: ThemeColors;
@@ -11,6 +12,9 @@ export function CharInRangeDialog({ theme }: CharInRangeDialogProps) {
   const [rangeStart, setRangeStart] = useState('0');
   const [rangeEnd, setRangeEnd] = useState('127');
   const [results, setResults] = useState<{ line: number; col: number; char: string; code: number }[]>([]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(dialogRef, true, () => setShowCharInRange(false));
 
   const handleFind = () => {
     const activeTab = tabs.find(t => t.id === activeTabId);
@@ -47,6 +51,7 @@ export function CharInRangeDialog({ theme }: CharInRangeDialogProps) {
   return (
     <div className="dialog-overlay" onClick={() => setShowCharInRange(false)}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="char-range-title"
