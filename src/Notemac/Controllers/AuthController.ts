@@ -126,9 +126,9 @@ export async function TestAuthentication(repoUrl: string, credentials: GitCreden
 
         return { success: true };
     }
-    catch (error: any)
+    catch (error: unknown)
     {
-        return { success: false, error: error.message };
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
 }
 
