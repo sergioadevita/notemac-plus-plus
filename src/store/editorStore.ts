@@ -488,7 +488,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   loadSession: (session) => {
-    const tabs: FileTab[] = session.tabs.map((t, i) => ({
+    const tabs: FileTab[] = session.tabs.map((t) => ({
       id: generateId(),
       name: t.name,
       path: t.path,
