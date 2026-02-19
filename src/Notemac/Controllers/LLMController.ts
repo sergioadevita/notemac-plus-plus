@@ -1,6 +1,5 @@
 import { useNotemacStore } from "../Model/Store";
-import type { AIProvider, AIProviderType, AICredential, AIMessage, AIContextItem } from "../Commons/Types";
-import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
+import type { AIProvider, AIProviderType, AICredential, AIContextItem } from "../Commons/Types";
 import { ANTHROPIC_API_VERSION } from "../Commons/Constants";
 
 // ─── Helpers ─────────────────────────────────────────────────────
