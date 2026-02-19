@@ -37,7 +37,6 @@ export default function App()
 {
   const tabs = useNotemacStore(s => s.tabs);
   const activeTabId = useNotemacStore(s => s.activeTabId);
-  const sidebarPanel = useNotemacStore(s => s.sidebarPanel);
   const showStatusBar = useNotemacStore(s => s.showStatusBar);
   const showToolbar = useNotemacStore(s => s.showToolbar);
   const settings = useNotemacStore(s => s.settings);
