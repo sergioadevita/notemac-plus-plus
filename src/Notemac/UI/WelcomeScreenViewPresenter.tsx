@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
@@ -9,50 +9,28 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ theme }: WelcomeScreenProps) {
-  const { addTab, recentFiles, setActiveTab } = useNotemacStore();
+  const { addTab, recentFiles } = useNotemacStore();
+  const styles = useStyles(theme);
 
   const isMac = navigator.platform.includes('Mac');
   const mod = isMac ? '\u2318' : 'Ctrl';
 
   return (
-    <div style={{
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.editorBg,
-      gap: 24,
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          fontSize: 64,
-          fontWeight: 200,
-          color: theme.textMuted,
-          letterSpacing: -2,
-          marginBottom: 8,
-        }}>
+    <div style={styles.container}>
+      <div style={styles.headerWrapper}>
+        <div style={styles.logo}>
           N++
         </div>
-        <h1 style={{
-          fontSize: 28,
-          fontWeight: 300,
-          color: theme.textSecondary,
-          marginBottom: 4,
-        }}>
+        <h1 style={styles.title}>
           Notemac++
         </h1>
-        <p style={{ color: theme.textMuted, fontSize: 14 }}>
+        <p style={styles.subtitle}>
           A powerful text editor for Mac & Web
         </p>
       </div>
 
       {/* Quick Actions */}
-      <div style={{
-        display: 'flex',
-        gap: 12,
-        marginTop: 8,
-      }}>
+      <div style={styles.quickActionsSection}>
         <WelcomeButton
           theme={theme}
           label="New File"
@@ -87,7 +65,7 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
           onClick={async () => {
             if ('showDirectoryPicker' in window) {
               try {
-                const dirHandle = await window.showDirectoryPicker!();
+                await window.showDirectoryPicker!();
                 // This would be handled by the sidebar
                 useNotemacStore.getState().setSidebarPanel('explorer');
               } catch { /* cancelled */ }
@@ -97,30 +75,11 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
       </div>
 
       {/* Keyboard Shortcuts Reference */}
-      <div style={{
-        marginTop: 24,
-        padding: 24,
-        backgroundColor: theme.bgSecondary,
-        borderRadius: 12,
-        border: `1px solid ${theme.border}`,
-        width: 400,
-      }}>
-        <div style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: theme.textSecondary,
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-          marginBottom: 12,
-        }}>
+      <div style={styles.shortcutsContainer}>
+        <div style={styles.shortcutsTitle}>
           Keyboard Shortcuts
         </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'auto 1fr',
-          gap: '8px 16px',
-          fontSize: 13,
-        }}>
+        <div style={styles.shortcutsGrid}>
           {[
             [`${mod}N`, 'New file'],
             [`${mod}O`, 'Open file'],
@@ -131,22 +90,12 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
             [`${mod}D`, 'Duplicate line'],
             [`${mod}B`, 'Toggle sidebar'],
             [`${mod},`, 'Preferences'],
-          ].map(([key, desc], i) => (
-            <React.Fragment key={i}>
-              <kbd style={{
-                backgroundColor: theme.bgTertiary,
-                color: theme.textSecondary,
-                padding: '2px 8px',
-                borderRadius: 4,
-                fontSize: 12,
-                fontFamily: '-apple-system, system-ui, sans-serif',
-                border: `1px solid ${theme.border}`,
-                textAlign: 'center',
-                minWidth: 60,
-              }}>
+          ].map(([key, desc]) => (
+            <React.Fragment key={`shortcut-${key}`}>
+              <kbd style={styles.shortcutKey}>
                 {key}
               </kbd>
-              <span style={{ color: theme.textSecondary }}>{desc}</span>
+              <span style={styles.shortcutDesc}>{desc}</span>
             </React.Fragment>
           ))}
         </div>
@@ -154,20 +103,13 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
 
       {/* Recent files */}
       {recentFiles.length > 0 && (
-        <div style={{ marginTop: 8 }}>
-          <div style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: theme.textSecondary,
-            textTransform: 'uppercase',
-            letterSpacing: 1,
-            marginBottom: 8,
-          }}>
+        <div style={styles.recentFilesWrapper}>
+          <div style={styles.recentFilesTitle}>
             Recent Files
           </div>
-          {recentFiles.slice(0, 5).map((file, i) => (
+          {recentFiles.slice(0, 5).map((file) => (
             <div
-              key={i}
+              key={`recent-${file.path || file.name}`}
               onClick={async () => {
                 if (window.electronAPI) {
                   const content = await window.electronAPI.readFile(file.path);
@@ -181,17 +123,10 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
                 }
               }}
               className="hover-bg hover-bg-reset"
-              style={{
-                padding: '6px 12px',
-                cursor: 'pointer',
-                color: theme.accent,
-                fontSize: 13,
-                borderRadius: 4,
-                '--hover-bg': theme.bgHover,
-              } as React.CSSProperties}
+              style={styles.recentFileItem}
             >
               {file.name}
-              <span style={{ color: theme.textMuted, fontSize: 11, marginLeft: 8 }}>
+              <span style={styles.recentFilePath}>
                 {file.path}
               </span>
             </div>
@@ -209,34 +144,140 @@ function WelcomeButton({ theme, label, shortcut, onClick }: {
   onClick: () => void;
 }) {
   const [hovered, setHovered] = React.useState(false);
+  const buttonStyles = useMemo(() => ({
+    button: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      padding: '12px 20px',
+      backgroundColor: hovered ? theme.bgHover : theme.bgSecondary,
+      color: theme.text,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 8,
+      cursor: 'pointer',
+      fontSize: 13,
+      transition: 'background-color 0.15s ease',
+      minWidth: 110,
+    } as React.CSSProperties,
+    shortcutLabel: {
+      fontSize: 11,
+      color: theme.textMuted,
+    } as React.CSSProperties,
+  }), [hovered, theme]);
 
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 6,
-        padding: '12px 20px',
-        backgroundColor: hovered ? theme.bgHover : theme.bgSecondary,
-        color: theme.text,
-        border: `1px solid ${theme.border}`,
-        borderRadius: 8,
-        cursor: 'pointer',
-        fontSize: 13,
-        transition: 'background-color 0.15s ease',
-        minWidth: 110,
-      }}
+      style={buttonStyles.button}
     >
       <span>{label}</span>
       {shortcut && (
-        <span style={{ fontSize: 11, color: theme.textMuted }}>{shortcut}</span>
+        <span style={buttonStyles.shortcutLabel}>{shortcut}</span>
       )}
     </button>
   );
+}
+
+function useStyles(theme: ThemeColors) {
+  return useMemo(() => ({
+    container: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: theme.editorBg,
+      gap: 24,
+    } as React.CSSProperties,
+    headerWrapper: {
+      textAlign: 'center' as const,
+    } as React.CSSProperties,
+    logo: {
+      fontSize: 64,
+      fontWeight: 200,
+      color: theme.textMuted,
+      letterSpacing: -2,
+      marginBottom: 8,
+    } as React.CSSProperties,
+    title: {
+      fontSize: 28,
+      fontWeight: 300,
+      color: theme.textSecondary,
+      marginBottom: 4,
+    } as React.CSSProperties,
+    subtitle: {
+      color: theme.textMuted,
+      fontSize: 14,
+    } as React.CSSProperties,
+    quickActionsSection: {
+      display: 'flex',
+      gap: 12,
+      marginTop: 8,
+    } as React.CSSProperties,
+    shortcutsContainer: {
+      marginTop: 24,
+      padding: 24,
+      backgroundColor: theme.bgSecondary,
+      borderRadius: 12,
+      border: `1px solid ${theme.border}`,
+      width: 400,
+    } as React.CSSProperties,
+    shortcutsTitle: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: theme.textSecondary,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      marginBottom: 12,
+    } as React.CSSProperties,
+    shortcutsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'auto 1fr',
+      gap: '8px 16px',
+      fontSize: 13,
+    } as React.CSSProperties,
+    shortcutKey: {
+      backgroundColor: theme.bgTertiary,
+      color: theme.textSecondary,
+      padding: '2px 8px',
+      borderRadius: 4,
+      fontSize: 12,
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      border: `1px solid ${theme.border}`,
+      textAlign: 'center' as const,
+      minWidth: 60,
+    } as React.CSSProperties,
+    shortcutDesc: {
+      color: theme.textSecondary,
+    } as React.CSSProperties,
+    recentFilesWrapper: {
+      marginTop: 8,
+    } as React.CSSProperties,
+    recentFilesTitle: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: theme.textSecondary,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      marginBottom: 8,
+    } as React.CSSProperties,
+    recentFileItem: {
+      padding: '6px 12px',
+      cursor: 'pointer',
+      color: theme.accent,
+      fontSize: 13,
+      borderRadius: 4,
+      '--hover-bg': theme.bgHover,
+    } as React.CSSProperties,
+    recentFilePath: {
+      color: theme.textMuted,
+      fontSize: 11,
+      marginLeft: 8,
+    } as React.CSSProperties,
+  }), [theme]);
 }
 
 async function openFileWeb(): Promise<{ name: string; content: string } | null> {
