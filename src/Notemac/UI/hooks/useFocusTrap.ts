@@ -19,7 +19,9 @@ export function useFocusTrap(
         if (!isOpen || !containerRef.current) return;
 
         // Save the previously focused element to restore on close
-        previousFocusRef.current = document.activeElement as HTMLElement;
+        previousFocusRef.current = document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
 
         const container = containerRef.current;
         const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
