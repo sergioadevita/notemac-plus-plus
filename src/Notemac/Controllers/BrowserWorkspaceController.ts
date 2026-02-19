@@ -42,7 +42,7 @@ export function OpenBrowserWorkspace(workspaceId: string): boolean
     store.SetIsBrowserWorkspace(true);
 
     // Initialize the LightningFS for this workspace
-    const _fs = CreateLightningFsAdapter(workspace.id);
+    CreateLightningFsAdapter(workspace.id);
 
     // Set workspace path to the workspace name
     store.setWorkspacePath(workspace.name);
