@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
 import { TAB_COLORS, type TabColor } from '../types';
