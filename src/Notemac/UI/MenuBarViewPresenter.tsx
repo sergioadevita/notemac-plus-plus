@@ -24,7 +24,8 @@ interface MenuItem {
 export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [focusedMenuItem, setFocusedMenuItem] = useState<string | null>(null);
+  const [focusedSubmenuIndex, setFocusedSubmenuIndex] = useState(-1);
   const menuRef = useRef<HTMLDivElement>(null);
   const { settings, isRecordingMacro } = useNotemacStore();
 
@@ -37,12 +38,73 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenu(null);
-        setOpenSubmenu(null);
+        setFocusedMenuItem(null);
+        setFocusedSubmenuIndex(-1);
       }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  const handleMenuBarKeyDown = (e: React.KeyboardEvent, menuNames: string[]) => {
+    const currentMenuIndex = focusedMenuItem ? menuNames.indexOf(focusedMenuItem) : -1;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        e.preventDefault();
+        const step = e.key === 'ArrowRight' ? 1 : -1;
+        const nextIndex = currentMenuIndex === -1 ? 0 : (currentMenuIndex + step + menuNames.length) % menuNames.length;
+        const nextMenu = menuNames[nextIndex];
+        setFocusedMenuItem(nextMenu);
+        setOpenMenu(nextMenu);
+        setFocusedSubmenuIndex(-1);
+        break;
+
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!openMenu && focusedMenuItem) {
+          setOpenMenu(focusedMenuItem);
+          setFocusedSubmenuIndex(0);
+        } else if (openMenu) {
+          setFocusedSubmenuIndex(focusedSubmenuIndex + 1);
+        }
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        if (openMenu && focusedSubmenuIndex > 0) {
+          setFocusedSubmenuIndex(focusedSubmenuIndex - 1);
+        }
+        break;
+
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (openMenu && focusedSubmenuIndex >= 0) {
+          const items = menus[openMenu as keyof typeof menus];
+          const nonSeparatorItems = items.filter(item => item.type !== 'separator' && !item.label.startsWith('\u2500'));
+          if (focusedSubmenuIndex < nonSeparatorItems.length) {
+            const item = nonSeparatorItems[focusedSubmenuIndex];
+            handleItemClick(item);
+          }
+        } else if (focusedMenuItem) {
+          setOpenMenu(focusedMenuItem);
+          setFocusedSubmenuIndex(0);
+        }
+        break;
+
+      case 'Escape':
+        e.preventDefault();
+        setOpenMenu(null);
+        setFocusedMenuItem(null);
+        setFocusedSubmenuIndex(-1);
+        break;
+
+      default:
+        break;
+    }
+  };
 
   // Build encoding submenu items
   const encodingItems: MenuItem[] = [];
@@ -328,12 +390,13 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       onAction(item.action, item.value);
     }
     setOpenMenu(null);
-    setOpenSubmenu(null);
   };
 
   return (
     <div
       ref={menuRef}
+      role="menubar"
+      onKeyDown={(e) => handleMenuBarKeyDown(e, Object.keys(menus))}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -342,7 +405,9 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
         borderBottom: `1px solid ${theme.border}`,
         paddingLeft: isElectron ? 8 : 8,
         flexShrink: 0,
+        outline: 'none',
       } as React.CSSProperties}
+      tabIndex={0}
     >
       {/* App icon/name */}
       <span style={{
@@ -360,22 +425,36 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
           style={{ position: 'relative' }}
         >
           <div
+            role="menuitem"
+            aria-haspopup="true"
+            aria-expanded={openMenu === menuName}
+            tabIndex={focusedMenuItem === menuName ? 0 : -1}
             style={{
               padding: '4px 10px',
               cursor: 'pointer',
               borderRadius: 4,
               fontSize: 13,
-              backgroundColor: openMenu === menuName ? theme.bgHover : 'transparent',
+              backgroundColor: openMenu === menuName ? theme.bgHover : focusedMenuItem === menuName ? theme.bgHover : 'transparent',
               color: openMenu === menuName ? theme.text : theme.menuText,
+              outline: focusedMenuItem === menuName ? `1px solid ${theme.accent}` : 'none',
+              outlineOffset: '-1px',
             }}
-            onClick={() => setOpenMenu(openMenu === menuName ? null : menuName)}
-            onMouseEnter={() => openMenu && setOpenMenu(menuName)}
+            onClick={() => {
+              setFocusedMenuItem(menuName);
+              setOpenMenu(openMenu === menuName ? null : menuName);
+              setFocusedSubmenuIndex(-1);
+            }}
+            onMouseEnter={() => {
+              setFocusedMenuItem(menuName);
+              if (openMenu) setOpenMenu(menuName);
+            }}
+            onMouseLeave={() => setFocusedMenuItem(null)}
           >
             {menuName}
           </div>
 
           {openMenu === menuName && (
-            <div style={{
+            <div role="menu" style={{
               position: 'absolute',
               top: '100%',
               left: 0,
@@ -393,7 +472,7 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
                 if (item.type === 'separator') {
                   if (item.label && item.label.startsWith('\u2500')) {
                     return (
-                      <div key={i} style={{
+                      <div key={`sep-header-${i}`} style={{
                         padding: '4px 16px',
                         fontSize: 11,
                         fontWeight: 700,
@@ -406,12 +485,19 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
                       </div>
                     );
                   }
-                  return <div key={i} style={{ height: 1, backgroundColor: theme.border, margin: '4px 0' }} />;
+                  return <div key={`sep-divider-${i}`} style={{ height: 1, backgroundColor: theme.border, margin: '4px 0' }} />;
                 }
+
+                const nonSeparatorItems = items.filter(it => it.type !== 'separator' && !it.label.startsWith('\u2500'));
+                const itemIndex = nonSeparatorItems.findIndex(it => it.label === item.label);
                 const itemKey = `${menuName}-${item.label}-${i}`;
+                const isFocused = focusedSubmenuIndex === itemIndex;
+
                 return (
                   <div
-                    key={i}
+                    key={`${menuName}-${item.action || item.label}-${i}`}
+                    role="menuitem"
+                    tabIndex={isFocused ? 0 : -1}
                     style={{
                       padding: '5px 16px',
                       cursor: 'pointer',
@@ -420,11 +506,16 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
                       justifyContent: 'space-between',
                       gap: 24,
                       fontSize: 13,
-                      backgroundColor: hoveredItem === itemKey ? theme.bgHover : 'transparent',
+                      backgroundColor: isFocused ? theme.bgHover : hoveredItem === itemKey ? theme.bgHover : 'transparent',
                       color: theme.menuText,
+                      outline: isFocused ? `1px solid ${theme.accent}` : 'none',
+                      outlineOffset: '-1px',
                     }}
                     onClick={() => handleItemClick(item)}
-                    onMouseEnter={() => setHoveredItem(itemKey)}
+                    onMouseEnter={() => {
+                      setHoveredItem(itemKey);
+                      setFocusedSubmenuIndex(itemIndex);
+                    }}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
                     <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
