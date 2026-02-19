@@ -16,8 +16,6 @@ export function FindReplace({ theme }: FindReplaceProps) {
   } = useEditorStore();
 
   const findInputRef = useRef<HTMLInputElement>(null);
-  const [matchCount, setMatchCount] = useState(0);
-  const [currentMatch, setCurrentMatch] = useState(0);
   const [markStyle, setMarkStyle] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   useEffect(() => {
