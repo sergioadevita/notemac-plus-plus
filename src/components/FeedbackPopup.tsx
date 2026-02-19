@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ThemeColors } from '../utils/themes';
 
 interface FeedbackPopupProps
@@ -8,7 +8,7 @@ interface FeedbackPopupProps
 
 const FEEDBACK_TIMER_MS = 20 * 60 * 1000;
 const FEEDBACK_STORAGE_KEY = 'notemac_feedback_shown_version';
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.4.0';
 
 export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {
@@ -163,7 +163,6 @@ export function FeedbackPopup({ theme }: FeedbackPopupProps)
                 }}>
                     {actions.map((action) =>
                     {
-                        let maxCount = actions.length;
                         let isHovered = hoveredButton === action.id;
                         return (
                             <a
