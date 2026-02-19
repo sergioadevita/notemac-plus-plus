@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useEditorStore } from '../store/editorStore';
@@ -16,7 +16,7 @@ interface EditorPanelProps {
 export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
-  const { updateTabContent, updateTab, showFindReplace } = useEditorStore();
+  const { updateTabContent, updateTab } = useEditorStore();
   const [monacoReady, setMonacoReady] = useState(false);
 
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
@@ -354,7 +354,7 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     };
 
     // Subscribe to menu actions via store
-    const unsubscribe = useEditorStore.subscribe((state, prevState) => {
+    const unsubscribe = useEditorStore.subscribe((_state, _prevState) => {
       // This is a simplified approach - in practice you'd use an event emitter
     });
 
