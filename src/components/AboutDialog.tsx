@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
 
@@ -28,7 +27,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           Notemac++
         </h2>
         <div style={{ color: theme.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Version 2.3.0
+          Version 2.4.0
         </div>
 
         <div style={{
