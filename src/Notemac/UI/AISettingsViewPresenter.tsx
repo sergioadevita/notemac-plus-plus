@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { GetBuiltInProviders, CreateCustomProvider, CreateCustomModel } from "../Configs/AIConfig";
+import { CreateCustomProvider, CreateCustomModel } from "../Configs/AIConfig";
 import { generateId } from "../../Shared/Helpers/IdHelpers";
 import { TestProviderConnection } from "../Controllers/LLMController";
 import { CRED_DEFAULT_AI_EXPIRY_HOURS } from "../Commons/Constants";
@@ -19,13 +19,11 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
         activeProviderId,
         activeModelId,
         aiSettings,
-        inlineSuggestionEnabled,
         SetActiveProvider,
         SetActiveModel,
         SetCredentialForProvider,
         RemoveCredentialForProvider,
         UpdateAISettings,
-        SetInlineSuggestionEnabled,
         AddProvider,
         RemoveProvider,
         SetShowAiSettings,
