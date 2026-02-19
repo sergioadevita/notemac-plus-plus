@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
-import { countWords, countLines, formatFileSize } from '../utils/helpers';
+import { countWords, formatFileSize } from '../utils/helpers';
 
 interface SummaryDialogProps {
   theme: ThemeColors;
