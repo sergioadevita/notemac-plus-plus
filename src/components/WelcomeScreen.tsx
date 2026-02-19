@@ -8,7 +8,7 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ theme }: WelcomeScreenProps) {
-  const { addTab, recentFiles, setActiveTab } = useEditorStore();
+  const { addTab, recentFiles } = useEditorStore();
 
   const isMac = navigator.platform.includes('Mac');
   const mod = isMac ? '\u2318' : 'Ctrl';
@@ -86,7 +86,7 @@ export function WelcomeScreen({ theme }: WelcomeScreenProps) {
           onClick={async () => {
             if ('showDirectoryPicker' in window) {
               try {
-                const dirHandle = await window.showDirectoryPicker!();
+                await window.showDirectoryPicker!();
                 // This would be handled by the sidebar
                 useEditorStore.getState().setSidebarPanel('explorer');
               } catch { /* cancelled */ }
