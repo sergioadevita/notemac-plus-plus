@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { useFocusTrap } from './hooks/useFocusTrap';
