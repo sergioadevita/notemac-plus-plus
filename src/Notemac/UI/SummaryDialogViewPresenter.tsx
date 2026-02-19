@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { countWords, countLines, formatFileSize } from '../../Shared/Helpers/TextHelpers';
+import { countWords, formatFileSize } from '../../Shared/Helpers/TextHelpers';
 import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface SummaryDialogProps {
@@ -75,9 +75,9 @@ export function SummaryDialog({ theme }: SummaryDialogProps) {
           fontSize: 13,
         }}>
           {stats.map(([label, value], i) => {
-            if (!label) return <React.Fragment key={i}><div style={{ height: 8 }} /><div /></React.Fragment>;
+            if (!label) return <React.Fragment key={`separator-${i}`}><div style={{ height: 8 }} /><div /></React.Fragment>;
             return (
-              <React.Fragment key={i}>
+              <React.Fragment key={`stat-${label}-${value}`}>
                 <span style={{ color: theme.textMuted, fontWeight: 500 }}>{label}:</span>
                 <span style={{ color: theme.text, fontFamily: 'monospace' }}>{value}</span>
               </React.Fragment>
