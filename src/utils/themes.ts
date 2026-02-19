@@ -1,5 +1,3 @@
-import type { AppSettings } from '../types';
-
 export interface ThemeColors {
   bg: string;
   bgSecondary: string;
