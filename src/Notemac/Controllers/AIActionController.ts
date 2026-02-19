@@ -1,7 +1,7 @@
 import { useNotemacStore } from "../Model/Store";
 import { SendChatCompletion, BuildContextString, ExtractCodeBlocks } from "./LLMController";
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
-import type { AIMessage, AIConversation, AIContextItem } from "../Commons/Types";
+import type { AIMessage, AIConversation } from "../Commons/Types";
 import { generateId } from '../../Shared/Helpers/IdHelpers';
 import { AI_COMMIT_MESSAGE_MAX_TOKENS, AI_COMMIT_MESSAGE_TEMPERATURE, AI_COMMIT_SUMMARY_MAX_CHARS } from "../Commons/Constants";
 
@@ -120,7 +120,6 @@ export async function SendChatMessage(userContent: string): Promise<void>
             (finalText) =>
             {
                 // Update with final parsed code blocks
-                const updatedMsg = CreateAssistantMessage(finalText);
                 store.UpdateLastMessage(conversationId!, finalText);
                 Dispatch(NOTEMAC_EVENTS.AI_RESPONSE_COMPLETE, { conversationId, text: finalText });
             },
