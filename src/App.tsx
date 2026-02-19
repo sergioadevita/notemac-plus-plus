@@ -65,7 +65,6 @@ export default function App() {
     setSplitView,
     startRecordingMacro,
     stopRecordingMacro,
-    isRecordingMacro,
     addRecentFile,
     restoreLastClosedTab,
     closeTabsToLeft,
