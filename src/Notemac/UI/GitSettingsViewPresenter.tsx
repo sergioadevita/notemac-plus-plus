@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { SaveCredentialsWithToken, ClearCredentials, TestAuthentication, StartGitHubOAuth, PollGitHubOAuthToken } from "../Controllers/AuthController";
