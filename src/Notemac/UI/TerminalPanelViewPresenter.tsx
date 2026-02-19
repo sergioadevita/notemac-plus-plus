@@ -325,7 +325,7 @@ export function TerminalPanelViewPresenter({ theme }: TerminalPanelProps)
                     }}
                 >
                     {lines.map((line, i) => (
-                        <div key={i} style={{ color: getLineColor(line.type), lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                        <div key={`line-${i}-${line.text.substring(0, 20)}`} style={{ color: getLineColor(line.type), lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                             {line.text}
                         </div>
                     ))}
