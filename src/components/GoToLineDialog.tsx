@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
 
