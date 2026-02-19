@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import './hover-utilities.css';
@@ -51,22 +51,24 @@ export function StatusBar({ theme }: StatusBarProps) {
 
   const StatusItem = React.memo(({ children, onClick, title }: { children: React.ReactNode; onClick?: () => void; title?: string }) => {
     const [hovered, setHovered] = useState(false);
+    const itemStyle = useMemo(() => ({
+      padding: '0 8px',
+      cursor: null !== onClick ? 'pointer' : 'default',
+      backgroundColor: hovered && null !== onClick ? 'rgba(255,255,255,0.1)' : 'transparent',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      borderRadius: 2,
+      position: 'relative',
+    } as React.CSSProperties), [onClick, hovered]);
+
     return (
       <div
         title={title}
         onClick={onClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        style={{
-          padding: '0 8px',
-          cursor: null !== onClick ? 'pointer' : 'default',
-          backgroundColor: hovered && null !== onClick ? 'rgba(255,255,255,0.1)' : 'transparent',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          borderRadius: 2,
-          position: 'relative',
-        }}
+        style={itemStyle}
       >
         {children}
       </div>
@@ -74,74 +76,74 @@ export function StatusBar({ theme }: StatusBarProps) {
   });
   StatusItem.displayName = 'StatusItem';
 
-  const Picker = React.memo(({ items, onSelect, onClose }: { items: { value: string; label: string }[]; onSelect: (value: string) => void; onClose: () => void }) => (
-    <>
-      <div
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: UI_ZINDEX_OVERLAY }}
-        onClick={onClose}
-      />
-      <div style={{
+  const Picker = React.memo(({ items, onSelect, onClose }: { items: { value: string; label: string }[]; onSelect: (value: string) => void; onClose: () => void }) => {
+    const pickerStyles = useMemo(() => ({
+      overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: UI_ZINDEX_OVERLAY } as React.CSSProperties,
+      dropdown: {
         position: 'absolute',
         bottom: '100%',
         left: 0,
         minWidth: 180,
         maxHeight: UI_STATUS_PICKER_MAX_HEIGHT,
-        overflowY: 'auto',
+        overflowY: 'auto' as const,
         backgroundColor: theme.menuBg,
         border: `1px solid ${theme.border}`,
         borderRadius: 6,
         padding: '4px 0',
         zIndex: UI_ZINDEX_DROPDOWN,
         boxShadow: '0 -4px 16px rgba(0,0,0,0.3)',
-      }}>
-        {items.map(item => (
-          <div
-            key={item.value}
-            onClick={() => { onSelect(item.value); onClose(); }}
-            className="hover-bg hover-bg-reset"
-            style={{
-              padding: '6px 16px',
-              cursor: 'pointer',
-              fontSize: 13,
-              color: theme.menuText,
-              '--hover-bg': theme.bgHover,
-            } as React.CSSProperties}
-          >
-            {item.label}
-          </div>
-        ))}
-      </div>
-    </>
-  ));
+      } as React.CSSProperties,
+      item: {
+        padding: '6px 16px',
+        cursor: 'pointer',
+        fontSize: 13,
+        color: theme.menuText,
+        '--hover-bg': theme.bgHover,
+      } as React.CSSProperties,
+    }), [theme]);
+
+    return (
+      <>
+        <div
+          style={pickerStyles.overlay}
+          onClick={onClose}
+        />
+        <div style={pickerStyles.dropdown}>
+          {items.map(item => (
+            <div
+              key={item.value}
+              onClick={() => { onSelect(item.value); onClose(); }}
+              className="hover-bg hover-bg-reset"
+              style={pickerStyles.item}
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  });
   Picker.displayName = 'Picker';
 
+  const mainStyles = useStyles(theme);
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      height: 24,
-      backgroundColor: theme.statusBarBg,
-      color: theme.statusBarText,
-      fontSize: 12,
-      flexShrink: 0,
-      padding: '0 4px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+    <div style={mainStyles.container}>
+      <div style={mainStyles.sectionLeft}>
         {true === isRepoInitialized && (
           <StatusItem title={`Branch: ${currentBranch}${null !== gitStatus && undefined !== gitStatus.aheadBy ? ` ↑${gitStatus.aheadBy}` : ''}${null !== gitStatus && undefined !== gitStatus.behindBy ? ` ↓${gitStatus.behindBy}` : ''}`} onClick={() => setSidebarPanel('git')}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontSize: 11 }}>{'\ud83d\udd00'}</span>
+            <span style={mainStyles.branchContainer}>
+              <span style={mainStyles.branchIcon}>{'\ud83d\udd00'}</span>
               {currentBranch}
-              {null !== gitStatus && 0 < gitStatus.aheadBy && <span style={{ fontSize: 10 }}>{'\u2191'}{gitStatus.aheadBy}</span>}
-              {null !== gitStatus && 0 < gitStatus.behindBy && <span style={{ fontSize: 10 }}>{'\u2193'}{gitStatus.behindBy}</span>}
-              {null !== gitStatus && true === gitStatus.isRepoDirty && <span style={{ fontSize: 10, color: '#f9e2af' }}>{'\u2022'}</span>}
+              {null !== gitStatus && 0 < gitStatus.aheadBy && <span style={mainStyles.gitAhead}>{'\u2191'}{gitStatus.aheadBy}</span>}
+              {null !== gitStatus && 0 < gitStatus.behindBy && <span style={mainStyles.gitBehind}>{'\u2193'}{gitStatus.behindBy}</span>}
+              {null !== gitStatus && true === gitStatus.isRepoDirty && <span style={mainStyles.gitDirty}>{'\u2022'}</span>}
             </span>
           </StatusItem>
         )}
         {true === isRecordingMacro && (
           <StatusItem>
-            <span className="recording-indicator" style={{ color: '#ff4444' }}>
+            <span className="recording-indicator" style={mainStyles.recordingIndicator}>
               {'\u23fa'} Recording
             </span>
           </StatusItem>
@@ -160,7 +162,7 @@ export function StatusBar({ theme }: StatusBarProps) {
         </StatusItem>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+      <div style={mainStyles.sectionRight}>
         <StatusItem title="Tab Size" onClick={() => {
           const newSize = settings.tabSize === 4 ? 2 : 4;
           updateSettings({ tabSize: newSize });
@@ -206,10 +208,10 @@ export function StatusBar({ theme }: StatusBarProps) {
             title={`AI: ${activeModelId}${true === inlineSuggestionEnabled ? ' (Inline On)' : ''}`}
             onClick={() => SetShowAiSettings(true)}
           >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={mainStyles.aiContainer}>
               {true === isAiStreaming
-                ? <span style={{ color: '#a6e3a1', animation: 'pulse 1s infinite' }}>{'\u2728'} Generating...</span>
-                : <span style={{ color: theme.statusBarText, opacity: 0.8 }}>{'\u2728'} {activeModelId || 'No Model'}</span>
+                ? <span style={mainStyles.aiGenerating}>{'\u2728'} Generating...</span>
+                : <span style={mainStyles.aiIdle}>{'\u2728'} {activeModelId || 'No Model'}</span>
               }
             </span>
           </StatusItem>
@@ -223,4 +225,64 @@ export function StatusBar({ theme }: StatusBarProps) {
       </div>
     </div>
   );
+}
+
+function useStyles(theme: ThemeColors) {
+  return useMemo(() => ({
+    container: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: 24,
+      backgroundColor: theme.statusBarBg,
+      color: theme.statusBarText,
+      fontSize: 12,
+      flexShrink: 0,
+      padding: '0 4px',
+    } as React.CSSProperties,
+    sectionLeft: {
+      display: 'flex',
+      alignItems: 'center',
+      height: '100%',
+    } as React.CSSProperties,
+    sectionRight: {
+      display: 'flex',
+      alignItems: 'center',
+      height: '100%',
+    } as React.CSSProperties,
+    branchContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 4,
+    } as React.CSSProperties,
+    branchIcon: {
+      fontSize: 11,
+    } as React.CSSProperties,
+    gitAhead: {
+      fontSize: 10,
+    } as React.CSSProperties,
+    gitBehind: {
+      fontSize: 10,
+    } as React.CSSProperties,
+    gitDirty: {
+      fontSize: 10,
+      color: '#f9e2af',
+    } as React.CSSProperties,
+    recordingIndicator: {
+      color: '#ff4444',
+    } as React.CSSProperties,
+    aiContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 4,
+    } as React.CSSProperties,
+    aiGenerating: {
+      color: '#a6e3a1',
+      animation: 'pulse 1s infinite',
+    } as React.CSSProperties,
+    aiIdle: {
+      color: theme.statusBarText,
+      opacity: 0.8,
+    } as React.CSSProperties,
+  }), [theme]);
 }
