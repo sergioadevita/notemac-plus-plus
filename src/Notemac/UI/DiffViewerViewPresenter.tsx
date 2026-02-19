@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
@@ -8,6 +8,124 @@ import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 interface DiffViewerProps
 {
     theme: ThemeColors;
+}
+
+function useStyles(theme: ThemeColors)
+{
+    return useMemo(() => ({
+        overlay: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: UI_ZINDEX_MODAL,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+        } as React.CSSProperties,
+        modal: {
+            width: '90vw',
+            height: '85vh',
+            backgroundColor: theme.bgSecondary,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 8,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+        } as React.CSSProperties,
+        header: {
+            padding: '12px 16px',
+            borderBottom: `1px solid ${theme.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+        } as React.CSSProperties,
+        headerTitle: {
+            fontSize: 14,
+            fontWeight: 600,
+            color: theme.text,
+        } as React.CSSProperties,
+        modeToggleContainer: {
+            display: 'flex',
+            gap: 4,
+        } as React.CSSProperties,
+        getModeButton: (isActive: boolean) => ({
+            padding: '3px 10px',
+            fontSize: 11,
+            borderRadius: 4,
+            cursor: 'pointer',
+            backgroundColor: isActive ? theme.accent : theme.bg,
+            color: isActive ? theme.accentText : theme.text,
+            border: `1px solid ${isActive ? theme.accent : theme.border}`,
+            fontWeight: isActive ? 600 : 400,
+        } as React.CSSProperties),
+        filesSelectContainer: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flex: 1,
+        } as React.CSSProperties,
+        selectLabel: {
+            fontSize: 12,
+            color: theme.textSecondary,
+        } as React.CSSProperties,
+        select: {
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: 12,
+            backgroundColor: theme.bg,
+            color: theme.text,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 4,
+        } as React.CSSProperties,
+        vsSeparator: {
+            color: theme.textSecondary,
+        } as React.CSSProperties,
+        gitModeContainer: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flex: 1,
+            fontSize: 12,
+            color: theme.textSecondary,
+        } as React.CSSProperties,
+        gitModeLabel: {
+            color: theme.textMuted,
+        } as React.CSSProperties,
+        gitModeFileName: {
+            color: theme.text,
+            fontWeight: 600,
+        } as React.CSSProperties,
+        gitModeFilePath: {
+            color: theme.textMuted,
+            fontSize: 10,
+        } as React.CSSProperties,
+        sideByCheckboxLabel: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 12,
+            color: theme.textSecondary,
+            cursor: 'pointer',
+        } as React.CSSProperties,
+        closeButton: {
+            padding: '4px 12px',
+            fontSize: 12,
+            backgroundColor: theme.bg,
+            color: theme.text,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 4,
+            cursor: 'pointer',
+        } as React.CSSProperties,
+        editorContainer: {
+            flex: 1,
+            overflow: 'hidden',
+        } as React.CSSProperties,
+    }), [theme]);
 }
 
 export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
@@ -51,61 +169,29 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
         setShowDiffViewer(false);
     }, [setShowDiffViewer]);
 
+    const styles = useStyles(theme);
+
     return (
         <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                zIndex: UI_ZINDEX_MODAL,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}
+            style={styles.overlay}
             onClick={handleClose}
         >
             <div
-                style={{
-                    width: '90vw',
-                    height: '85vh',
-                    backgroundColor: theme.bgSecondary,
-                    border: `1px solid ${theme.border}`,
-                    borderRadius: 8,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                }}
+                style={styles.modal}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with file selectors */}
-                <div style={{
-                    padding: '12px 16px',
-                    borderBottom: `1px solid ${theme.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    flexWrap: 'wrap',
-                }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>Compare Files</span>
+                <div style={styles.header}>
+                    <span style={styles.headerTitle}>Compare Files</span>
 
                     {/* Mode toggle */}
                     {isRepoInitialized && (
-                        <div style={{ display: 'flex', gap: 4 }}>
+                        <div style={styles.modeToggleContainer}>
                             {(['files', 'git'] as const).map(m => (
                                 <button
                                     key={m}
                                     onClick={() => setMode(m)}
-                                    style={{
-                                        padding: '3px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer',
-                                        backgroundColor: mode === m ? theme.accent : theme.bg,
-                                        color: mode === m ? theme.accentText : theme.text,
-                                        border: `1px solid ${mode === m ? theme.accent : theme.border}`,
-                                        fontWeight: mode === m ? 600 : 400,
-                                    }}
+                                    style={styles.getModeButton(mode === m)}
                                 >
                                     {'files' === m ? 'Files' : 'Git HEAD'}
                                 </button>
@@ -114,41 +200,25 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
                     )}
 
                     {'files' === mode ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                            <label style={{ fontSize: 12, color: theme.textSecondary }}>Original:</label>
+                        <div style={styles.filesSelectContainer}>
+                            <label style={styles.selectLabel}>Original:</label>
                             <select
                                 value={originalTabId}
                                 onChange={(e) => setOriginalTabId(e.target.value)}
-                                style={{
-                                    flex: 1,
-                                    padding: '4px 8px',
-                                    fontSize: 12,
-                                    backgroundColor: theme.bg,
-                                    color: theme.text,
-                                    border: `1px solid ${theme.border}`,
-                                    borderRadius: 4,
-                                }}
+                                style={styles.select}
                             >
                                 {tabs.map(tab => (
                                     <option key={tab.id} value={tab.id}>{tab.name}</option>
                                 ))}
                             </select>
 
-                            <span style={{ color: theme.textSecondary }}>vs</span>
+                            <span style={styles.vsSeparator}>vs</span>
 
-                            <label style={{ fontSize: 12, color: theme.textSecondary }}>Modified:</label>
+                            <label style={styles.selectLabel}>Modified:</label>
                             <select
                                 value={modifiedTabId}
                                 onChange={(e) => setModifiedTabId(e.target.value)}
-                                style={{
-                                    flex: 1,
-                                    padding: '4px 8px',
-                                    fontSize: 12,
-                                    backgroundColor: theme.bg,
-                                    color: theme.text,
-                                    border: `1px solid ${theme.border}`,
-                                    borderRadius: 4,
-                                }}
+                                style={styles.select}
                             >
                                 {tabs.map(tab => (
                                     <option key={tab.id} value={tab.id}>{tab.name}</option>
@@ -156,15 +226,15 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
                             </select>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, fontSize: 12, color: theme.textSecondary }}>
+                        <div style={styles.gitModeContainer}>
                             <span>HEAD</span>
-                            <span style={{ color: theme.textMuted }}>vs</span>
-                            <span style={{ color: theme.text, fontWeight: 600 }}>{activeTab?.name || 'No file'}</span>
-                            {gitFilePath && <span style={{ color: theme.textMuted, fontSize: 10 }}>({gitFilePath})</span>}
+                            <span style={styles.gitModeLabel}>vs</span>
+                            <span style={styles.gitModeFileName}>{activeTab?.name || 'No file'}</span>
+                            {gitFilePath && <span style={styles.gitModeFilePath}>({gitFilePath})</span>}
                         </div>
                     )}
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: theme.textSecondary, cursor: 'pointer' }}>
+                    <label style={styles.sideByCheckboxLabel}>
                         <input
                             type="checkbox"
                             checked={renderSideBySide}
@@ -175,22 +245,14 @@ export function DiffViewerViewPresenter({ theme }: DiffViewerProps)
 
                     <button
                         onClick={handleClose}
-                        style={{
-                            padding: '4px 12px',
-                            fontSize: 12,
-                            backgroundColor: theme.bg,
-                            color: theme.text,
-                            border: `1px solid ${theme.border}`,
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                        }}
+                        style={styles.closeButton}
                     >
                         Close
                     </button>
                 </div>
 
                 {/* Diff Editor */}
-                <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={styles.editorContainer}>
                     <DiffEditor
                         original={originalContent}
                         modified={modifiedContent}
