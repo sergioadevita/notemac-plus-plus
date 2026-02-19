@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026
+
+### Architecture
+- **GitController split**: 908-line monolith split into 7 focused modules (`Git/GitInitController.ts`, `GitStatusController.ts`, `GitCommitController.ts`, `GitBranchController.ts`, `GitRemoteController.ts`, `GitLogController.ts`, `GitAutoFetchController.ts`) with backward-compatible re-exports
+- **EditorPanelVP split**: 1048-line component split into 4 custom hooks (`useEditorActions`, `useEditorSetup`, `useEditorEvents`, `useMacroPlayback`)
+
+### Performance
+- **Inline style extraction**: Created `useStyles(theme)` memoized hooks in 11 ViewPresenter files, eliminating hundreds of style object re-creations per render
+- **React key anti-patterns**: Replaced 25+ array-index keys (`key={i}`) with stable unique identifiers across all list renderings
+
+### TypeScript Strictness
+- Enabled `noUnusedLocals: true` and `noUnusedParameters: true` in tsconfig.json
+- Fixed 83 unused variable/import/parameter errors across 30+ files
+- Converted unused imports to `import type`, prefixed unused params with `_`
+
+### Accessibility
+- **Keyboard navigation**: Arrow key navigation for file tree (Up/Down/Left/Right to navigate and expand/collapse), Enter to open files
+- **Menu keyboard support**: Alt+key shortcuts for menu bar, arrow keys within menus
+
+### Testing
+- **5 new UI test suites** (83 new tests): ToolbarVP, StatusBarVP, WelcomeScreenVP, ErrorBoundary, useFocusTrap hook
+- Total: 546 tests across 27 test suites (up from 463/22)
+
+### Fixed
+- **useFocusTrap**: Unsafe `document.activeElement as HTMLElement` replaced with `instanceof` check
+
 ## [2.3.0] - 2026
 
 ### Zero `any` Milestone
