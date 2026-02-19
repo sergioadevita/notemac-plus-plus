@@ -219,7 +219,7 @@ export function CreateWebFsAdapter(rootHandle: FileSystemDirectoryHandle): FsAda
 
             try
             {
-                const dir = await resolveDir(filepath);
+                await resolveDir(filepath);
                 return {
                     isFile: () => false,
                     isDirectory: () => true,
