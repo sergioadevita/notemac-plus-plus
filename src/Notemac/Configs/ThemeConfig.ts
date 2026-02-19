@@ -1,5 +1,3 @@
-import { ThemeName } from "../Commons/Enums";
-
 export interface ThemeColors
 {
     bg: string;
