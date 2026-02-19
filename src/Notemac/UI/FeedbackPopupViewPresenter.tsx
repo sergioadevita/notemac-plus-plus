@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { UI_ZINDEX_MODAL } from "../Commons/Constants";
+import { UI_ZINDEX_MODAL, APP_VERSION } from "../Commons/Constants";
 import './hover-utilities.css';
 import { useFocusTrap } from './hooks/useFocusTrap';
 
@@ -11,7 +11,6 @@ interface FeedbackPopupProps
 
 const FEEDBACK_TIMER_MS = 20 * 60 * 1000;
 const FEEDBACK_STORAGE_KEY = 'notemac_feedback_shown_version';
-const APP_VERSION = '2.4.0';
 
 export function FeedbackPopup({ theme }: FeedbackPopupProps)
 {

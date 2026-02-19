@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** Injected by Vite from package.json — single source of truth for app version */
+declare const __APP_VERSION__: string;
+
 interface Window {
   electronAPI?: {
     onMenuAction: (callback: (action: string, value?: boolean | string | number) => void) => void;

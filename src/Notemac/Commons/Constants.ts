@@ -1,5 +1,8 @@
 import { TabColor } from "./Enums";
 
+// App version — injected from package.json via Vite define
+export const APP_VERSION = __APP_VERSION__;
+
 // DB - Persistence keys
 export const DB_SESSION_DATA = "SessionData";
 export const DB_SETTINGS = "Settings";

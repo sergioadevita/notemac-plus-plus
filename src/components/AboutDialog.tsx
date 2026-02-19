@@ -1,5 +1,6 @@
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
+import { APP_VERSION } from '../Notemac/Commons/Constants';
 
 interface AboutDialogProps {
   theme: ThemeColors;
@@ -27,7 +28,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           Notemac++
         </h2>
         <div style={{ color: theme.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Version 2.4.0
+          Version {APP_VERSION}
         </div>
 
         <div style={{

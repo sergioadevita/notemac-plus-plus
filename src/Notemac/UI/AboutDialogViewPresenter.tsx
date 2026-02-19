@@ -3,6 +3,7 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import './hover-utilities.css';
 import { useFocusTrap } from './hooks/useFocusTrap';
+import { APP_VERSION } from '../Commons/Constants';
 
 interface AboutDialogProps {
   theme: ThemeColors;
@@ -162,7 +163,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
           Notemac++
         </h2>
         <div style={styles.version}>
-          Version 2.4.0
+          Version {APP_VERSION}
         </div>
 
         <div style={styles.description}>
