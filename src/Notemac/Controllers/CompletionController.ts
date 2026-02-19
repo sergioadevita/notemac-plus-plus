@@ -148,7 +148,7 @@ export function RegisterCompletionProviders(monaco: MonacoNamespace, editorInsta
  * suggestions from the configured LLM. Debounced to avoid excessive
  * API calls while typing.
  */
-export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, editorInstance: editor.IStandaloneCodeEditor): IDisposable
+export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, _editorInstance: editor.IStandaloneCodeEditor): IDisposable
 {
     const provider = monaco.languages.registerInlineCompletionsProvider('*', {
         provideInlineCompletions: async (model: editor.ITextModel, position: { lineNumber: number; column: number }, _context: languages.InlineCompletionContext, token: { onCancellationRequested: (fn: () => void) => void }) =>
