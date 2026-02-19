@@ -9,10 +9,10 @@ import {
   TIME_SECONDS_PER_WEEK,
 } from "../Commons/Constants";
 import {
-    RefreshGitStatus, StageFile, StageAllFiles, UnstageFile,
+    StageFile, StageAllFiles, UnstageFile,
     DiscardFileChanges, CreateCommit, PushToRemote, PullFromRemote,
-    FetchFromRemote, CheckoutBranch, CreateBranch, DeleteBranch,
-    InitializeRepository, GetFileAtHead, GetStagedDiff,
+    FetchFromRemote, CheckoutBranch, CreateBranch,
+    InitializeRepository, GetStagedDiff,
 } from "../Controllers/GitController";
 import { GenerateCommitMessage } from "../Controllers/AIActionController";
 
@@ -63,7 +63,6 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
     const gitStatus = useNotemacStore(s => s.gitStatus);
     const commitLog = useNotemacStore(s => s.commitLog);
     const isGitOperationInProgress = useNotemacStore(s => s.isGitOperationInProgress);
-    const currentGitOperation = useNotemacStore(s => s.currentGitOperation);
     const gitOperationProgress = useNotemacStore(s => s.gitOperationProgress);
     const gitOperationError = useNotemacStore(s => s.gitOperationError);
     const isBrowserWorkspace = useNotemacStore(s => s.isBrowserWorkspace);
@@ -195,8 +194,6 @@ export function GitPanelViewPresenter({ theme }: GitPanelProps)
     }
 
     const stagedCount = gitStatus?.stagedFiles.length || 0;
-    const unstagedCount = gitStatus?.unstagedFiles.length || 0;
-    const untrackedCount = gitStatus?.untrackedFiles.length || 0;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -610,7 +607,7 @@ function FileSection({ title, sectionKey, files, expanded, onToggle, theme, hove
                             <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
                                 {fileActions.map((a, i) => (
                                     <span
-                                        key={i}
+                                        key={`${file.path}-action-${i}-${a.label}`}
                                         onClick={(e) => { e.stopPropagation(); a.action(); }}
                                         title={a.title}
                                         style={{
