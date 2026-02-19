@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/version-2.4.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-463%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-1600%2B%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -376,7 +376,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 463 unit tests (Vitest)
+└── __tests__/                  # 961 unit tests (Vitest)
 ```
 
 ## Testing
@@ -385,7 +385,11 @@ src/
 npx vitest run
 ```
 
-463 unit tests across 22 test suites covering tab management, search, macros, UI state, file tree, configurations, git operations, AI integration, snippets, security, controllers, and helper utilities.
+961 unit tests across 39 test suites and 640+ Playwright E2E tests across 36 spec files, covering all UI components, panels, dialogs, keyboard shortcuts, and user flows.
+
+```bash
+npx playwright test          # E2E tests
+```
 
 See [docs/TESTING.md](docs/TESTING.md) for details.
 
@@ -460,7 +464,8 @@ See [docs/BUILDING.md](docs/BUILDING.md) for full build documentation.
 | [isomorphic-git](https://isomorphic-git.org/) | Git operations (web & desktop) |
 | [Xterm.js](https://xtermjs.org/) | Integrated terminal emulator |
 | OpenAI / Anthropic / Google AI | Multi-provider AI assistant |
-| [Vitest](https://vitest.dev/) | Testing framework |
+| [Vitest](https://vitest.dev/) | Unit testing framework |
+| [Playwright](https://playwright.dev/) | E2E testing framework |
 
 ## Author
 
