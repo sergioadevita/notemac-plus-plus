@@ -79,6 +79,10 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     };
   }, []);
 
+  // Custom event listeners for find, replace, mark, go-to-line, column-edit
+  // Must be called at top level (React hook)
+  useEditorEvents(editorRef.current, monacoRef.current, tab, updateTab);
+
   // Handle external actions
   useEffect(() => {
     const editor = editorRef.current;
@@ -89,9 +93,6 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
 
     // Register AI context menu actions
     RegisterAIContextMenuActions(editor, monaco, tab);
-
-    // Custom event listeners for find, replace, mark, go-to-line, column-edit
-    useEditorEvents(editor, monaco, tab, updateTab);
 
     return () => {
       unregisterActionHandler();

@@ -20,3 +20,8 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createGitSlice(...a),
     ...createAISlice(...a),
 }));
+
+// Expose store for E2E test inspection
+if (typeof window !== 'undefined') {
+    (window as unknown as Record<string, unknown>).__ZUSTAND_STORE__ = useNotemacStore;
+}

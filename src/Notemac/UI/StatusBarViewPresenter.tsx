@@ -29,6 +29,9 @@ export function StatusBar({ theme }: StatusBarProps) {
   const [showEncodingPicker, setShowEncodingPicker] = useState(false);
   const [showEOLPicker, setShowEOLPicker] = useState(false);
 
+  // useStyles must be called before any early return to satisfy Rules of Hooks
+  const mainStyles = useStyles(theme);
+
   if (undefined === activeTab) return null;
 
   const lineCount = countLines(activeTab.content);
