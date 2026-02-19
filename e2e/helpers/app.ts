@@ -26,6 +26,32 @@ export async function pressShortcut(page: Page, shortcut: string): Promise<void>
 }
 
 /**
+ * Dispatch a keyboard event directly to the app container via JS.
+ * This bypasses browser-level shortcut interception (Ctrl+N, Ctrl+W, etc.)
+ * and tests the app's HandleKeyDown handler directly.
+ * Use this for shortcuts that the browser intercepts before JS can see them.
+ */
+export async function dispatchShortcut(page: Page, shortcut: string): Promise<void> {
+  await page.evaluate((sc) => {
+    const parts = sc.split('+');
+    const key = parts[parts.length - 1];
+    const ctrlKey = parts.some(p => p === 'Cmd' || p === 'Ctrl' || p === 'Control');
+    const shiftKey = parts.some(p => p === 'Shift');
+    const altKey = parts.some(p => p === 'Alt');
+    const target = document.querySelector('.notemac-app') || document.body;
+    target.dispatchEvent(new KeyboardEvent('keydown', {
+      key,
+      ctrlKey,
+      shiftKey,
+      altKey,
+      metaKey: false,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }, shortcut);
+}
+
+/**
  * Press a chord shortcut like 'Cmd+K Cmd+0' (two sequential key combos).
  */
 export async function pressChordShortcut(page: Page, first: string, second: string): Promise<void> {
@@ -165,7 +191,10 @@ export async function closeAllDialogs(page: Page): Promise<void> {
 }
 
 /**
- * Create a new tab via the store (keyboard shortcut Ctrl+N is intercepted by browser).
+ * Create a new tab via the store.
+ * Note: Ctrl+N is intercepted by the browser in many contexts,
+ * so we use the store for reliability. The keyboard path is tested
+ * explicitly in keyboard-shortcuts.spec.ts.
  */
 export async function createNewTab(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -176,7 +205,8 @@ export async function createNewTab(page: Page): Promise<void> {
 }
 
 /**
- * Close the active tab via the store (Ctrl+W is intercepted by browser).
+ * Close the active tab via the store.
+ * Note: Ctrl+W closes the browser tab, so we use the store.
  */
 export async function closeActiveTab(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -278,4 +308,101 @@ export async function openDialog(page: Page, dialogKey: string): Promise<void> {
     }
   }, dialogKey);
   await page.waitForTimeout(300);
+}
+
+/**
+ * Focus the app container before shortcuts.
+ */
+export async function focusApp(page: Page): Promise<void> {
+  await page.click('.notemac-app');
+  await page.waitForTimeout(100);
+}
+
+/**
+ * Git panel helpers
+ */
+export async function openGitPanel(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (store) store.getState().setSidebarPanel('git');
+  });
+  await page.waitForTimeout(300);
+}
+
+/**
+ * AI panel helper
+ */
+export async function openAIPanel(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (store) store.getState().setSidebarPanel('ai');
+  });
+  await page.waitForTimeout(300);
+}
+
+/**
+ * Open diff viewer
+ */
+export async function openDiffViewer(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (store) store.getState().setShowDiffViewer(true);
+  });
+  await page.waitForTimeout(300);
+}
+
+/**
+ * Open snippet manager
+ */
+export async function openSnippetManager(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (store) store.getState().setShowSnippetManager(true);
+  });
+  await page.waitForTimeout(300);
+}
+
+/**
+ * Get the count of pinned tabs.
+ */
+export async function getPinnedTabCount(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (!store) return 0;
+    return store.getState().tabs.filter((t: any) => t.pinned).length;
+  });
+}
+
+/**
+ * Get the color of a tab by index.
+ */
+export async function getTabColor(page: Page, index: number): Promise<string> {
+  return page.evaluate((idx) => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (!store) return 'none';
+    const tab = store.getState().tabs[idx];
+    return tab?.color || 'none';
+  }, index);
+}
+
+/**
+ * Change a setting in the store.
+ */
+export async function changeSetting(page: Page, key: string, value: any): Promise<void> {
+  await page.evaluate(({ k, v }) => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (store) store.getState().updateSettings({ [k]: v });
+  }, { k: key, v: value });
+  await page.waitForTimeout(200);
+}
+
+/**
+ * Get a setting from the store.
+ */
+export async function getSetting(page: Page, key: string): Promise<any> {
+  return page.evaluate((k) => {
+    const store = (window as any).__ZUSTAND_STORE__;
+    if (!store) return null;
+    return store.getState().settings?.[k];
+  }, key);
 }

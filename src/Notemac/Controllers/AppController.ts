@@ -6,6 +6,14 @@ import { useNotemacStore } from "../Model/Store";
  */
 export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoomLevel: number): void
 {
+    // Only intercept shortcuts when the app has focus.
+    // This prevents Notemac shortcuts from overriding browser shortcuts
+    // when the user is interacting with browser chrome (address bar, etc.).
+    const activeEl = document.activeElement;
+    const appContainer = document.querySelector('.notemac-app');
+    const isAppFocused = appContainer?.contains(activeEl) || activeEl === document.body;
+    if (!isAppFocused) return;
+
     const isMod = e.metaKey || e.ctrlKey;
     const store = useNotemacStore.getState();
 

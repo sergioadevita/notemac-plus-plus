@@ -128,8 +128,6 @@ export function StatusBar({ theme }: StatusBarProps) {
   });
   Picker.displayName = 'Picker';
 
-  const mainStyles = useStyles(theme);
-
   return (
     <div style={mainStyles.container}>
       <div style={mainStyles.sectionLeft}>

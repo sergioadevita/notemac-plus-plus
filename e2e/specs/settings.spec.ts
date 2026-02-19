@@ -33,8 +33,13 @@ test.describe('Settings Dialog', () => {
     await pressShortcut(page, 'Cmd+,');
     await page.waitForTimeout(500);
 
-    // Look for theme select or button
-    const themeControl = page.locator('label:has-text("Theme"), select[aria-label*="theme" i], button:has-text("Theme")').first();
+    // Navigate to Appearance section where Theme lives
+    const appearanceTab = page.locator('text=Appearance').first();
+    await appearanceTab.click();
+    await page.waitForTimeout(300);
+
+    // Look for "Color Theme" label
+    const themeControl = page.locator('text=Color Theme').first();
     const count = await themeControl.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -61,7 +66,12 @@ test.describe('Settings Dialog', () => {
     await pressShortcut(page, 'Cmd+,');
     await page.waitForTimeout(500);
 
-    const wordWrapControl = page.locator('label:has-text("Word Wrap"), input[type="checkbox"][aria-label*="wrap" i]').first();
+    // Navigate to Editor section where Word Wrap lives
+    const editorTab = page.locator('text=Editor').first();
+    await editorTab.click();
+    await page.waitForTimeout(300);
+
+    const wordWrapControl = page.locator('text=Word Wrap').first();
     const count = await wordWrapControl.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -70,7 +80,12 @@ test.describe('Settings Dialog', () => {
     await pressShortcut(page, 'Cmd+,');
     await page.waitForTimeout(500);
 
-    const lineNumbersControl = page.locator('label:has-text("Line Numbers"), input[type="checkbox"][aria-label*="line" i]').first();
+    // Navigate to Editor section where Show Line Numbers lives
+    const editorTab = page.locator('text=Editor').first();
+    await editorTab.click();
+    await page.waitForTimeout(300);
+
+    const lineNumbersControl = page.locator('text=Show Line Numbers').first();
     const count = await lineNumbersControl.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -79,7 +94,12 @@ test.describe('Settings Dialog', () => {
     await pressShortcut(page, 'Cmd+,');
     await page.waitForTimeout(500);
 
-    const minimapControl = page.locator('label:has-text("Minimap"), input[type="checkbox"][aria-label*="minimap" i]').first();
+    // Navigate to Editor section where Show Minimap lives
+    const editorTab = page.locator('text=Editor').first();
+    await editorTab.click();
+    await page.waitForTimeout(300);
+
+    const minimapControl = page.locator('text=Show Minimap').first();
     const count = await minimapControl.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -252,4 +272,151 @@ test.describe('Settings Dialog', () => {
 
     await closeAllDialogs(page);
   });
+
+  test('Theme change updates store setting', async ({ page }) => {
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    const initialTheme = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.theme;
+    });
+
+    const newTheme = initialTheme === 'light' ? 'dark' : 'light';
+
+    await page.evaluate((theme) => {
+      const store = window.__ZUSTAND_STORE__;
+      store.getState().updateSettings({ theme });
+    }, newTheme);
+
+    const updatedTheme = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.theme;
+    });
+
+    expect(updatedTheme).toBe(newTheme);
+
+    await closeAllDialogs(page);
+  });
+
+  test('Font size change persists in settings', async ({ page }) => {
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    const initialFontSize = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.fontSize;
+    });
+
+    const newFontSize = (initialFontSize || 14) + 2;
+
+    await page.evaluate((size) => {
+      const store = window.__ZUSTAND_STORE__;
+      store.getState().updateSettings({ fontSize: size });
+    }, newFontSize);
+
+    const updatedFontSize = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.fontSize;
+    });
+
+    expect(updatedFontSize).toBe(newFontSize);
+
+    await closeAllDialogs(page);
+  });
+
+  test('Tab size change persists in settings', async ({ page }) => {
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    const initialTabSize = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.tabSize;
+    });
+
+    const newTabSize = initialTabSize === 2 ? 4 : 2;
+
+    await page.evaluate((size) => {
+      const store = window.__ZUSTAND_STORE__;
+      store.getState().updateSettings({ tabSize: size });
+    }, newTabSize);
+
+    const updatedTabSize = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.tabSize;
+    });
+
+    expect(updatedTabSize).toBe(newTabSize);
+
+    await closeAllDialogs(page);
+  });
+
+  test('Word wrap toggle persists in settings', async ({ page }) => {
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    const initialWordWrap = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.wordWrap;
+    });
+
+    const newWordWrap = !initialWordWrap;
+
+    await page.evaluate((wrap) => {
+      const store = window.__ZUSTAND_STORE__;
+      store.getState().updateSettings({ wordWrap: wrap });
+    }, newWordWrap);
+
+    const updatedWordWrap = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings.wordWrap;
+    });
+
+    expect(updatedWordWrap).toBe(newWordWrap);
+
+    await closeAllDialogs(page);
+  });
+
+  test('Settings persist after closing and reopening dialog', async ({ page }) => {
+    // Open settings
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    // Get current settings
+    const initialSettings = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings;
+    });
+
+    // Update multiple settings
+    await page.evaluate((settings) => {
+      const store = window.__ZUSTAND_STORE__;
+      store.getState().updateSettings({
+        fontSize: (settings.fontSize || 14) + 2,
+        tabSize: settings.tabSize === 2 ? 4 : 2,
+        wordWrap: !settings.wordWrap,
+      });
+    }, initialSettings);
+
+    // Close dialog
+    await closeAllDialogs(page);
+    await page.waitForTimeout(300);
+
+    // Reopen settings
+    await pressShortcut(page, 'Cmd+,');
+    await page.waitForTimeout(500);
+
+    // Verify settings persisted
+    const persistedSettings = await page.evaluate(() => {
+      const store = window.__ZUSTAND_STORE__;
+      return store.getState().settings;
+    });
+
+    expect(persistedSettings.fontSize).toBe((initialSettings.fontSize || 14) + 2);
+    expect(persistedSettings.tabSize).toBe(initialSettings.tabSize === 2 ? 4 : 2);
+    expect(persistedSettings.wordWrap).toBe(!initialSettings.wordWrap);
+
+    await closeAllDialogs(page);
+  });
+
 });
