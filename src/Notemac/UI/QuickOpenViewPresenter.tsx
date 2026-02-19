@@ -145,7 +145,7 @@ export function QuickOpenViewPresenter({ theme }: QuickOpenProps)
         {
             const isHighlighted = result.indices.includes(i);
             return (
-                <span key={i} style={{ fontWeight: isHighlighted ? 700 : 400, color: isHighlighted ? theme.accent : 'inherit' }}>
+                <span key={`char-${i}-${char}`} style={{ fontWeight: isHighlighted ? 700 : 400, color: isHighlighted ? theme.accent : 'inherit' }}>
                     {char}
                 </span>
             );
