@@ -1,10 +1,29 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { MARK_COLORS } from '../Commons/Constants';
 
 interface FindReplaceProps {
   theme: ThemeColors;
+}
+
+function useStyles(theme: ThemeColors) {
+  return useMemo(() => ({
+    container: { display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 12px', background: theme.bgSecondary, borderBottom: `1px solid ${theme.border}`, fontSize: 13 } as React.CSSProperties,
+    modesRow: { display: 'flex', alignItems: 'center', gap: 4 } as React.CSSProperties,
+    modeTab: (active: boolean) => ({ padding: '2px 8px', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: active ? 600 : 400, color: active ? theme.accent : theme.textSecondary, background: active ? theme.bgHover : 'transparent' }) as React.CSSProperties,
+    spacer: { flex: 1 } as React.CSSProperties,
+    closeButton: { background: 'transparent', border: 'none', color: theme.textSecondary, cursor: 'pointer', fontSize: 16, padding: '0 4px', lineHeight: 1 } as React.CSSProperties,
+    row: { display: 'flex', alignItems: 'center', gap: 4 } as React.CSSProperties,
+    findInput: { flex: 1, background: theme.bg, color: theme.text, border: `1px solid ${theme.border}`, borderRadius: 4, padding: '4px 8px', fontSize: 13, outline: 'none' } as React.CSSProperties,
+    replaceInput: { flex: 1, background: theme.bg, color: theme.text, border: `1px solid ${theme.border}`, borderRadius: 4, padding: '4px 8px', fontSize: 13, outline: 'none' } as React.CSSProperties,
+    markRow: { display: 'flex', alignItems: 'center', gap: 6 } as React.CSSProperties,
+    markLabel: { fontSize: 12, color: theme.textSecondary } as React.CSSProperties,
+    markColor: (selected: boolean, styleNum: number) => ({ width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, cursor: 'pointer', color: '#fff', background: MARK_COLORS[styleNum] || '#888', border: selected ? '2px solid #fff' : '2px solid transparent', boxShadow: selected ? `0 0 0 1px ${MARK_COLORS[styleNum]}` : 'none' }) as React.CSSProperties,
+    optionsRow: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: theme.textSecondary } as React.CSSProperties,
+    checkboxLabel: { display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' } as React.CSSProperties,
+    checkbox: { accentColor: theme.accent } as React.CSSProperties,
+  }), [theme]);
 }
 
 export function FindReplace({ theme }: FindReplaceProps) {
@@ -15,9 +34,8 @@ export function FindReplace({ theme }: FindReplaceProps) {
     setShowFindReplace,
   } = useNotemacStore();
 
+  const styles = useStyles(theme);
   const findInputRef = useRef<HTMLInputElement>(null);
-  const [matchCount, setMatchCount] = useState(0);
-  const [currentMatch, setCurrentMatch] = useState(0);
   const [markStyle, setMarkStyle] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   useEffect(() => {
@@ -76,58 +94,66 @@ export function FindReplace({ theme }: FindReplaceProps) {
     onClick: () => void;
     title: string;
     children: React.ReactNode;
-  }) => (
-    <button
-      title={title}
-      aria-label={title}
-      onClick={onClick}
-      style={{
-        background: active ? theme.accent : 'transparent',
-        color: active ? theme.accentText : theme.textSecondary,
-        border: `1px solid ${active ? theme.accent : theme.border}`,
-        borderRadius: 4,
-        padding: '2px 6px',
-        cursor: 'pointer',
-        fontSize: 12,
-        fontWeight: active ? 600 : 400,
-        minWidth: 28,
-        height: 24,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {children}
-    </button>
-  );
+  }) => {
+    const buttonStyle = useMemo(() => ({
+      background: active ? theme.accent : 'transparent',
+      color: active ? theme.accentText : theme.textSecondary,
+      border: `1px solid ${active ? theme.accent : theme.border}`,
+      borderRadius: 4,
+      padding: '2px 6px',
+      cursor: 'pointer',
+      fontSize: 12,
+      fontWeight: active ? 600 : 400,
+      minWidth: 28,
+      height: 24,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties), [active, theme]);
+
+    return (
+      <button
+        title={title}
+        aria-label={title}
+        onClick={onClick}
+        style={buttonStyle}
+      >
+        {children}
+      </button>
+    );
+  };
 
   const ActionButton = ({ onClick, title, children, primary }: {
     onClick: () => void;
     title: string;
     children: React.ReactNode;
     primary?: boolean;
-  }) => (
-    <button
-      title={title}
-      aria-label={title}
-      onClick={onClick}
-      style={{
-        background: primary ? theme.accent : 'transparent',
-        color: primary ? theme.accentText : theme.textSecondary,
-        border: `1px solid ${primary ? theme.accent : theme.border}`,
-        borderRadius: 4,
-        padding: '2px 8px',
-        cursor: 'pointer',
-        fontSize: 12,
-        height: 24,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {children}
-    </button>
-  );
+  }) => {
+    const buttonStyle = useMemo(() => ({
+      background: primary ? theme.accent : 'transparent',
+      color: primary ? theme.accentText : theme.textSecondary,
+      border: `1px solid ${primary ? theme.accent : theme.border}`,
+      borderRadius: 4,
+      padding: '2px 8px',
+      cursor: 'pointer',
+      fontSize: 12,
+      height: 24,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties), [primary, theme]);
+
+    return (
+      <button
+        title={title}
+        aria-label={title}
+        onClick={onClick}
+        style={buttonStyle}
+      >
+        {children}
+      </button>
+    );
+  };
 
   const modes: { key: typeof findReplaceMode; label: string }[] = [
     { key: 'find', label: 'Find' },
@@ -137,57 +163,32 @@ export function FindReplace({ theme }: FindReplaceProps) {
   ];
 
   return (
-    <div style={{
-      backgroundColor: theme.findBg,
-      borderBottom: `1px solid ${theme.border}`,
-      padding: '8px 12px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 6,
-      flexShrink: 0,
-    }}>
+    <div style={styles.container}>
       {/* Mode tabs */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+      <div style={styles.modesRow}>
         {modes.map(mode => (
           <span
             key={mode.key}
             onClick={() => useNotemacStore.getState().setShowFindReplace(true, mode.key)}
-            style={{
-              fontSize: 12,
-              fontWeight: findReplaceMode === mode.key ? 600 : 400,
-              color: findReplaceMode === mode.key ? theme.accent : theme.textSecondary,
-              cursor: 'pointer',
-              borderBottom: findReplaceMode === mode.key ? `2px solid ${theme.accent}` : 'none',
-              paddingBottom: 2,
-            }}
+            style={styles.modeTab(findReplaceMode === mode.key)}
           >
             {mode.label}
           </span>
         ))}
 
-        <div style={{ flex: 1 }} />
+        <div style={styles.spacer} />
 
         <button
           aria-label="Close find and replace"
           onClick={() => setShowFindReplace(false)}
-          style={{
-            cursor: 'pointer',
-            color: theme.textMuted,
-            fontSize: 16,
-            padding: '0 4px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          style={styles.closeButton}
         >
           {'\u00d7'}
         </button>
       </div>
 
       {/* Find row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={styles.row}>
         <input
           ref={findInputRef}
           type="text"
@@ -195,16 +196,7 @@ export function FindReplace({ theme }: FindReplaceProps) {
           value={searchOptions.query}
           onChange={(e) => updateSearchOptions({ query: e.target.value })}
           onKeyDown={handleKeyDown}
-          style={{
-            flex: 1,
-            height: 28,
-            backgroundColor: theme.bg,
-            color: theme.text,
-            border: `1px solid ${theme.border}`,
-            borderRadius: 4,
-            padding: '0 8px',
-            fontSize: 13,
-          }}
+          style={styles.findInput}
         />
 
         <ToggleButton
@@ -239,23 +231,14 @@ export function FindReplace({ theme }: FindReplaceProps) {
 
       {/* Replace row */}
       {(findReplaceMode === 'replace' || findReplaceMode === 'findInFiles') && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={styles.row}>
           <input
             type="text"
             placeholder="Replace..."
             value={searchOptions.replaceText}
             onChange={(e) => updateSearchOptions({ replaceText: e.target.value })}
             onKeyDown={handleKeyDown}
-            style={{
-              flex: 1,
-              height: 28,
-              backgroundColor: theme.bg,
-              color: theme.text,
-              border: `1px solid ${theme.border}`,
-              borderRadius: 4,
-              padding: '0 8px',
-              fontSize: 13,
-            }}
+            style={styles.replaceInput}
           />
 
           <ActionButton onClick={handleReplace} title="Replace">
@@ -269,32 +252,18 @@ export function FindReplace({ theme }: FindReplaceProps) {
 
       {/* Mark row */}
       {findReplaceMode === 'mark' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: theme.textSecondary }}>Style:</span>
+        <div style={styles.markRow}>
+          <span style={styles.markLabel}>Style:</span>
           {([1, 2, 3, 4, 5] as const).map(style => (
             <div
               key={style}
               onClick={() => setMarkStyle(style)}
-              style={{
-                width: 24,
-                height: 20,
-                borderRadius: 3,
-                backgroundColor: MARK_COLORS[style],
-                border: markStyle === style ? '2px solid white' : `1px solid ${theme.border}`,
-                cursor: 'pointer',
-                opacity: markStyle === style ? 1 : 0.6,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 10,
-                color: '#fff',
-                fontWeight: 700,
-              }}
+              style={styles.markColor(markStyle === style, style)}
             >
               {style}
             </div>
           ))}
-          <div style={{ flex: 1 }} />
+          <div style={styles.spacer} />
           <ActionButton onClick={handleMark} title="Mark All" primary>
             Mark All
           </ActionButton>
@@ -305,22 +274,22 @@ export function FindReplace({ theme }: FindReplaceProps) {
       )}
 
       {/* Search in selection / wrap around */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: theme.textSecondary }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+      <div style={styles.optionsRow}>
+        <label style={styles.checkboxLabel}>
           <input
             type="checkbox"
             checked={searchOptions.wrapAround}
             onChange={(e) => updateSearchOptions({ wrapAround: e.target.checked })}
-            style={{ accentColor: theme.accent }}
+            style={styles.checkbox}
           />
           Wrap around
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+        <label style={styles.checkboxLabel}>
           <input
             type="checkbox"
             checked={searchOptions.searchInSelection}
             onChange={(e) => updateSearchOptions({ searchInSelection: e.target.checked })}
-            style={{ accentColor: theme.accent }}
+            style={styles.checkbox}
           />
           In selection
         </label>
