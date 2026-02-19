@@ -1,5 +1,5 @@
 import type { TabColor } from "../Commons/Enums";
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import {
@@ -238,11 +238,11 @@ export function TabBar({ theme }: TabBarProps) {
             { label: 'Clone to Split View', action: () => setSplitView('vertical', contextMenu.tabId) },
           ].map((item, i) => {
             if (item.label === 'separator') {
-              return <div key={i} style={{ height: 1, backgroundColor: theme.border, margin: '4px 0' }} />;
+              return <div key={`sep-${i}`} style={{ height: 1, backgroundColor: theme.border, margin: '4px 0' }} />;
             }
             return (
               <div
-                key={i}
+                key={`contextmenu-${item.label}-${i}`}
                 style={{
                   padding: '5px 16px',
                   cursor: 'pointer',
@@ -273,9 +273,9 @@ export function TabBar({ theme }: TabBarProps) {
               gap: 4,
               padding: '4px 16px 8px',
             }}>
-              {(['none', 'color1', 'color2', 'color3', 'color4', 'color5'] as TabColor[]).map(color => (
+              {(['none', 'color1', 'color2', 'color3', 'color4', 'color5'] as TabColor[]).map((color) => (
                 <div
-                  key={color}
+                  key={`color-${color}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setTabColor(contextMenu.tabId, color);
