@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import type { AIMessage, AIConversation } from "../Commons/Types";
+import type { AIMessage } from "../Commons/Types";
 import { UI_COPY_FEEDBACK_MS } from "../Commons/Constants";
 import { SendChatMessage } from "../Controllers/AIActionController";
 import { CancelActiveRequest } from "../Controllers/LLMController";
@@ -15,18 +15,13 @@ interface AIChatPanelProps
 export function AIChatPanelViewPresenter({ theme }: AIChatPanelProps)
 {
     const {
-        aiEnabled,
         conversations,
         activeConversationId,
         isAiStreaming,
         aiStreamContent,
         aiOperationError,
-        activeProviderId,
         activeModelId,
-        providers,
-        credentials,
         SetActiveConversation,
-        AddConversation,
         RemoveConversation,
         SetAiOperationError,
         SetShowAiSettings,
@@ -480,7 +475,7 @@ const MessageBubbleMemo = memo(function MessageBubble({ message, theme, isStream
                     {
                         return (
                             <CodeBlockDisplayMemo
-                                key={idx}
+                                key={`code-${idx}-${part.language}`}
                                 code={part.content}
                                 language={part.language || ''}
                                 theme={theme}
@@ -489,7 +484,7 @@ const MessageBubbleMemo = memo(function MessageBubble({ message, theme, isStream
                     }
                     return (
                         <span
-                            key={idx}
+                            key={`text-${idx}-${part.content.substring(0, 20)}`}
                             style={{ whiteSpace: 'pre-wrap' }}
                         >
                             {part.content}
