@@ -1,0 +1,4 @@
+/* Sample CSS file */
+body { margin: 0; padding: 0; font-family: sans-serif; }
+.container { max-width: 1200px; margin: 0 auto; }
+.header { background: #333; color: white; padding: 1rem; }
