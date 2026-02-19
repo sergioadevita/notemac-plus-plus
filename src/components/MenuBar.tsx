@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
 import { ENCODINGS, ALL_LANGUAGES } from '../types';
@@ -22,7 +22,6 @@ interface MenuItem {
 export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { settings, isRecordingMacro } = useEditorStore();
 
@@ -35,7 +34,6 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenu(null);
-        setOpenSubmenu(null);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -296,7 +294,6 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       onAction(item.action, item.value);
     }
     setOpenMenu(null);
-    setOpenSubmenu(null);
   };
 
   return (
