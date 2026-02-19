@@ -38,8 +38,10 @@ export function Sidebar({ theme }: SidebarProps) {
 
   const [isResizing, setIsResizing] = useState(false);
   const [width, setWidth] = useState(sidebarWidth);
+  const [focusedTreeIndex, setFocusedTreeIndex] = useState(-1);
   const handleMouseMoveRef = useRef<((e: MouseEvent) => void) | null>(null);
   const handleMouseUpRef = useRef<(() => void) | null>(null);
+  const treeContainerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,6 +105,16 @@ export function Sidebar({ theme }: SidebarProps) {
     }
   };
 
+  const getVisibleNodes = (nodes: FileTreeNode[], result: FileTreeNode[] = []): FileTreeNode[] => {
+    for (const node of nodes) {
+      result.push(node);
+      if (node.isDirectory && node.isExpanded && node.children) {
+        getVisibleNodes(node.children, result);
+      }
+    }
+    return result;
+  };
+
   const handleFileClick = async (node: FileTreeNode) => {
     if (node.isDirectory) {
       toggleTreeNode(node.path);
@@ -143,14 +155,90 @@ export function Sidebar({ theme }: SidebarProps) {
     }
   };
 
-  const TreeNodeMemo = React.memo(({ node, depth = 0 }: { node: FileTreeNode; depth?: number }) => {
+  const handleTreeKeyDown = (e: React.KeyboardEvent) => {
+    if (sidebarPanel !== 'explorer' || fileTree.length === 0) return;
+
+    const visibleNodes = getVisibleNodes(fileTree);
+    const currentFocused = focusedTreeIndex >= 0 ? visibleNodes[focusedTreeIndex] : null;
+
+    const focusNodeAtIndex = (index: number) => {
+      if (index >= 0 && index < visibleNodes.length) {
+        setFocusedTreeIndex(index);
+        setTimeout(() => {
+          const element = treeContainerRef.current?.querySelector(`[data-tree-index="${index}"]`) as HTMLElement;
+          element?.focus();
+        }, 0);
+      }
+    };
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        const nextIndex = focusedTreeIndex === -1 ? 0 : Math.min(focusedTreeIndex + 1, visibleNodes.length - 1);
+        focusNodeAtIndex(nextIndex);
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        const prevIndex = focusedTreeIndex === -1 ? visibleNodes.length - 1 : Math.max(focusedTreeIndex - 1, 0);
+        focusNodeAtIndex(prevIndex);
+        break;
+
+      case 'ArrowRight':
+        e.preventDefault();
+        if (currentFocused?.isDirectory) {
+          if (!currentFocused.isExpanded) {
+            toggleTreeNode(currentFocused.path);
+          } else if (currentFocused.children && currentFocused.children.length > 0) {
+            focusNodeAtIndex(focusedTreeIndex + 1);
+          }
+        }
+        break;
+
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (currentFocused?.isDirectory && currentFocused.isExpanded) {
+          toggleTreeNode(currentFocused.path);
+        }
+        break;
+
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (currentFocused) {
+          handleFileClick(currentFocused);
+        }
+        break;
+
+      case 'Home':
+        e.preventDefault();
+        focusNodeAtIndex(0);
+        break;
+
+      case 'End':
+        e.preventDefault();
+        focusNodeAtIndex(visibleNodes.length - 1);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const TreeNodeMemo = React.memo(({ node, depth = 0, index }: { node: FileTreeNode; depth?: number; index: number }) => {
     const [hovered, setHovered] = useState(false);
     const isOpen = node.isExpanded;
     const isActive = tabs.find(t => t.id === activeTabId)?.path === node.path;
+    const isFocused = focusedTreeIndex === index;
 
     return (
       <div>
         <div
+          ref={isFocused ? (el) => el?.focus() : null}
+          data-tree-index={index}
+          role="treeitem"
+          tabIndex={isFocused ? 0 : -1}
+          aria-expanded={node.isDirectory ? node.isExpanded : undefined}
           onClick={() => handleFileClick(node)}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
@@ -161,12 +249,14 @@ export function Sidebar({ theme }: SidebarProps) {
             padding: '3px 8px',
             paddingLeft: 8 + depth * 16,
             cursor: 'pointer',
-            backgroundColor: isActive ? theme.bgActive : hovered ? theme.bgHover : 'transparent',
+            backgroundColor: isActive ? theme.bgActive : isFocused ? theme.bgHover : hovered ? theme.bgHover : 'transparent',
             color: isActive ? theme.text : theme.sidebarText,
             fontSize: 13,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            outline: isFocused ? `1px solid ${theme.accent}` : 'none',
+            outlineOffset: '-1px',
           }}
         >
           <span style={{ fontSize: 10, width: 16, textAlign: 'center', flexShrink: 0 }}>
@@ -179,9 +269,13 @@ export function Sidebar({ theme }: SidebarProps) {
             {node.name}
           </span>
         </div>
-        {node.isDirectory && isOpen && node.children?.map((child, i) => (
-          <TreeNodeMemo key={child.path || i} node={child} depth={depth + 1} />
-        ))}
+        {node.isDirectory && isOpen && node.children?.map((child, i) => {
+          const visibleNodes = getVisibleNodes(fileTree);
+          const childIndex = visibleNodes.findIndex(n => n.path === child.path);
+          return (
+            <TreeNodeMemo key={child.path || i} node={child} depth={depth + 1} index={childIndex} />
+          );
+        })}
       </div>
     );
   });
@@ -201,9 +295,9 @@ export function Sidebar({ theme }: SidebarProps) {
         {0 === functions.length ? (
           <div style={{ color: theme.textMuted, fontSize: 12, padding: 8 }}>No functions found</div>
         ) : (
-          functions.map((fn, i) => (
+          functions.map((fn) => (
             <div
-              key={i}
+              key={`fn-${fn.name}-${fn.line}`}
               onClick={() => {
                 document.dispatchEvent(new CustomEvent('notemac-goto-line', { detail: { line: fn.line } }));
               }}
@@ -347,7 +441,7 @@ export function Sidebar({ theme }: SidebarProps) {
           {sidebarPanel === 'explorer' && (
             <>
               {fileTree.length > 0 ? (
-                <div style={{ paddingTop: 4 }}>
+                <div ref={treeContainerRef} role="tree" tabIndex={0} onKeyDown={handleTreeKeyDown} style={{ paddingTop: 4, outline: 'none' }}>
                   {workspacePath && (
                     <div style={{
                       padding: '6px 12px',
@@ -362,9 +456,13 @@ export function Sidebar({ theme }: SidebarProps) {
                       {typeof workspacePath === 'string' ? workspacePath.split('/').pop() || workspacePath : workspacePath}
                     </div>
                   )}
-                  {fileTree.map((node, i) => (
-                    <TreeNodeMemo key={node.path || i} node={node} />
-                  ))}
+                  {fileTree.map((node, i) => {
+                    const visibleNodes = getVisibleNodes(fileTree);
+                    const nodeIndex = visibleNodes.findIndex(n => n.path === node.path);
+                    return (
+                      <TreeNodeMemo key={node.path || i} node={node} index={nodeIndex} />
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={{
@@ -495,9 +593,9 @@ const ClipboardHistoryPanel = React.memo(function ClipboardHistoryPanel({ theme 
       {0 === clipboardHistory.length ? (
         <div style={{ color: theme.textMuted, fontSize: 12, padding: 8 }}>No clipboard entries yet</div>
       ) : (
-        clipboardHistory.map((entry, i) => (
+        clipboardHistory.map((entry) => (
           <div
-            key={i}
+            key={`clipboard-${entry.timestamp}`}
             onClick={() => navigator.clipboard.writeText(entry.text)}
             style={{
               padding: '6px 8px',
@@ -569,13 +667,13 @@ const CharacterPanel = React.memo(function CharacterPanel({ theme }: { theme: Th
           Insert
         </button>
       </div>
-      {charGroups.map((group, gi) => (
-        <div key={gi} style={{ marginBottom: 8 }}>
+      {charGroups.map((group) => (
+        <div key={`chargroup-${group.label}`} style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 4 }}>{group.label}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-            {group.chars.split('').map((ch, ci) => (
+            {group.chars.split('').map((ch) => (
               <div
-                key={ci}
+                key={`char-${ch}-${ch.charCodeAt(0)}`}
                 onClick={() => handleInsertChar(ch)}
                 title={`U+${ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`}
                 style={{
@@ -644,9 +742,9 @@ const SearchPanel = React.memo(function SearchPanel({ theme }: { theme: ThemeCol
           <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>
             {results.length} results
           </div>
-          {results.map((r, i) => (
+          {results.map((r) => (
             <div
-              key={i}
+              key={`search-${r.file}-${r.line}`}
               className="hover-bg hover-bg-reset"
               style={{
                 padding: '4px 8px',
