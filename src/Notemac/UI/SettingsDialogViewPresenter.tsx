@@ -1,17 +1,157 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import type { AppSettings } from "../Commons/Types";
 import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface SettingsDialogProps {
   theme: ThemeColors;
 }
 
+function useStyles(theme: ThemeColors) {
+  return useMemo(() => ({
+    fieldContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '8px 0',
+    } as React.CSSProperties,
+    fieldLabel: {
+      color: theme.text,
+      fontSize: 13,
+    } as React.CSSProperties,
+    selectInput: {
+      backgroundColor: theme.bg,
+      color: theme.text,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 4,
+      padding: '4px 8px',
+      fontSize: 13,
+      minWidth: 160,
+    } as React.CSSProperties,
+    numberInput: {
+      backgroundColor: theme.bg,
+      color: theme.text,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 4,
+      padding: '4px 8px',
+      fontSize: 13,
+      width: 80,
+      textAlign: 'center',
+    } as React.CSSProperties,
+    checkboxContainer: {
+      padding: '8px 0',
+    } as React.CSSProperties,
+    checkboxLabel: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      cursor: 'pointer',
+    } as React.CSSProperties,
+    checkboxInput: {
+      accentColor: theme.accent,
+      width: 16,
+      height: 16,
+    } as React.CSSProperties,
+    checkboxLabelText: {
+      color: theme.text,
+      fontSize: 13,
+    } as React.CSSProperties,
+    checkboxDescription: {
+      color: theme.textMuted,
+      fontSize: 12,
+      marginTop: 2,
+    } as React.CSSProperties,
+    sectionHeader: {
+      fontSize: 12,
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: theme.textSecondary,
+      padding: '16px 0 8px',
+      borderBottom: `1px solid ${theme.border}`,
+      marginBottom: 8,
+    } as React.CSSProperties,
+    dialogOverlay: {
+      className: 'dialog-overlay',
+    },
+    dialogMain: {
+      backgroundColor: theme.bgSecondary,
+      border: `1px solid ${theme.border}`,
+      width: 650,
+      maxHeight: '80vh',
+      display: 'flex',
+      flexDirection: 'column',
+    } as React.CSSProperties,
+    dialogHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    } as React.CSSProperties,
+    dialogTitle: {
+      color: theme.text,
+      fontSize: 18,
+      fontWeight: 600,
+    } as React.CSSProperties,
+    closeButton: {
+      cursor: 'pointer',
+      color: theme.textMuted,
+      fontSize: 20,
+    } as React.CSSProperties,
+    contentWrapper: {
+      display: 'flex',
+      flex: 1,
+      gap: 16,
+      overflow: 'hidden',
+    } as React.CSSProperties,
+    sidebarNav: {
+      width: 140,
+      flexShrink: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
+    } as React.CSSProperties,
+    sidebarItem: (isActive: boolean) => ({
+      padding: '8px 12px',
+      cursor: 'pointer',
+      borderRadius: 6,
+      fontSize: 13,
+      backgroundColor: isActive ? theme.bgHover : 'transparent',
+      color: isActive ? theme.text : theme.textSecondary,
+      fontWeight: isActive ? 600 : 400,
+    } as React.CSSProperties),
+    settingsContent: {
+      flex: 1,
+      overflow: 'auto',
+      paddingRight: 8,
+    } as React.CSSProperties,
+    keybindingsContainer: {
+      color: theme.textSecondary,
+      fontSize: 13,
+    } as React.CSSProperties,
+    keybindingRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '6px 0',
+      borderBottom: `1px solid ${theme.border}`,
+    } as React.CSSProperties,
+    keybindingKbd: {
+      backgroundColor: theme.bgTertiary,
+      padding: '2px 8px',
+      borderRadius: 4,
+      fontSize: 12,
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      border: `1px solid ${theme.border}`,
+    } as React.CSSProperties,
+  }), [theme]);
+}
+
 export function SettingsDialog({ theme }: SettingsDialogProps) {
   const { settings, updateSettings, setShowSettings } = useNotemacStore();
   const [activeSection, setActiveSection] = useState('general');
   const dialogRef = useRef<HTMLDivElement>(null);
+  const styles = useStyles(theme);
 
   useFocusTrap(dialogRef, true, () => setShowSettings(false));
 
@@ -29,20 +169,12 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     options: { value: T; label: string }[];
     onChange: (value: T) => void;
   }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-      <label style={{ color: theme.text, fontSize: 13 }}>{label}</label>
+    <div style={styles.fieldContainer}>
+      <label style={styles.fieldLabel}>{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        style={{
-          backgroundColor: theme.bg,
-          color: theme.text,
-          border: `1px solid ${theme.border}`,
-          borderRadius: 4,
-          padding: '4px 8px',
-          fontSize: 13,
-          minWidth: 160,
-        }}
+        style={styles.selectInput}
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -59,8 +191,8 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     step?: number;
     onChange: (value: number) => void;
   }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-      <label style={{ color: theme.text, fontSize: 13 }}>{label}</label>
+    <div style={styles.fieldContainer}>
+      <label style={styles.fieldLabel}>{label}</label>
       <input
         type="number"
         value={value}
@@ -68,16 +200,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
         max={max}
         step={step || 1}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        style={{
-          backgroundColor: theme.bg,
-          color: theme.text,
-          border: `1px solid ${theme.border}`,
-          borderRadius: 4,
-          padding: '4px 8px',
-          fontSize: 13,
-          width: 80,
-          textAlign: 'center',
-        }}
+        style={styles.numberInput}
       />
     </div>
   );
@@ -88,18 +211,18 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     onChange: (checked: boolean) => void;
     description?: string;
   }) => (
-    <div style={{ padding: '8px 0' }}>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+    <div style={styles.checkboxContainer}>
+      <label style={styles.checkboxLabel}>
         <input
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          style={{ accentColor: theme.accent, width: 16, height: 16 }}
+          style={styles.checkboxInput}
         />
         <div>
-          <div style={{ color: theme.text, fontSize: 13 }}>{label}</div>
+          <div style={styles.checkboxLabelText}>{label}</div>
           {description && (
-            <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 2 }}>{description}</div>
+            <div style={styles.checkboxDescription}>{description}</div>
           )}
         </div>
       </label>
@@ -107,16 +230,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
   );
 
   const SectionHeader = ({ title }: { title: string }) => (
-    <div style={{
-      fontSize: 12,
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      color: theme.textSecondary,
-      padding: '16px 0 8px',
-      borderBottom: `1px solid ${theme.border}`,
-      marginBottom: 8,
-    }}>
+    <div style={styles.sectionHeader}>
       {title}
     </div>
   );
@@ -130,53 +244,27 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
         aria-labelledby="settings-title"
         className="dialog"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: theme.bgSecondary,
-          border: `1px solid ${theme.border}`,
-          width: 650,
-          maxHeight: '80vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
+        style={styles.dialogMain}
       >
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}>
-          <h2 id="settings-title" style={{ color: theme.text, fontSize: 18, fontWeight: 600 }}>Preferences</h2>
+        <div style={styles.dialogHeader}>
+          <h2 id="settings-title" style={styles.dialogTitle}>Preferences</h2>
           <span
             onClick={() => setShowSettings(false)}
-            style={{ cursor: 'pointer', color: theme.textMuted, fontSize: 20 }}
+            style={styles.closeButton}
           >
             {'\u00d7'}
           </span>
         </div>
 
-        <div style={{ display: 'flex', flex: 1, gap: 16, overflow: 'hidden' }}>
+        <div style={styles.contentWrapper}>
           {/* Section tabs */}
-          <div style={{
-            width: 140,
-            flexShrink: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}>
+          <div style={styles.sidebarNav}>
             {sections.map(section => (
               <div
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                style={{
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  borderRadius: 6,
-                  fontSize: 13,
-                  backgroundColor: activeSection === section.id ? theme.bgHover : 'transparent',
-                  color: activeSection === section.id ? theme.text : theme.textSecondary,
-                  fontWeight: activeSection === section.id ? 600 : 400,
-                }}
+                style={styles.sidebarItem(activeSection === section.id)}
               >
                 {section.label}
               </div>
@@ -184,7 +272,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
           </div>
 
           {/* Settings content */}
-          <div style={{ flex: 1, overflow: 'auto', paddingRight: 8 }}>
+          <div style={styles.settingsContent}>
             {activeSection === 'general' && (
               <>
                 <SectionHeader title="General Settings" />
@@ -439,7 +527,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
             {activeSection === 'keybindings' && (
               <>
                 <SectionHeader title="Keyboard Shortcuts" />
-                <div style={{ color: theme.textSecondary, fontSize: 13 }}>
+                <div style={styles.keybindingsContainer}>
                   {[
                     { key: '\u2318N', desc: 'New File' },
                     { key: '\u2318O', desc: 'Open File' },
@@ -464,23 +552,10 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                     { key: '\u21e7F2', desc: 'Previous Bookmark' },
                     { key: '\u2325\u2191', desc: 'Move Line Up' },
                     { key: '\u2325\u2193', desc: 'Move Line Down' },
-                  ].map((binding, i) => (
-                    <div key={i} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '6px 0',
-                      borderBottom: `1px solid ${theme.border}`,
-                    }}>
+                  ].map((binding) => (
+                    <div key={`binding-${binding.key}`} style={styles.keybindingRow}>
                       <span>{binding.desc}</span>
-                      <kbd style={{
-                        backgroundColor: theme.bgTertiary,
-                        padding: '2px 8px',
-                        borderRadius: 4,
-                        fontSize: 12,
-                        fontFamily: '-apple-system, system-ui, sans-serif',
-                        border: `1px solid ${theme.border}`,
-                      }}>
+                      <kbd style={styles.keybindingKbd}>
                         {binding.key}
                       </kbd>
                     </div>
