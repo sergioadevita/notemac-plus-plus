@@ -21,8 +21,9 @@ function createWindow() {
   });
 
   // app.isPackaged is true when running from a built .app/.dmg,
-  // false when running via "electron ." during development
-  if (app.isPackaged) {
+  // false when running via "electron ." during development.
+  // In test mode (NODE_ENV=test), load from built dist/ to avoid needing a dev server.
+  if (app.isPackaged || process.env.NODE_ENV === 'test') {
     mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   } else {
     mainWindow.loadURL('http://localhost:5173');
