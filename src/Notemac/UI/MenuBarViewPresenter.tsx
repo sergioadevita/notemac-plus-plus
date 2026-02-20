@@ -406,9 +406,6 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
         paddingLeft: isElectron ? 8 : 8,
         flexShrink: 0,
         outline: 'none',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        scrollbarWidth: 'none',
       } as React.CSSProperties}
       tabIndex={0}
     >
