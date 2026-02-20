@@ -28,10 +28,14 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
         RemoveProvider,
         SetShowAiSettings,
         SetAiEnabled,
+        isRefreshingModels,
+        RefreshProviderModels,
     } = useNotemacStore();
 
     const [activeTab, setActiveTab] = useState<'providers' | 'completion' | 'chat' | 'custom'>('providers');
     const [testStatus, setTestStatus] = useState<Record<string, { testing: boolean; result?: string }>>({});
+    const [customModelId, setCustomModelId] = useState('');
+    const [refreshResult, setRefreshResult] = useState<string | null>(null);
 
     // Local state for API key inputs
     const [keyInputs, setKeyInputs] = useState<Record<string, string>>(() =>
@@ -221,17 +225,82 @@ export function AISettingsViewPresenter({ theme }: AISettingsProps)
 
                             <div style={sectionStyle}>
                                 <label style={labelStyle}>Active Model</label>
-                                <select
-                                    value={activeModelId}
-                                    onChange={(e) => SetActiveModel(e.target.value)}
-                                    style={inputStyle}
-                                >
-                                    {providers
-                                        .find(p => p.id === activeProviderId)
-                                        ?.models.map(m => (
-                                            <option key={m.id} value={m.id}>{m.name}</option>
-                                        ))}
-                                </select>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    <select
+                                        value={activeModelId}
+                                        onChange={(e) => SetActiveModel(e.target.value)}
+                                        style={{ ...inputStyle, flex: 1 }}
+                                    >
+                                        {providers
+                                            .find(p => p.id === activeProviderId)
+                                            ?.models.map(m => (
+                                                <option key={m.id} value={m.id}>{m.name}</option>
+                                            ))}
+                                    </select>
+                                    <button
+                                        onClick={async () =>
+                                        {
+                                            setRefreshResult(null);
+                                            const ok = await RefreshProviderModels(activeProviderId);
+                                            setRefreshResult(ok ? 'Models updated' : 'Failed — check API key');
+                                            if (ok) setTimeout(() => setRefreshResult(null), 3000);
+                                        }}
+                                        disabled={isRefreshingModels}
+                                        title="Fetch latest models from provider API"
+                                        style={{
+                                            height: 28, padding: '0 10px',
+                                            fontSize: 11, border: `1px solid ${theme.border}`,
+                                            borderRadius: 4, cursor: 'pointer',
+                                            backgroundColor: theme.bgHover, color: theme.text,
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {isRefreshingModels ? 'Fetching...' : '\u21BB Refresh'}
+                                    </button>
+                                </div>
+                                {refreshResult && (
+                                    <div style={{
+                                        marginTop: 4, fontSize: 11,
+                                        color: refreshResult.startsWith('Models') ? '#4caf50' : '#ff6b6b',
+                                    }}>
+                                        {refreshResult}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={sectionStyle}>
+                                <label style={labelStyle}>Custom Model ID (override)</label>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    <input
+                                        type="text"
+                                        value={customModelId}
+                                        onChange={(e) => setCustomModelId(e.target.value)}
+                                        placeholder="e.g., gpt-5.3-codex"
+                                        style={{ ...inputStyle, flex: 1 }}
+                                    />
+                                    <button
+                                        onClick={() =>
+                                        {
+                                            if (0 < customModelId.trim().length)
+                                            {
+                                                SetActiveModel(customModelId.trim());
+                                                setCustomModelId('');
+                                            }
+                                        }}
+                                        disabled={0 === customModelId.trim().length}
+                                        style={{
+                                            height: 28, padding: '0 10px',
+                                            fontSize: 11, border: 'none',
+                                            borderRadius: 4, cursor: 'pointer',
+                                            backgroundColor: theme.accent, color: theme.accentText,
+                                        }}
+                                    >
+                                        Use
+                                    </button>
+                                </div>
+                                <div style={{ fontSize: 10, color: theme.textMuted, marginTop: 4 }}>
+                                    Type any model ID to use it directly, even if it's not in the dropdown.
+                                </div>
                             </div>
 
                             {/* API Keys */}

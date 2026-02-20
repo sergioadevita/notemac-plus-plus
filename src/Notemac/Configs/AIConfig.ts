@@ -57,10 +57,18 @@ export function GetBuiltInProviders(): AIProvider[]
     ];
 }
 
+// ─── Fallback Model Lists ────────────────────────────────────────
+// These are used when no API key is configured or when the dynamic
+// fetch fails. Once a key is saved, use FetchModelsForProvider()
+// in LLMController to get the real-time list from the API.
+
 function GetOpenAIModels(): AIModelDefinition[]
 {
     return [
-        // GPT-4.1 series (latest general-purpose, 1M context)
+        // GPT-5 series (latest flagship)
+        { id: 'gpt-5.2', name: 'GPT-5.2', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
+        { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
+        // GPT-4.1 series (1M context)
         { id: 'gpt-4.1', name: 'GPT-4.1', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
         { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
         { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
@@ -69,7 +77,6 @@ function GetOpenAIModels(): AIModelDefinition[]
         { id: 'gpt-4o-mini', name: 'GPT-4o Mini', providerId: 'openai', contextWindow: 128000, supportsStreaming: true, supportsFIM: false },
         // O-series reasoning models
         { id: 'o3', name: 'o3', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
-        { id: 'o3-mini', name: 'o3-mini', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
         { id: 'o4-mini', name: 'o4-mini', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
     ];
 }
@@ -94,8 +101,6 @@ function GetGoogleModels(): AIModelDefinition[]
         { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
         { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
         { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
-        // Gemini 2.0 series (still available)
-        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
     ];
 }
 

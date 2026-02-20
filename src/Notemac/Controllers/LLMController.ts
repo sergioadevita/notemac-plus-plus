@@ -477,6 +477,136 @@ export async function TestProviderConnection(
     }
 }
 
+// ─── Dynamic Model Fetching ─────────────────────────────────────
+
+/**
+ * OpenAI model IDs that should be excluded from the model list
+ * (embeddings, TTS, whisper, DALL-E, etc.)
+ */
+const OPENAI_EXCLUDED_PREFIXES = [
+    'text-embedding', 'tts-', 'whisper', 'dall-e', 'davinci',
+    'babbage', 'curie', 'ada', 'gpt-3.5-turbo-instruct',
+    'chatgpt-4o-latest',
+];
+
+function IsOpenAIChatModel(modelId: string): boolean
+{
+    const lower = modelId.toLowerCase();
+    for (let i = 0, len = OPENAI_EXCLUDED_PREFIXES.length; i < len; i++)
+    {
+        if (lower.startsWith(OPENAI_EXCLUDED_PREFIXES[i]))
+            return false;
+    }
+    // Exclude snapshot variants (e.g., gpt-4o-2024-05-13) — keep only base IDs
+    if (/^\w+-\d{4}-\d{2}-\d{2}/.test(modelId) || /\d{4}-\d{2}-\d{2}$/.test(modelId))
+        return false;
+    return true;
+}
+
+function FormatModelName(modelId: string): string
+{
+    return modelId
+        .replace(/^gpt-/, 'GPT-')
+        .replace(/^o(\d)/, 'o$1')
+        .replace(/-mini$/, ' Mini')
+        .replace(/-nano$/, ' Nano')
+        .replace(/-pro$/, ' Pro')
+        .replace(/-turbo$/, ' Turbo')
+        .replace(/^claude-/, 'Claude ')
+        .replace(/^gemini-/, 'Gemini ');
+}
+
+/**
+ * Fetch available models from a provider's API.
+ * Returns an array of AIModelDefinition or null on failure.
+ */
+export async function FetchModelsForProvider(
+    provider: AIProvider,
+    apiKey: string,
+): Promise<{ id: string; name: string; providerId: string; contextWindow: number; supportsStreaming: boolean; supportsFIM: boolean }[] | null>
+{
+    try
+    {
+        if ('openai' === provider.type || 'custom' === provider.type)
+        {
+            const response = await fetch(`${provider.baseUrl}/v1/models`, {
+                headers: { 'Authorization': `Bearer ${apiKey}` },
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            const models = (data.data || []) as { id: string; created?: number }[];
+            return models
+                .filter(m => IsOpenAIChatModel(m.id))
+                .sort((a, b) => (b.created || 0) - (a.created || 0))
+                .map(m => ({
+                    id: m.id,
+                    name: FormatModelName(m.id),
+                    providerId: provider.id,
+                    contextWindow: 128000,
+                    supportsStreaming: true,
+                    supportsFIM: false,
+                }));
+        }
+
+        if ('anthropic' === provider.type)
+        {
+            const response = await fetch(`${provider.baseUrl}/v1/models`, {
+                headers: {
+                    'x-api-key': apiKey,
+                    'anthropic-version': ANTHROPIC_API_VERSION,
+                    'anthropic-dangerous-direct-browser-access': 'true',
+                },
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            const models = (data.data || []) as { id: string; display_name?: string; created_at?: string }[];
+            return models.map(m => ({
+                id: m.id,
+                name: m.display_name || FormatModelName(m.id),
+                providerId: provider.id,
+                contextWindow: 200000,
+                supportsStreaming: true,
+                supportsFIM: false,
+            }));
+        }
+
+        if ('google' === provider.type)
+        {
+            const response = await fetch(
+                `${provider.baseUrl}/v1beta/models?key=${apiKey}&pageSize=100`
+            );
+            if (!response.ok) return null;
+            const data = await response.json();
+            const models = (data.models || []) as {
+                name: string;
+                displayName?: string;
+                inputTokenLimit?: number;
+                supportedGenerationMethods?: string[];
+            }[];
+            return models
+                .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+                .map(m =>
+                {
+                    const id = m.name.replace('models/', '');
+                    return {
+                        id,
+                        name: m.displayName || FormatModelName(id),
+                        providerId: provider.id,
+                        contextWindow: m.inputTokenLimit || 1048576,
+                        supportsStreaming: true,
+                        supportsFIM: false,
+                    };
+                });
+        }
+
+        return null;
+    }
+    catch
+    {
+        return null;
+    }
+}
+
 // ─── Context Building ───────────────────────────────────────────
 
 /**

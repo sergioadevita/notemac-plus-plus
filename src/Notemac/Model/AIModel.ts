@@ -5,6 +5,7 @@ import type { AISettings } from "../Configs/AIConfig";
 import { GetDefaultAISettings, GetBuiltInProviders } from "../Configs/AIConfig";
 import { GetValue, SetValue, RemoveValue } from '../../Shared/Persistence/PersistenceService';
 import { StoreSecureValue, RetrieveSecureValue, RemoveSecureValue } from '../../Shared/Persistence/CredentialStorageService';
+import { FetchModelsForProvider } from '../Controllers/LLMController';
 import { DB_AI_PROVIDERS, DB_AI_CREDENTIALS, DB_AI_SETTINGS, DB_AI_CONVERSATIONS, AI_MAX_CONVERSATIONS, CRED_DEFAULT_AI_EXPIRY_HOURS } from '../Commons/Constants';
 
 export interface NotemacAISlice
@@ -79,6 +80,10 @@ export interface NotemacAISlice
     // Error
     SetAiOperationError: (error: string | null) => void;
 
+    // Model refresh
+    isRefreshingModels: boolean;
+    RefreshProviderModels: (providerId: string) => Promise<boolean>;
+
     // Persistence
     LoadAIState: () => void;
     SaveAIState: () => void;
@@ -113,6 +118,8 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
     showAiSettings: false,
 
     aiOperationError: null,
+
+    isRefreshingModels: false,
 
     // Setters
     SetAiEnabled: (enabled) => set({ aiEnabled: enabled }),
@@ -296,6 +303,44 @@ export const createAISlice: StateCreator<NotemacAISlice> = (set, get) => ({
 
     // Error
     SetAiOperationError: (error) => set({ aiOperationError: error }),
+
+    // Model refresh — fetches live model list from provider API
+    RefreshProviderModels: async (providerId: string) =>
+    {
+        const state = get();
+        const provider = state.providers.find(p => p.id === providerId);
+        if (!provider) return false;
+
+        const credential = state.credentials.find(c => c.providerId === providerId);
+        if (!credential) return false;
+
+        set({ isRefreshingModels: true });
+
+        try
+        {
+            const models = await FetchModelsForProvider(provider, credential.apiKey);
+            if (null === models || 0 === models.length)
+            {
+                set({ isRefreshingModels: false });
+                return false;
+            }
+
+            set(produce((draft: NotemacAISlice) =>
+            {
+                const idx = draft.providers.findIndex(p => p.id === providerId);
+                if (-1 !== idx)
+                    draft.providers[idx].models = models;
+                draft.isRefreshingModels = false;
+            }));
+
+            return true;
+        }
+        catch
+        {
+            set({ isRefreshingModels: false });
+            return false;
+        }
+    },
 
     // Persistence
     LoadAIState: () =>
