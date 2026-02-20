@@ -5,347 +5,479 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notemac++ - A powerful text editor for macOS & Web</title>
     <meta name="description" content="A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Now with Tauri — 75% smaller desktop app.">
-    <meta name="theme-color" content="#1e1e2e">
+    <meta name="theme-color" content="#1a1520">
     <link rel="icon" type="image/png" href="./Icons/icon.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #1e1e2e;
-            --bg-secondary: #252535;
-            --bg-tertiary: #2e2e42;
-            --bg-card: #1a1a2a;
-            --accent: #4ec9b0;
-            --accent-glow: rgba(78, 201, 176, 0.15);
-            --accent-dark: #3ba896;
-            --accent-light: #66d9cf;
-            --text-primary: #e5e5ea;
-            --text-secondary: #a0a0a8;
-            --text-tertiary: #767680;
-            --border: #363649;
-            --success: #4ade80;
-            --highlight: #fbbf24;
+            --bg-deep: #1a1520;
+            --bg-mid: #221c2a;
+            --bg-surface: #2a2233;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-bg-hover: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-border-hover: rgba(255, 255, 255, 0.22);
+            --glass-shadow: rgba(0, 0, 0, 0.4);
+            --orange: #e8863a;
+            --orange-light: #f5a04e;
+            --orange-glow: rgba(232, 134, 58, 0.2);
+            --orange-soft: rgba(232, 134, 58, 0.08);
+            --amber: #f5c242;
+            --green: #6cd97e;
+            --green-soft: rgba(108, 217, 126, 0.12);
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(255, 255, 255, 0.58);
+            --text-tertiary: rgba(255, 255, 255, 0.35);
         }
 
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+            background: var(--bg-deep);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Glass Utility ─── */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+        .glass:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-hover);
         }
 
         /* ─── Nav ─── */
         nav {
             position: fixed; top: 0; width: 100%; z-index: 1000;
-            background: rgba(30,30,46,0.92);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            padding: 0.8rem 2rem;
+            background: rgba(26, 21, 32, 0.7);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.75rem 2rem;
             display: flex; justify-content: space-between; align-items: center;
         }
         .nav-logo {
             display: flex; align-items: center; gap: 0.6rem;
-            font-size: 1.35rem; font-weight: 700; color: var(--accent);
+            font-size: 1.3rem; font-weight: 700; color: var(--text-primary);
             text-decoration: none;
         }
-        .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
-        .nav-links { display: flex; gap: 1.8rem; align-items: center; }
-        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
-        .nav-links a:hover { color: var(--accent); }
-        .nav-cta {
-            background: var(--accent); color: var(--bg-primary);
-            padding: 0.5rem 1.2rem; border-radius: 6px;
-            font-weight: 600; font-size: 0.9rem;
-            text-decoration: none; transition: all 0.2s;
+        .nav-logo img { width: 30px; height: 30px; border-radius: 8px; }
+        .nav-logo .plus { color: var(--orange); }
+        .nav-links { display: flex; gap: 1.6rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.88rem; font-weight: 500; transition: color 0.25s;
         }
-        .nav-cta:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-cta {
+            background: var(--orange); color: #fff;
+            padding: 0.45rem 1.1rem; border-radius: 8px;
+            font-weight: 600; font-size: 0.88rem;
+            text-decoration: none; transition: all 0.25s;
+            box-shadow: 0 2px 12px var(--orange-glow);
+        }
+        .nav-cta:hover { background: var(--orange-light); transform: translateY(-1px); box-shadow: 0 6px 24px var(--orange-glow); }
 
         /* ─── Hero ─── */
         .hero {
-            margin-top: 56px;
-            min-height: calc(100vh - 56px);
+            margin-top: 54px;
+            min-height: calc(100vh - 54px);
             display: flex; align-items: center; justify-content: center;
-            padding: 3rem 2rem;
-            background: linear-gradient(160deg, #1e1e2e 0%, #22223a 40%, #1e1e2e 100%);
+            padding: 4rem 2rem;
             position: relative;
+            overflow: hidden;
         }
+        /* Warm gradient background */
         .hero::before {
             content: '';
-            position: absolute; top: 20%; right: 5%;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
-            border-radius: 50%;
-            animation: drift 8s ease-in-out infinite;
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 40%, rgba(232, 134, 58, 0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(245, 194, 66, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 20% 70%, rgba(108, 217, 126, 0.04) 0%, transparent 50%),
+                linear-gradient(170deg, #1a1520 0%, #221c2a 50%, #1a1520 100%);
         }
-        .hero::after {
-            content: '';
-            position: absolute; bottom: 10%; left: 8%;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(78,201,176,0.06) 0%, transparent 60%);
+        /* Floating orbs */
+        .orb {
+            position: absolute;
             border-radius: 50%;
-            animation: drift 10s ease-in-out infinite reverse;
+            filter: blur(80px);
+            animation: float 12s ease-in-out infinite;
+            pointer-events: none;
         }
-        @keyframes drift {
+        .orb-1 {
+            width: 400px; height: 400px;
+            top: 10%; right: 10%;
+            background: rgba(232, 134, 58, 0.15);
+            animation-delay: 0s;
+        }
+        .orb-2 {
+            width: 250px; height: 250px;
+            bottom: 15%; left: 10%;
+            background: rgba(245, 194, 66, 0.08);
+            animation-delay: -4s;
+        }
+        .orb-3 {
+            width: 180px; height: 180px;
+            top: 50%; left: 50%;
+            background: rgba(108, 217, 126, 0.06);
+            animation-delay: -8s;
+        }
+        @keyframes float {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, -20px) scale(1.05); }
+            33% { transform: translate(15px, -25px) scale(1.05); }
+            66% { transform: translate(-10px, 15px) scale(0.97); }
         }
+
         .hero-content {
             position: relative; z-index: 10;
             text-align: center; max-width: 720px;
-            animation: fadeUp 0.6s ease-out;
+            animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .hero-icon {
-            width: 100px; height: 100px;
-            margin: 0 auto 1.5rem;
-            border-radius: 20px;
-            box-shadow: 0 16px 48px rgba(78,201,176,0.25);
+            width: 110px; height: 110px;
+            margin: 0 auto 2rem;
+            border-radius: 24px;
+            box-shadow:
+                0 20px 60px rgba(232, 134, 58, 0.3),
+                0 0 0 1px rgba(255,255,255,0.08);
         }
         .hero h1 {
-            font-size: 3.2rem; font-weight: 800;
+            font-size: 3.5rem; font-weight: 800;
+            letter-spacing: -0.03em;
             margin-bottom: 0.4rem;
             display: flex; align-items: center; justify-content: center; gap: 0.8rem; flex-wrap: wrap;
         }
-        .hero h1 .name {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .hero h1 .name { color: var(--text-primary); }
+        .hero h1 .plus-sign { color: var(--orange); }
         .version-badge {
-            font-size: 0.75rem; font-weight: 700;
-            padding: 0.25rem 0.7rem; border-radius: 16px;
-            border: 1px solid var(--accent);
-            color: var(--accent);
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.25rem 0.65rem; border-radius: 20px;
+            background: var(--orange-soft);
+            border: 1px solid rgba(232, 134, 58, 0.25);
+            color: var(--orange-light);
+            letter-spacing: 0.3px;
         }
         .hero .tagline {
-            font-size: 1.3rem; color: var(--text-secondary);
-            margin-bottom: 0.8rem; max-width: 560px; margin-left: auto; margin-right: auto;
+            font-size: 1.25rem; color: var(--text-secondary);
+            margin-bottom: 0.7rem; max-width: 520px; margin-left: auto; margin-right: auto;
+            font-weight: 400;
         }
         .hero .size-callout {
             display: inline-flex; align-items: center; gap: 0.4rem;
-            font-size: 0.95rem; color: var(--success); font-weight: 600;
-            margin-bottom: 2rem;
+            font-size: 0.92rem; color: var(--green); font-weight: 600;
+            margin-bottom: 2.2rem;
         }
-        .hero-buttons { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+        .hero-buttons { display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.8rem; }
         .btn {
-            padding: 0.85rem 2rem; border-radius: 8px;
-            text-decoration: none; font-weight: 600; font-size: 0.95rem;
-            transition: all 0.25s; display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.8rem 2rem; border-radius: 12px;
+            text-decoration: none; font-weight: 600; font-size: 0.92rem;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex; align-items: center; gap: 0.5rem;
             border: none; cursor: pointer;
         }
-        .btn-primary { background: var(--accent); color: var(--bg-primary); }
-        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 10px 28px var(--accent-glow); }
-        .btn-secondary { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
-        .btn-secondary:hover { background: var(--accent-glow); transform: translateY(-2px); }
-        .hero-credit { font-size: 0.9rem; color: var(--text-tertiary); }
-        .hero-credit a { color: var(--accent); text-decoration: none; }
+        .btn-primary {
+            background: var(--orange);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--orange-glow);
+        }
+        .btn-primary:hover {
+            background: var(--orange-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(232, 134, 58, 0.35);
+        }
+        .btn-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-glass:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .hero-credit { font-size: 0.88rem; color: var(--text-tertiary); }
+        .hero-credit a { color: var(--orange-light); text-decoration: none; font-weight: 500; }
+        .hero-credit a:hover { text-decoration: underline; }
         .kofi-btn {
             display: inline-flex; align-items: center; gap: 6px;
             margin-top: 0.8rem;
-            background: #FF5E5B; color: #fff;
-            padding: 0.5rem 1.2rem; border-radius: 8px;
-            text-decoration: none; font-weight: 600; font-size: 0.85rem;
-            transition: all 0.2s;
+            background: rgba(255, 94, 91, 0.15); color: #FF7B79;
+            border: 1px solid rgba(255, 94, 91, 0.25);
+            padding: 0.45rem 1.1rem; border-radius: 10px;
+            text-decoration: none; font-weight: 600; font-size: 0.82rem;
+            transition: all 0.25s;
         }
-        .kofi-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+        .kofi-btn:hover { background: rgba(255, 94, 91, 0.25); transform: translateY(-1px); }
 
         /* ─── Stats Strip ─── */
         .stats {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            padding: 2rem;
+            padding: 2.5rem 2rem;
+            position: relative;
+        }
+        .stats::before {
+            content: '';
+            position: absolute; left: 10%; right: 10%; top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        }
+        .stats::after {
+            content: '';
+            position: absolute; left: 10%; right: 10%; bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
         }
         .stats-grid {
-            display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 3.5rem; flex-wrap: wrap;
             max-width: 900px; margin: 0 auto;
         }
         .stat-item { text-align: center; }
-        .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
-        .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem; }
+        .stat-num {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--amber) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label { font-size: 0.82rem; color: var(--text-tertiary); margin-top: 0.15rem; font-weight: 500; letter-spacing: 0.3px; }
+
+        /* ─── Section Common ─── */
+        .section-title {
+            text-align: center; font-size: 2.2rem; font-weight: 700; margin-bottom: 0.6rem;
+            letter-spacing: -0.02em;
+        }
+        .section-title span {
+            background: linear-gradient(135deg, var(--orange) 0%, var(--amber) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-subtitle {
+            text-align: center; color: var(--text-secondary); font-size: 1rem;
+            margin-bottom: 3rem; max-width: 520px; margin-left: auto; margin-right: auto;
+        }
 
         /* ─── What's New ─── */
         .whats-new {
-            padding: 4.5rem 2rem;
-            background: var(--bg-primary);
-        }
-        .section-title {
-            text-align: center; font-size: 2.2rem; font-weight: 700; margin-bottom: 0.6rem;
-        }
-        .section-title span { color: var(--accent); }
-        .section-subtitle {
-            text-align: center; color: var(--text-secondary); font-size: 1rem;
-            margin-bottom: 3rem; max-width: 540px; margin-left: auto; margin-right: auto;
+            padding: 5rem 2rem;
         }
         .new-feature-highlight {
             max-width: 800px; margin: 0 auto;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
         }
         .new-card {
-            background: var(--bg-tertiary);
-            padding: 1.8rem; border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
+            padding: 1.8rem; border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .new-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .new-card:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(232, 134, 58, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25), 0 0 0 1px rgba(232, 134, 58, 0.1);
+        }
         .new-card .badge {
             display: inline-block;
-            background: rgba(78,201,176,0.15); color: var(--accent);
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            padding: 0.2rem 0.5rem; border-radius: 4px; margin-bottom: 0.8rem;
-            letter-spacing: 0.5px;
+            background: var(--orange-soft); color: var(--orange-light);
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.8rem;
+            letter-spacing: 0.6px;
         }
-        .new-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
-        .new-card p { color: var(--text-secondary); font-size: 0.9rem; }
+        .new-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .new-card p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.55; }
         .new-card.full-width { grid-column: 1 / -1; }
 
         /* ─── Features Grid ─── */
         .features {
             padding: 5rem 2rem;
-            background: var(--bg-secondary);
         }
         .features-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem; max-width: 1100px; margin: 0 auto;
         }
         .feature-card {
-            background: var(--bg-card);
-            padding: 1.8rem; border-radius: 10px;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
+            padding: 1.6rem; border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative; overflow: hidden;
         }
-        .feature-card::after {
+        .feature-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
-            transform: scaleX(0); transform-origin: left;
-            transition: transform 0.3s;
+            background: linear-gradient(90deg, var(--orange), var(--amber), transparent);
+            opacity: 0; transition: opacity 0.3s;
         }
-        .feature-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-        .feature-card:hover::after { transform: scaleX(1); }
-        .feature-icon { font-size: 2rem; margin-bottom: 0.75rem; display: inline-block; }
-        .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
-        .feature-card p { color: var(--text-secondary); font-size: 0.88rem; }
+        .feature-card:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(232, 134, 58, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon { font-size: 1.8rem; margin-bottom: 0.65rem; display: inline-block; }
+        .feature-card h3 { font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
 
         /* ─── Comparison ─── */
         .comparison {
             padding: 5rem 2rem;
-            background: var(--bg-primary);
+        }
+        .comparison-wrapper {
+            max-width: 900px; margin: 0 auto;
+            border-radius: 16px; overflow: hidden;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
         }
         .comparison-table {
-            max-width: 900px; margin: 0 auto;
-            border-collapse: collapse; width: 100%;
+            width: 100%;
+            border-collapse: collapse;
             font-size: 0.9rem;
         }
         .comparison-table th {
-            background: var(--bg-tertiary);
-            padding: 0.8rem 1rem; text-align: left;
-            border-bottom: 2px solid var(--accent);
-            font-weight: 700; color: var(--accent);
+            padding: 1rem 1.2rem; text-align: left;
+            font-weight: 600; color: var(--orange-light);
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.03);
+            font-size: 0.85rem;
         }
         .comparison-table td {
-            padding: 0.6rem 1rem;
-            border-bottom: 1px solid var(--border);
+            padding: 0.65rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
             color: var(--text-secondary);
         }
-        .comparison-table tr:hover td { background: var(--bg-secondary); }
-        .comparison-table .yes { color: var(--success); font-weight: 600; }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .comparison-table .yes { color: var(--green); font-weight: 600; }
         .comparison-table .no { color: var(--text-tertiary); }
-        .comparison-table .highlight { color: var(--accent); font-weight: 600; }
+        .comparison-table .highlight { color: var(--orange-light); font-weight: 600; }
 
         /* ─── Screenshots ─── */
         .screenshots {
             padding: 5rem 2rem;
-            background: var(--bg-secondary);
         }
         .screenshots-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+            gap: 1.2rem; max-width: 1100px; margin: 0 auto;
         }
         .screenshot-item {
-            border-radius: 10px; overflow: hidden;
-            border: 1px solid var(--border);
-            transition: all 0.3s; cursor: pointer;
+            border-radius: 16px; overflow: hidden;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
         }
-        .screenshot-item:hover { border-color: var(--accent); box-shadow: 0 10px 30px rgba(78,201,176,0.15); transform: translateY(-5px); }
+        .screenshot-item:hover {
+            border-color: rgba(232, 134, 58, 0.3);
+            box-shadow: 0 16px 48px rgba(232, 134, 58, 0.12);
+            transform: translateY(-5px);
+        }
         .screenshot-item img { width: 100%; height: 260px; object-fit: cover; display: block; }
         .screenshot-item .caption {
-            padding: 0.8rem 1rem;
-            background: var(--bg-card);
-            color: var(--text-secondary); font-size: 0.85rem; text-align: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary); font-size: 0.82rem; text-align: center;
+            font-weight: 500;
         }
 
         /* ─── Tech Stack ─── */
         .tech-stack {
             padding: 4rem 2rem;
-            background: var(--bg-primary);
             text-align: center;
         }
         .tech-grid {
             display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 0.8rem; max-width: 800px; margin: 0 auto;
+            gap: 0.6rem; max-width: 800px; margin: 0 auto;
         }
         .tech-pill {
-            background: var(--bg-tertiary);
-            padding: 0.6rem 1.2rem; border-radius: 20px;
-            border: 1px solid var(--border);
-            font-weight: 600; font-size: 0.85rem;
-            color: var(--text-primary);
-            transition: all 0.2s;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.55rem 1.1rem; border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            font-weight: 600; font-size: 0.82rem;
+            color: var(--text-secondary);
+            transition: all 0.25s;
         }
-        .tech-pill:hover { border-color: var(--accent); color: var(--accent); }
-        .tech-pill.new { border-color: var(--accent); color: var(--accent); }
+        .tech-pill:hover { border-color: var(--glass-border-hover); color: var(--text-primary); }
+        .tech-pill.new {
+            border-color: rgba(232, 134, 58, 0.35);
+            color: var(--orange-light);
+            background: var(--orange-soft);
+        }
 
         /* ─── CTA ─── */
         .cta {
             padding: 5rem 2rem;
-            background: linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
             text-align: center;
+            position: relative;
         }
-        .cta h2 { font-size: 2rem; margin-bottom: 1rem; }
-        .cta p { color: var(--text-secondary); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .cta::before {
+            content: '';
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px; height: 300px;
+            background: radial-gradient(ellipse, var(--orange-glow) 0%, transparent 70%);
+            filter: blur(40px);
+            pointer-events: none;
+        }
+        .cta-content { position: relative; z-index: 1; }
+        .cta h2 { font-size: 2rem; margin-bottom: 1rem; font-weight: 700; }
+        .cta p { color: var(--text-secondary); margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto; }
 
         /* ─── Footer ─── */
         footer {
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--glass-border);
             padding: 2rem;
             text-align: center;
         }
         .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        .footer-links a { color: var(--text-tertiary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-        .footer-links a:hover { color: var(--accent); }
-        .footer-bottom { color: var(--text-tertiary); font-size: 0.8rem; }
+        .footer-links a { color: var(--text-tertiary); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: color 0.25s; }
+        .footer-links a:hover { color: var(--text-secondary); }
+        .footer-bottom { color: var(--text-tertiary); font-size: 0.78rem; }
 
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
-            nav { flex-direction: column; gap: 0.8rem; padding: 0.8rem 1rem; }
-            .nav-links { width: 100%; justify-content: center; gap: 1rem; font-size: 0.85rem; }
-            .hero { margin-top: 110px; padding: 2rem 1.5rem; }
-            .hero h1 { font-size: 2.4rem; }
+            nav { flex-direction: column; gap: 0.8rem; padding: 0.7rem 1rem; }
+            .nav-links { width: 100%; justify-content: center; gap: 1rem; font-size: 0.82rem; }
+            .hero { margin-top: 100px; padding: 2rem 1.5rem; }
+            .hero h1 { font-size: 2.5rem; }
             .hero .tagline { font-size: 1.05rem; }
             .hero-buttons { flex-direction: column; }
             .btn { width: 100%; justify-content: center; }
             .section-title { font-size: 1.8rem; }
-            .stats-grid { gap: 1.5rem; }
+            .stats-grid { gap: 2rem; }
             .new-feature-highlight { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .screenshots-grid { grid-template-columns: 1fr; }
             .comparison-table { font-size: 0.8rem; }
-            .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
-            .hero-icon { width: 72px; height: 72px; }
+            .comparison-table th, .comparison-table td { padding: 0.4rem 0.6rem; }
+            .hero-icon { width: 80px; height: 80px; }
         }
         @media (max-width: 480px) {
-            .hero h1 { font-size: 1.8rem; }
+            .hero h1 { font-size: 1.9rem; }
             .section-title { font-size: 1.5rem; }
-            .tech-grid { gap: 0.5rem; }
-            .tech-pill { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+            .tech-grid { gap: 0.4rem; }
+            .tech-pill { font-size: 0.72rem; padding: 0.4rem 0.8rem; }
         }
     </style>
 </head>
@@ -355,7 +487,7 @@
 <nav>
     <a href="#" class="nav-logo">
         <img src="./Icons/icon.png" alt="Notemac++">
-        Notemac++
+        Notemac<span class="plus">++</span>
     </a>
     <div class="nav-links">
         <a href="#whats-new">What's New</a>
@@ -369,26 +501,29 @@
 
 <!-- Hero -->
 <section class="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
     <div class="hero-content">
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
-            <span class="name">Notemac++</span>
+            <span class="name">Notemac<span class="plus-sign">++</span></span>
             <span class="version-badge">v3.0.0</span>
         </h1>
         <p class="tagline">A powerful text editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
             Now 75% smaller with Tauri — just ~10 MB
         </p>
         <div class="hero-buttons">
             <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-secondary">Download Desktop</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download Desktop</a>
         </div>
         <p class="hero-credit">
             Created by <a href="https://github.com/sergioadevita" target="_blank">Sergio Agustin De Vita</a>
         </p>
         <a href="https://ko-fi.com/sergioadevita" target="_blank" class="kofi-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
             Support on Ko-fi
         </a>
     </div>
@@ -525,28 +660,30 @@
 <section id="compare" class="comparison">
     <h2 class="section-title">How It <span>Compares</span></h2>
     <p class="section-subtitle">Notemac++ combines Notepad++ familiarity with modern power — without the overhead.</p>
-    <table class="comparison-table">
-        <thead>
-            <tr>
-                <th>Feature</th>
-                <th>Notemac++</th>
-                <th>Notepad++</th>
-                <th>VS Code</th>
-                <th>Sublime Text</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>Platform</td><td class="highlight">macOS / Web</td><td>Windows</td><td>All</td><td>All</td></tr>
-            <tr><td>App Size</td><td class="highlight">~10-15 MB</td><td>~5 MB</td><td>~300 MB</td><td>~30 MB</td></tr>
-            <tr><td>Built-in Git</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
-            <tr><td>Built-in AI</td><td class="yes">Yes (multi-provider)</td><td class="no">No</td><td>Via Copilot</td><td class="no">No</td></tr>
-            <tr><td>Terminal</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
-            <tr><td>Command Palette</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-            <tr><td>Mark System</td><td class="yes">Yes (5 colors)</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
-            <tr><td>Runs in Browser</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
-            <tr><td>Price</td><td class="highlight">Free (MIT)</td><td>Free (GPL)</td><td>Free</td><td>$99</td></tr>
-        </tbody>
-    </table>
+    <div class="comparison-wrapper">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Notemac++</th>
+                    <th>Notepad++</th>
+                    <th>VS Code</th>
+                    <th>Sublime Text</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Platform</td><td class="highlight">macOS / Web</td><td>Windows</td><td>All</td><td>All</td></tr>
+                <tr><td>App Size</td><td class="highlight">~10-15 MB</td><td>~5 MB</td><td>~300 MB</td><td>~30 MB</td></tr>
+                <tr><td>Built-in Git</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+                <tr><td>Built-in AI</td><td class="yes">Yes (multi-provider)</td><td class="no">No</td><td>Via Copilot</td><td class="no">No</td></tr>
+                <tr><td>Terminal</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+                <tr><td>Command Palette</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+                <tr><td>Mark System</td><td class="yes">Yes (5 colors)</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+                <tr><td>Runs in Browser</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+                <tr><td>Price</td><td class="highlight">Free (MIT)</td><td>Free (GPL)</td><td>Free</td><td>$99</td></tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 
 <!-- Screenshots -->
@@ -587,11 +724,13 @@
 
 <!-- CTA -->
 <section class="cta">
-    <h2>Ready to try it?</h2>
-    <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
-    <div class="hero-buttons">
-        <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-        <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-secondary">Download v3.0.0</a>
+    <div class="cta-content">
+        <h2>Ready to try it?</h2>
+        <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
+        <div class="hero-buttons">
+            <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.0.0</a>
+        </div>
     </div>
 </section>
 
@@ -602,7 +741,7 @@
         <a href="https://github.com/sergioadevita/notemac-plus-plus/issues" target="_blank">Issues</a>
         <a href="https://github.com/sergioadevita/notemac-plus-plus/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
         <a href="https://github.com/sergioadevita/notemac-plus-plus/blob/main/LICENSE" target="_blank">License</a>
-        <a href="https://ko-fi.com/sergioadevita" target="_blank" style="color: #FF5E5B;">Support on Ko-fi</a>
+        <a href="https://ko-fi.com/sergioadevita" target="_blank" style="color: #FF7B79;">Support on Ko-fi</a>
     </div>
     <div class="footer-bottom">
         Made by Sergio Agustin De Vita &middot; MIT License &middot; &copy; 2024-2026
