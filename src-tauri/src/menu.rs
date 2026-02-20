@@ -334,13 +334,9 @@ pub fn build_menu(app: &AppHandle) -> Result<Menu<tauri::Wry>, tauri::Error>
     // ── Window Menu ─────────────────────────────────────────────
     let minimize = PredefinedMenuItem::minimize(app, None)?;
     let zoom = PredefinedMenuItem::maximize(app, None)?;
-    let bring_all_to_front = PredefinedMenuItem::bring_all_to_front(app, None)?;
-
     let window_submenu = SubmenuBuilder::new(app, "Window")
         .item(&minimize)
         .item(&zoom)
-        .separator()
-        .item(&bring_all_to_front)
         .build()?;
 
     // ── Build Full Menu ─────────────────────────────────────────

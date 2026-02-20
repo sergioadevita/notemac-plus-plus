@@ -40,13 +40,7 @@
     "category": "DeveloperTool"
   },
   "plugins": {
-    "dialog": {},
-    "fs": {
-      "scope": {
-        "allow": ["**"],
-        "deny": []
-      }
-    },
+    "fs": {},
     "shell": {
       "open": true
     }
