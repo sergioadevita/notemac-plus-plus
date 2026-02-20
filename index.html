@@ -376,12 +376,39 @@
         .screenshots {
             padding: 5rem 2rem;
         }
-        .screenshots-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.2rem; max-width: 1100px; margin: 0 auto;
+        .screenshot-hero {
+            max-width: 1100px; margin: 0 auto 2.5rem;
+            border-radius: 20px; overflow: hidden;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 24px 80px rgba(232, 134, 58, 0.15), 0 0 0 1px rgba(232, 134, 58, 0.08);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .screenshot-hero:hover {
+            box-shadow: 0 32px 100px rgba(232, 134, 58, 0.22), 0 0 0 1px rgba(232, 134, 58, 0.15);
+            transform: translateY(-4px);
+        }
+        .screenshot-hero img { width: 100%; display: block; }
+        .screenshot-hero .caption {
+            padding: 1rem 1.5rem;
+            color: var(--text-primary); font-size: 0.95rem; text-align: center;
+            font-weight: 600;
+            background: linear-gradient(135deg, rgba(232, 134, 58, 0.08), rgba(245, 194, 66, 0.05));
+        }
+        .screenshot-hero .caption span {
+            background: linear-gradient(135deg, var(--orange), var(--amber));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .theme-gallery-label {
+            text-align: center; margin-bottom: 1rem;
+            color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;
+        }
+        .theme-gallery {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem; max-width: 1100px; margin: 0 auto;
         }
         .screenshot-item {
-            border-radius: 16px; overflow: hidden;
+            border-radius: 14px; overflow: hidden;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -392,10 +419,10 @@
             box-shadow: 0 16px 48px rgba(232, 134, 58, 0.12);
             transform: translateY(-5px);
         }
-        .screenshot-item img { width: 100%; height: 260px; object-fit: cover; display: block; }
+        .screenshot-item img { width: 100%; height: 180px; object-fit: cover; object-position: top; display: block; }
         .screenshot-item .caption {
-            padding: 0.75rem 1rem;
-            color: var(--text-secondary); font-size: 0.82rem; text-align: center;
+            padding: 0.6rem 0.8rem;
+            color: var(--text-secondary); font-size: 0.78rem; text-align: center;
             font-weight: 500;
         }
 
@@ -468,7 +495,7 @@
             .stats-grid { gap: 2rem; }
             .new-feature-highlight { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
-            .screenshots-grid { grid-template-columns: 1fr; }
+            .theme-gallery { grid-template-columns: repeat(2, 1fr); }
             .comparison-table { font-size: 0.8rem; }
             .comparison-table th, .comparison-table td { padding: 0.4rem 0.6rem; }
             .hero-icon { width: 80px; height: 80px; }
@@ -689,18 +716,35 @@
 <!-- Screenshots -->
 <section id="screenshots" class="screenshots">
     <h2 class="section-title">See It In <span>Action</span></h2>
-    <div class="screenshots-grid">
+    <div class="screenshot-hero">
+        <img src="./docs/screenshots/editor-mac-glass.png" alt="Mac Glass Theme — Default">
+        <div class="caption"><span>Mac Glass</span> — Default Theme</div>
+    </div>
+    <p class="theme-gallery-label">Plus 6 more built-in themes</p>
+    <div class="theme-gallery">
         <div class="screenshot-item">
             <img src="./docs/screenshots/editor-dark.png" alt="Dark Theme">
-            <div class="caption">Dark theme (default)</div>
+            <div class="caption">Dark</div>
         </div>
         <div class="screenshot-item">
             <img src="./docs/screenshots/editor-light.png" alt="Light Theme">
-            <div class="caption">Light theme</div>
+            <div class="caption">Light</div>
         </div>
         <div class="screenshot-item">
             <img src="./docs/screenshots/editor-monokai.png" alt="Monokai Theme">
-            <div class="caption">Monokai theme</div>
+            <div class="caption">Monokai</div>
+        </div>
+        <div class="screenshot-item">
+            <img src="./docs/screenshots/editor-dracula.png" alt="Dracula Theme">
+            <div class="caption">Dracula</div>
+        </div>
+        <div class="screenshot-item">
+            <img src="./docs/screenshots/editor-solarized-dark.png" alt="Solarized Dark Theme">
+            <div class="caption">Solarized Dark</div>
+        </div>
+        <div class="screenshot-item">
+            <img src="./docs/screenshots/editor-solarized-light.png" alt="Solarized Light Theme">
+            <div class="caption">Solarized Light</div>
         </div>
     </div>
 </section>
