@@ -60,31 +60,42 @@ export function GetBuiltInProviders(): AIProvider[]
 function GetOpenAIModels(): AIModelDefinition[]
 {
     return [
+        // GPT-4.1 series (latest general-purpose, 1M context)
+        { id: 'gpt-4.1', name: 'GPT-4.1', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
+        { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
+        { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', providerId: 'openai', contextWindow: 1047576, supportsStreaming: true, supportsFIM: false },
+        // GPT-4o series (widely available, 128K context)
         { id: 'gpt-4o', name: 'GPT-4o', providerId: 'openai', contextWindow: 128000, supportsStreaming: true, supportsFIM: false },
         { id: 'gpt-4o-mini', name: 'GPT-4o Mini', providerId: 'openai', contextWindow: 128000, supportsStreaming: true, supportsFIM: false },
-        { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', providerId: 'openai', contextWindow: 128000, supportsStreaming: true, supportsFIM: false },
-        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', providerId: 'openai', contextWindow: 16385, supportsStreaming: true, supportsFIM: false },
-        { id: 'o1', name: 'o1', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
-        { id: 'o1-mini', name: 'o1-mini', providerId: 'openai', contextWindow: 128000, supportsStreaming: true, supportsFIM: false },
+        // O-series reasoning models
+        { id: 'o3', name: 'o3', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        { id: 'o3-mini', name: 'o3-mini', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        { id: 'o4-mini', name: 'o4-mini', providerId: 'openai', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
     ];
 }
 
 function GetAnthropicModels(): AIModelDefinition[]
 {
     return [
-        { id: 'claude-sonnet-4-5-20250514', name: 'Claude Sonnet 4.5', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
-        { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        // Latest generation (4.6)
+        { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        // 4.5 generation
+        { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
+        { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
         { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
-        { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', providerId: 'anthropic', contextWindow: 200000, supportsStreaming: true, supportsFIM: false },
     ];
 }
 
 function GetGoogleModels(): AIModelDefinition[]
 {
     return [
+        // Gemini 2.5 series (stable, recommended)
+        { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
+        { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
+        // Gemini 2.0 series (still available)
         { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
-        { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', providerId: 'google', contextWindow: 1048576, supportsStreaming: true, supportsFIM: false },
-        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', providerId: 'google', contextWindow: 2097152, supportsStreaming: true, supportsFIM: false },
     ];
 }
 
