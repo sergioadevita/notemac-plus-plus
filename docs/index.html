@@ -548,7 +548,7 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 const markdown = await response.text();
-                const html = marked(markdown);
+                const html = marked.parse(markdown);
                 contentCache[section] = html;
                 contentDiv.innerHTML = html;
             } catch (error) {
