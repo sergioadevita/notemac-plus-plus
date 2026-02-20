@@ -429,7 +429,8 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                   label="Color Theme"
                   value={settings.theme}
                   options={[
-                    { value: 'dark', label: 'Dark (Default)' },
+                    { value: 'mac-glass', label: 'Mac Glass (Default)' },
+                    { value: 'dark', label: 'Dark' },
                     { value: 'light', label: 'Light' },
                     { value: 'monokai', label: 'Monokai' },
                     { value: 'dracula', label: 'Dracula' },

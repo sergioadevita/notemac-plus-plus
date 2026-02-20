@@ -16,4 +16,4 @@ export type RenderWhitespace = 'none' | 'boundary' | 'selection' | 'trailing' | 
 
 export type LineEnding = 'LF' | 'CRLF' | 'CR';
 
-export type ThemeName = 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
+export type ThemeName = 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';

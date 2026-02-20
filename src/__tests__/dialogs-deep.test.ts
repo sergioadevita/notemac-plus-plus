@@ -212,7 +212,7 @@ describe('Dialog Model — edge cases', () =>
         const state = useNotemacStore.getState();
         expect(state.showSettings).toBe(true);
         expect(state.settings).toBeTruthy();
-        expect(state.settings.theme).toBe('dark');
+        expect(state.settings.theme).toBe('mac-glass');
         expect(state.settings.fontSize).toBe(14);
     });
 

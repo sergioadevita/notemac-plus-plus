@@ -159,7 +159,7 @@ function createMockTab(overrides?: Partial<FileTab>): FileTab {
 
 function createMockSettings(overrides?: Partial<AppSettings>): AppSettings {
   return {
-    theme: 'dark',
+    theme: 'mac-glass',
     fontSize: 14,
     fontFamily: 'monospace',
     tabSize: 4,

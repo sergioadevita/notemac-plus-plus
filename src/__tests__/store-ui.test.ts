@@ -249,7 +249,7 @@ describe('UIModel — settings', () =>
     it('returns default settings', () =>
     {
         const state = useNotemacStore.getState();
-        expect(state.settings.theme).toBe('dark');
+        expect(state.settings.theme).toBe('mac-glass');
         expect(14 === state.settings.fontSize).toBe(true);
         expect(4 === state.settings.tabSize).toBe(true);
         expect(state.settings.wordWrap).toBe(false);
@@ -281,7 +281,7 @@ describe('UIModel — settings', () =>
         store.updateSettings({ fontSize: 16 });
         const settings = useNotemacStore.getState().settings;
 
-        expect(settings.theme).toBe('dark');
+        expect(settings.theme).toBe('mac-glass');
         expect(settings.showLineNumbers).toBe(true);
         expect(4 === settings.tabSize).toBe(true);
     });

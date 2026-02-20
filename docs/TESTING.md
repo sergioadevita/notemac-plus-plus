@@ -23,7 +23,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Helpers | `helpers.test.ts` | 46 | `detectLanguage` (30 extensions + edge cases), `detectLineEnding`, `convertLineEnding`, `generateId` |
 | Tabs | `store-tabs.test.ts` | 36 | `addTab`, `closeTab`, `closeAllTabs`, `closeOtherTabs`, `closeTabsToLeft/Right`, `closeUnchangedTabs`, `closeAllButPinned`, `restoreLastClosedTab`, tab navigation, `updateTab`, `updateTabContent`, `togglePinTab`, `setTabColor`, `moveTab`, `addRecentFile` |
 | UI State | `store-ui.test.ts` | 31 | Sidebar, zoom, split view, clipboard history, dialog toggles, settings, session save/load |
-| Configs | `configs.test.ts` | 21 | `EditorConfig`, `ThemeConfig` (all 6 themes), `Constants` |
+| Configs | `configs.test.ts` | 21 | `EditorConfig`, `ThemeConfig` (all 7 themes), `Constants` |
 | Search | `store-search.test.ts` | 13 | Search state, find options, marks, bookmarks |
 | Search Deep | `search-model-deep.test.ts` | 10 | Advanced search patterns, regex, whole word matching |
 | Macros | `store-macro.test.ts` | 9 | Recording, playback, action logging, saved macros |

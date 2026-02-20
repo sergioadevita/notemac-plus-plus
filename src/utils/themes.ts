@@ -33,6 +33,39 @@ export interface ThemeColors {
 }
 
 const themes: Record<string, ThemeColors> = {
+  'mac-glass': {
+    bg: '#1a1520',
+    bgSecondary: '#221c2a',
+    bgTertiary: '#2a2233',
+    bgHover: '#342c3e',
+    bgActive: '#3d2e1e',
+    text: '#e8e4ec',
+    textSecondary: '#9e96a8',
+    textMuted: '#6b6474',
+    border: '#362e40',
+    accent: '#e8863a',
+    accentHover: '#f5a04e',
+    accentText: '#ffffff',
+    danger: '#e85555',
+    warning: '#f5c242',
+    success: '#6cd97e',
+    tabBg: '#221c2a',
+    tabActiveBg: '#1a1520',
+    tabActiveText: '#f5a04e',
+    tabBorder: '#362e40',
+    menuBg: '#221c2a',
+    menuHover: '#3d2e1e',
+    menuText: '#e8e4ec',
+    statusBarBg: '#e8863a',
+    statusBarText: '#ffffff',
+    sidebarBg: '#221c2a',
+    sidebarText: '#c8c0d0',
+    scrollbarBg: 'transparent',
+    scrollbarThumb: '#3e3648',
+    editorBg: '#1a1520',
+    editorMonacoTheme: 'mac-glass',
+    findBg: '#221c2a',
+  },
   dark: {
     bg: '#1e1e1e',
     bgSecondary: '#252526',
@@ -234,10 +267,38 @@ const themes: Record<string, ThemeColors> = {
 };
 
 export function getTheme(name: string): ThemeColors {
-  return themes[name] || themes.dark;
+  return themes[name] || themes['mac-glass'];
 }
 
 export function defineMonacoThemes(monaco: typeof import('monaco-editor')) {
+  monaco.editor.defineTheme('mac-glass', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '6b6474', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'e8863a' },
+      { token: 'string', foreground: '6cd97e' },
+      { token: 'number', foreground: 'f5c242' },
+      { token: 'type', foreground: 'f5a04e', fontStyle: 'italic' },
+      { token: 'function', foreground: 'c8a0ff' },
+      { token: 'variable', foreground: 'e8e4ec' },
+      { token: 'operator', foreground: 'e8863a' },
+      { token: 'delimiter', foreground: '9e96a8' },
+    ],
+    colors: {
+      'editor.background': '#1a1520',
+      'editor.foreground': '#e8e4ec',
+      'editor.lineHighlightBackground': '#221c2a',
+      'editor.selectionBackground': '#3d2e1e',
+      'editorCursor.foreground': '#e8863a',
+      'editor.selectionHighlightBackground': '#362e4040',
+      'editorLineNumber.foreground': '#6b6474',
+      'editorLineNumber.activeForeground': '#e8863a',
+      'editorIndentGuide.background': '#2a2233',
+      'editorIndentGuide.activeBackground': '#362e40',
+    },
+  });
+
   monaco.editor.defineTheme('monokai', {
     base: 'vs-dark',
     inherit: true,

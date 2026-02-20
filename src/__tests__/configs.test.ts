@@ -40,7 +40,7 @@ describe('EditorConfig — GetDefaultSettings', () =>
     {
         const settings = GetDefaultSettings();
         expect(settings).toBeDefined();
-        expect(settings.theme).toBe('dark');
+        expect(settings.theme).toBe('mac-glass');
         expect(14 === settings.fontSize).toBe(true);
         expect(4 === settings.tabSize).toBe(true);
         expect(settings.insertSpaces).toBe(true);
@@ -89,9 +89,9 @@ describe('EditorConfig — individual getters', () =>
         expect(family).toContain('Monaco');
     });
 
-    it('GetDefaultTheme returns dark', () =>
+    it('GetDefaultTheme returns mac-glass', () =>
     {
-        expect(GetDefaultTheme()).toBe('dark');
+        expect(GetDefaultTheme()).toBe('mac-glass');
     });
 
     it('GetDefaultCursorBlinking returns blink', () =>
@@ -115,6 +115,15 @@ describe('EditorConfig — individual getters', () =>
 // ============================================================
 describe('ThemeConfig — getTheme', () =>
 {
+    it('returns mac-glass theme', () =>
+    {
+        const theme = GetTheme('mac-glass');
+        expect(theme).toBeDefined();
+        expect(theme.bg).toBe('#1a1520');
+        expect(theme.editorMonacoTheme).toBe('mac-glass');
+        expect(theme.accent).toBe('#e8863a');
+    });
+
     it('returns dark theme', () =>
     {
         const theme = GetTheme('dark');
@@ -157,7 +166,7 @@ describe('ThemeConfig — getTheme', () =>
 
     it('all themes have required color keys', () =>
     {
-        const themeNames = ['dark', 'light', 'monokai', 'solarized-dark', 'solarized-light', 'dracula'] as const;
+        const themeNames = ['mac-glass', 'dark', 'light', 'monokai', 'solarized-dark', 'solarized-light', 'dracula'] as const;
         const requiredKeys = [
             'bg', 'bgSecondary', 'bgTertiary', 'bgHover', 'bgActive',
             'text', 'textSecondary', 'textMuted', 'border',

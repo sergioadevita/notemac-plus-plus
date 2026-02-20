@@ -64,7 +64,7 @@ export interface SearchOptions {
 }
 
 export interface AppSettings {
-  theme: 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
+  theme: 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
   fontSize: number;
   fontFamily: string;
   tabSize: number;

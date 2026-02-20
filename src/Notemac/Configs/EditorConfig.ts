@@ -11,7 +11,7 @@ import {
 
 const defaultSettings: AppSettings =
 {
-    theme: 'dark',
+    theme: 'mac-glass',
     fontSize: EDITOR_DEFAULT_FONT_SIZE,
     fontFamily: EDITOR_DEFAULT_FONT_FAMILY,
     tabSize: EDITOR_DEFAULT_TAB_SIZE,
