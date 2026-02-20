@@ -94,6 +94,18 @@ npm run electron:dev     # Electron dev mode
 ## Features
 
 <details>
+<summary><strong>Command Palette & Quick Open</strong> — Fast access to every command and file</summary>
+
+&nbsp;
+
+- **Command Palette** (`Cmd+Shift+P`): Fuzzy-searchable launcher with 100+ commands spanning every menu action, keybinding, and feature
+- **Quick Open** (`Cmd+P`): Fuzzy file finder that searches all files in the current workspace
+- Keyboard navigation with arrow keys and Enter
+- Real-time filtered results as you type
+
+</details>
+
+<details>
 <summary><strong>Editing</strong> — Monaco-powered editor with full code intelligence</summary>
 
 &nbsp;
@@ -299,7 +311,7 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 - **AI Chat panel**: Ask questions, get code explanations, generate code, and refactor
 - **Inline completions**: Context-aware code suggestions as you type
 - **Multi-provider support**: OpenAI (GPT-4), Anthropic (Claude), and Google (Gemini)
-- **Context actions**: Explain selection, fix errors, optimize code, add comments
+- **Context actions**: Explain, refactor, fix, document, test, simplify, convert language
 - **XSS-protected responses**: Sanitized AI output for safe rendering
 - **Configurable**: Choose your provider, model, and API key in settings
 
@@ -397,26 +409,32 @@ See [docs/TESTING.md](docs/TESTING.md) for details.
 
 How Notemac++ stacks up against other editors:
 
-| Feature | Notemac++ | Notepad++ | VS Code |
-|---|---|---|---|
-| **Platform** | macOS / Web | Windows | All |
-| **Size** | ~50 MB | ~5 MB | ~300 MB |
-| **Startup Time** | Instant | Fast | Moderate |
-| **Syntax Languages** | 70+ | 80+ | 200+ |
-| **Built-in Git** | Yes | No | Yes |
-| **Built-in AI** | Yes (multi-provider) | No | Via Copilot |
-| **Terminal** | Yes | No | Yes |
-| **Macros** | Yes | Yes | Via Extensions |
-| **Split View** | Yes | Yes | Yes |
-| **Themes** | 6 | 30+ | 1000+ |
-| **Plugins** | Planned | 200+ | 30K+ |
-| **Price** | Free (MIT) | Free (GPL) | Free |
+| Feature | Notemac++ | Notepad++ | VS Code | Sublime Text |
+|---|---|---|---|---|
+| **Platform** | macOS / Web | Windows | All | All |
+| **Size** | ~50 MB | ~5 MB | ~300 MB | ~30 MB |
+| **Startup Time** | Instant | Fast | Moderate | Fast |
+| **Syntax Languages** | 70+ | 80+ | 200+ | 50+ |
+| **Built-in Git** | Yes | No | Yes | No |
+| **Built-in AI** | Yes (multi-provider) | No | Via Copilot | No |
+| **Terminal** | Yes | No | Yes | No |
+| **Command Palette** | Yes | No | Yes | Yes |
+| **Quick Open** | Yes | No | Yes | Yes |
+| **Macros** | Yes | Yes | Via Extensions | Yes |
+| **Split View** | Yes | Yes | Yes | Yes |
+| **Code Snippets** | Yes | No (plugins) | Yes | Yes |
+| **Mark System** | Yes (5 colors) | Yes (5 styles) | No | No |
+| **Column Editor** | Yes | Yes | Via Extensions | Yes |
+| **Themes** | 6 | 30+ | 1000+ | 25+ |
+| **Plugins** | Planned | 200+ | 30K+ | 5K+ |
+| **Runs in Browser** | Yes | No | Yes (vscode.dev) | No |
+| **Price** | Free (MIT) | Free (GPL) | Free | $99 |
 
-Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity with modern web technology and native desktop integration.
+Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity with modern web technology and native desktop integration. It combines the simplicity of Notepad++ with power features found in VS Code — without the overhead.
 
 ## Roadmap
 
-Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code.
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests.
 
 Planned for future releases:
 

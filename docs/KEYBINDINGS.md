@@ -2,6 +2,14 @@
 
 All default keyboard shortcuts in Notemac++. Shortcuts can be customized via Settings > Shortcut Mapper.
 
+## Quick Access
+
+| Shortcut | Action |
+|---|---|
+| `Cmd+Shift+P` | Command Palette |
+| `Cmd+P` | Quick Open (file search) |
+| `` Ctrl+` `` | Toggle Terminal |
+
 ## File Operations
 
 | Shortcut | Action |
@@ -13,7 +21,6 @@ All default keyboard shortcuts in Notemac++. Shortcuts can be customized via Set
 | `Cmd+Alt+S` | Save All |
 | `Cmd+W` | Close tab |
 | `Cmd+Shift+T` | Restore last closed tab |
-| `Cmd+P` | Print |
 
 ## Editing
 
@@ -69,7 +76,9 @@ All default keyboard shortcuts in Notemac++. Shortcuts can be customized via Set
 | Shortcut | Action |
 |---|---|
 | `Cmd+Shift+R` | Start / Stop Recording |
-| `Cmd+Shift+P` | Playback Macro |
+| `Cmd+Shift+P` | Playback Macro (Electron only; in web, use Macro menu or Command Palette) |
+
+Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is accessible via the Macro menu, toolbar, or by searching "Playback" in the Command Palette.
 
 ## Settings
 

@@ -4,6 +4,7 @@ Complete reference of every feature in Notemac++.
 
 ## Table of Contents
 
+- [Command Palette & Quick Open](#command-palette--quick-open)
 - [Git Integration](#git-integration)
 - [AI Assistant](#ai-assistant)
 - [Terminal](#terminal)
@@ -24,7 +25,27 @@ Complete reference of every feature in Notemac++.
 - [Tools](#tools)
 - [Status Bar](#status-bar)
 - [Settings & Preferences](#settings--preferences)
+- [Session Management](#session-management)
+- [Monitoring](#monitoring)
+- [Feedback & Support](#feedback--support)
 - [Dialogs](#dialogs)
+
+---
+
+## Command Palette & Quick Open
+
+Two fast-access overlays for navigating commands and files without touching the mouse.
+
+**Command Palette** (`Cmd+Shift+P`): A fuzzy-searchable launcher with 100+ registered commands spanning every menu action, keybinding, and feature in the app. Commands are organized by category (File, Edit, Search, View, Encoding, Language, Line Operations, Macro, Run, Tools, Settings, Git, AI). Type to filter, use arrow keys to navigate, and press Enter to execute.
+
+**Quick Open** (`Cmd+P`): A fuzzy file finder that searches all files in the current workspace by name. Results are ranked by match quality and displayed in real-time as you type. Press Enter to open the selected file.
+
+**Features:**
+- Fuzzy matching algorithm with scoring (FuzzyMatch / FuzzyFilter)
+- Keyboard navigation (Up/Down arrows, Enter to select, Escape to dismiss)
+- Real-time filtered results as you type
+- Category labels for each command in the palette
+- Full coverage of all menu actions, keybindings, and features
 
 ---
 
@@ -51,7 +72,7 @@ Multi-provider LLM integration supporting OpenAI, Anthropic, Google Gemini, Mist
 - Support for 6+ LLM providers
 - AI chat panel for interactive discussion
 - Inline code completions with ghost text
-- Code actions: explain, refactor, fix, document, test
+- Code actions: explain, refactor, fix, document, test, simplify, convert language
 - Configurable model, temperature, token limits
 - Secure credential storage with auto-expiry
 
@@ -188,7 +209,7 @@ Sort (ascending, descending, case-insensitive, by length), remove duplicates (al
 
 ### Macro
 
-Start Recording (`Cmd+Shift+R`), Stop Recording, Playback (`Cmd+Shift+P`), Run Multiple Times, Save Recorded Macro.
+Start Recording (`Cmd+Shift+R`), Stop Recording, Playback (`Cmd+Shift+P` in Electron), Run Multiple Times, Save Recorded Macro. In web mode, `Cmd+Shift+P` opens the Command Palette; macro playback is accessible via the Macro menu or toolbar.
 
 ### Run
 
@@ -201,6 +222,14 @@ MD5/SHA-1/SHA-256/SHA-512 generation (from text and file), copy hash to clipboar
 ### Settings
 
 Preferences (`Cmd+,`), Shortcut Mapper, About Notemac++.
+
+### Quick Access
+
+| Action | Shortcut |
+|---|---|
+| Command Palette | `Cmd+Shift+P` |
+| Quick Open (file search) | `Cmd+P` |
+| Toggle Terminal | `` Ctrl+` `` |
 
 ---
 
@@ -328,6 +357,29 @@ Preferences are organized into sections:
 
 ---
 
+## Session Management
+
+Save the current workspace layout to a JSON file and reload it later. A session captures all open tabs, the active tab, sidebar panel state, cursor positions, and scroll positions. The "Remember last session" preference automatically restores your workspace on launch.
+
+**Features:**
+- Save Session (File > Save Session) — exports to `.json`
+- Load Session (File > Load Session) — restores tabs, cursors, scroll positions
+- Auto-restore on launch (configurable in Settings > General)
+
+---
+
+## Monitoring
+
+Live file watching (like `tail -f`) that auto-scrolls to the end of the file as it updates. Useful for monitoring log files in real time. Toggle via the View menu or Command Palette.
+
+---
+
+## Feedback & Support
+
+After 20 minutes of continuous use (once per version), a non-intrusive feedback popup appears with links to GitHub Issues, social sharing, and Ko-fi donation. Dismiss with "Maybe later" — it will not reappear until the next version.
+
+---
+
 ## Dialogs
 
-Notemac++ includes these dialogs: About (version, creator, feature highlights, tech stack), Settings (5-section preferences), Go to Line, Column Editor, Find/Replace, Run Command, Character Panel, Summary (file statistics), Find Characters in Range, Shortcut Mapper, and Clipboard History.
+Notemac++ includes these dialogs: About (version, creator, feature highlights, tech stack), Settings (5-section preferences), Go to Line, Column Editor, Find/Replace, Run Command, Character Panel, Summary (file statistics), Find Characters in Range, Shortcut Mapper, Clipboard History, Command Palette, Quick Open, Clone Repository, Git Settings, AI Settings, Diff Viewer, and Snippet Manager.
