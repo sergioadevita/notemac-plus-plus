@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/version-2.4.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-1600%2B%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-1880%2B%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -376,7 +376,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 961 unit tests (Vitest)
+└── __tests__/                  # 961 unit tests (39 suites, Vitest)
 ```
 
 ## Testing
@@ -385,7 +385,7 @@ src/
 npx vitest run
 ```
 
-961 unit tests across 39 test suites and 640+ Playwright E2E tests across 36 spec files, covering all UI components, panels, dialogs, keyboard shortcuts, and user flows.
+961 unit tests across 39 test suites, ~709 web E2E tests across 36 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
 
 ```bash
 npx playwright test          # E2E tests
