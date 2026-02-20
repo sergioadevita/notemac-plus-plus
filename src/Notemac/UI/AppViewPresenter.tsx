@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { useNotemacStore } from "../Model/Store";
-import { GetTheme } from "../Configs/ThemeConfig";
+import { GetTheme, GetCustomTheme } from "../Configs/ThemeConfig";
 import { HandleKeyDown } from "../Controllers/AppController";
 import { HandleMenuAction } from "../Controllers/MenuActionController";
 import { HandleDragOver, HandleDrop, SetupElectronIPC } from "../Controllers/FileController";
@@ -63,7 +63,11 @@ export default function App()
   const addTab = useNotemacStore(s => s.addTab);
   const zoomLevel = useNotemacStore(s => s.zoomLevel);
 
-  const theme = useMemo(() => GetTheme(settings.theme), [settings.theme]);
+  const theme = useMemo(() =>
+    settings.theme === 'custom'
+      ? GetCustomTheme(settings.customThemeBase, settings.customThemeColors as Record<string, string>)
+      : GetTheme(settings.theme),
+    [settings.theme, settings.customThemeBase, settings.customThemeColors]);
 
   // Keyboard shortcut handler — delegates to NotemacAppController
   const onKeyDown = useCallback((e: KeyboardEvent) =>
