@@ -277,7 +277,7 @@ The sidebar (toggled with `Cmd+B`) includes these panels, switched via icon tabs
 
 ## Themes
 
-Six built-in themes, each fully styling the editor, tabs, sidebar, menus, dialogs, and status bar: Dark (VS Code dark), Light (VS Code light), Monokai, Dracula, Solarized Dark, and Solarized Light. Themes define 27+ color properties covering backgrounds, text, accents, status colors, and component-specific colors.
+Seven built-in themes, each fully styling the editor, tabs, sidebar, menus, dialogs, and status bar: Mac Glass (default — warm orange/amber glassmorphism), Dark (VS Code dark), Light (VS Code light), Monokai, Dracula, Solarized Dark, and Solarized Light. Themes define 31+ color properties covering backgrounds, text, accents, status colors, and component-specific colors.
 
 ---
 

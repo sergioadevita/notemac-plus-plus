@@ -201,8 +201,9 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 - **Close split** to return to single-pane mode
 
 #### Themes
-- **6 built-in color themes**:
-  - Dark (VS Code Dark) — default modern dark theme
+- **7 built-in color themes**:
+  - Mac Glass — warm orange/amber glassmorphism (default)
+  - Dark (VS Code Dark) — modern dark theme
   - Light (VS Code Light) — clean light theme
   - Monokai — classic warm palette
   - Dracula — purple-toned dark theme

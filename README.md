@@ -32,14 +32,19 @@ Notemac++ brings the familiar power of Notepad++ to macOS — both as a native d
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/editor-dark.png" alt="Notemac++ — Dark theme" width="900">
+  <img src="docs/screenshots/editor-mac-glass.png" alt="Notemac++ — Mac Glass theme" width="900">
 </p>
-<p align="center"><em>Dark theme — the default look, with JavaScript syntax highlighting.</em></p>
+<p align="center"><em>Mac Glass — the default theme, with warm orange accents and glassmorphism-inspired palette.</em></p>
 
 <details>
 <summary><strong>More themes and features</strong></summary>
 
 &nbsp;
+
+<p align="center">
+  <img src="docs/screenshots/editor-dark.png" alt="Notemac++ — Dark theme" width="900">
+</p>
+<p align="center"><em>Dark theme</em></p>
 
 <p align="center">
   <img src="docs/screenshots/editor-light.png" alt="Notemac++ — Light theme" width="900">
@@ -55,6 +60,16 @@ Notemac++ brings the familiar power of Notepad++ to macOS — both as a native d
   <img src="docs/screenshots/editor-dracula.png" alt="Notemac++ — Dracula theme" width="900">
 </p>
 <p align="center"><em>Dracula theme</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-solarized-dark.png" alt="Notemac++ — Solarized Dark theme" width="900">
+</p>
+<p align="center"><em>Solarized Dark theme</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-solarized-light.png" alt="Notemac++ — Solarized Light theme" width="900">
+</p>
+<p align="center"><em>Solarized Light theme</em></p>
 
 <p align="center">
   <img src="docs/screenshots/find-replace.png" alt="Notemac++ — Find & Replace" width="900">
@@ -176,13 +191,14 @@ See [Keybindings Reference](docs/KEYBINDINGS.md) for all search shortcuts.
 </details>
 
 <details>
-<summary><strong>Themes</strong> — 6 built-in color themes</summary>
+<summary><strong>Themes</strong> — 7 built-in color themes</summary>
 
 &nbsp;
 
 | Theme | Style |
 |---|---|
-| Dark | VS Code Dark (default) |
+| Mac Glass | Warm orange/amber glassmorphism (default) |
+| Dark | VS Code Dark |
 | Light | VS Code Light |
 | Monokai | Classic warm palette |
 | Dracula | Purple-toned dark theme |
@@ -425,7 +441,7 @@ How Notemac++ stacks up against other editors:
 | **Code Snippets** | Yes | No (plugins) | Yes | Yes |
 | **Mark System** | Yes (5 colors) | Yes (5 styles) | No | No |
 | **Column Editor** | Yes | Yes | Via Extensions | Yes |
-| **Themes** | 6 | 30+ | 1000+ | 25+ |
+| **Themes** | 7 | 30+ | 1000+ | 25+ |
 | **Plugins** | Planned | 200+ | 30K+ | 5K+ |
 | **Runs in Browser** | Yes | No | Yes (vscode.dev) | No |
 | **Price** | Free (MIT) | Free (GPL) | Free | $99 |
