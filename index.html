@@ -482,29 +482,60 @@
         .footer-links a:hover { color: var(--text-secondary); }
         .footer-bottom { color: var(--text-tertiary); font-size: 0.78rem; }
 
+        /* ─── Hamburger Menu ─── */
+        .nav-hamburger {
+            display: none;
+            background: none; border: none; cursor: pointer;
+            padding: 4px; color: var(--text-primary); font-size: 1.5rem; line-height: 1;
+        }
+        @media (max-width: 768px) {
+            .nav-hamburger { display: block; }
+            nav {
+                flex-wrap: wrap; padding: 0.7rem 1rem;
+            }
+            .nav-top {
+                display: flex; width: 100%;
+                justify-content: space-between; align-items: center;
+            }
+            .nav-links {
+                display: none; width: 100%; flex-direction: column;
+                gap: 0.6rem; padding-top: 0.8rem; align-items: center;
+            }
+            .nav-links.open { display: flex; }
+        }
+
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
-            nav { flex-direction: column; gap: 0.8rem; padding: 0.7rem 1rem; }
-            .nav-links { width: 100%; justify-content: center; gap: 1rem; font-size: 0.82rem; }
-            .hero { margin-top: 100px; padding: 2rem 1.5rem; }
+            .hero { margin-top: 90px; padding: 2rem 1.5rem; }
             .hero h1 { font-size: 2.5rem; }
             .hero .tagline { font-size: 1.05rem; }
             .hero-buttons { flex-direction: column; }
             .btn { width: 100%; justify-content: center; }
             .section-title { font-size: 1.8rem; }
-            .stats-grid { gap: 2rem; }
+            .stats-grid { gap: 1.5rem; }
             .new-feature-highlight { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .theme-gallery { grid-template-columns: repeat(2, 1fr); }
-            .comparison-table { font-size: 0.8rem; }
-            .comparison-table th, .comparison-table td { padding: 0.4rem 0.6rem; }
+            .comparison-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .comparison-table { font-size: 0.8rem; min-width: 520px; }
+            .comparison-table th, .comparison-table td { padding: 0.4rem 0.6rem; white-space: nowrap; }
             .hero-icon { width: 80px; height: 80px; }
+            .orb-1 { width: 200px; height: 200px; }
+            .orb-2 { width: 130px; height: 130px; }
+            .orb-3 { width: 90px; height: 90px; }
+            .cta::before { width: 300px; height: 180px; }
+            .footer-links { gap: 1rem; }
         }
         @media (max-width: 480px) {
             .hero h1 { font-size: 1.9rem; }
             .section-title { font-size: 1.5rem; }
             .tech-grid { gap: 0.4rem; }
             .tech-pill { font-size: 0.72rem; padding: 0.4rem 0.8rem; }
+            .theme-gallery { grid-template-columns: 1fr; }
+            .screenshot-item img { height: 140px; }
+            .stats-grid { gap: 1rem; }
+            .stat-num { font-size: 1.5rem; }
+            .whats-new, .features, .comparison, .screenshots { padding: 3rem 1rem; }
         }
     </style>
 </head>
@@ -512,15 +543,18 @@
 
 <!-- Nav -->
 <nav>
-    <a href="#" class="nav-logo">
-        <img src="./Icons/icon.png" alt="Notemac++">
-        Notemac<span class="plus">++</span>
-    </a>
+    <div class="nav-top">
+        <a href="#" class="nav-logo">
+            <img src="./Icons/icon.png" alt="Notemac++">
+            Notemac<span class="plus">++</span>
+        </a>
+        <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">&#9776;</button>
+    </div>
     <div class="nav-links">
-        <a href="#whats-new">What's New</a>
-        <a href="#features">Features</a>
-        <a href="#compare">Compare</a>
-        <a href="#screenshots">Screenshots</a>
+        <a href="#whats-new" onclick="document.querySelector('.nav-links').classList.remove('open')">What's New</a>
+        <a href="#features" onclick="document.querySelector('.nav-links').classList.remove('open')">Features</a>
+        <a href="#compare" onclick="document.querySelector('.nav-links').classList.remove('open')">Compare</a>
+        <a href="#screenshots" onclick="document.querySelector('.nav-links').classList.remove('open')">Screenshots</a>
         <a href="./docs/">Docs</a>
         <a href="https://github.com/sergioadevita/notemac-plus-plus" target="_blank">GitHub</a>
         <a href="./app/" class="nav-cta">Launch Editor</a>
@@ -536,7 +570,7 @@
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
             <span class="name">Notemac<span class="plus-sign">++</span></span>
-            <span class="version-badge">v3.0.0</span>
+            <span class="version-badge">v3.1.0</span>
         </h1>
         <p class="tagline">A powerful text editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
@@ -565,7 +599,7 @@
             <div class="stat-label">Languages</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">961</div>
+            <div class="stat-num">992</div>
             <div class="stat-label">Unit Tests</div>
         </div>
         <div class="stat-item">
@@ -573,7 +607,7 @@
             <div class="stat-label">Desktop App</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">7</div>
+            <div class="stat-num">8</div>
             <div class="stat-label">Themes</div>
         </div>
         <div class="stat-item">
@@ -585,8 +619,8 @@
 
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
-    <h2 class="section-title">What's <span>New in v3.0.0</span></h2>
-    <p class="section-subtitle">The biggest release yet. Notemac++ now ships with Tauri for a dramatically smaller, faster desktop experience.</p>
+    <h2 class="section-title">What's <span>New</span></h2>
+    <p class="section-subtitle">Tauri desktop shell, custom theme color picker, and mobile-responsive layouts — all in v3.1.0.</p>
     <div class="new-feature-highlight">
         <div class="new-card full-width">
             <span class="badge">Major</span>
@@ -612,6 +646,11 @@
             <span class="badge">Menus</span>
             <h3>~100 Native Menu Items</h3>
             <p>Every File, Edit, Search, View, Encoding, Language, Settings, Tools, Macro, and Window menu action — implemented natively in Rust.</p>
+        </div>
+        <div class="new-card full-width">
+            <span class="badge">v3.1.0</span>
+            <h3>Custom Theme Color Picker</h3>
+            <p>30 color pickers organized into 8 groups let you customize every aspect of the UI. Derive from any built-in theme, reset individual colors, and see changes live.</p>
         </div>
     </div>
 </section>
@@ -668,8 +707,8 @@
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#127752;</div>
-            <h3>7 Themes</h3>
-            <p>Mac Glass, Dark, Light, Monokai, Dracula, Solarized Dark, and Solarized Light. Full UI coverage.</p>
+            <h3>8 Themes + Custom</h3>
+            <p>7 built-in themes plus a custom theme color picker with 30 color controls. Mix and match to create your own.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#9998;</div>
@@ -721,7 +760,7 @@
         <img src="./docs/screenshots/editor-mac-glass.png" alt="Mac Glass Theme — Default">
         <div class="caption"><span>Mac Glass</span> — Default Theme</div>
     </div>
-    <p class="theme-gallery-label">Plus 6 more built-in themes</p>
+    <p class="theme-gallery-label">Plus 6 more built-in themes + custom color picker</p>
     <div class="theme-gallery">
         <div class="screenshot-item">
             <img src="./docs/screenshots/editor-dark.png" alt="Dark Theme">
@@ -774,7 +813,7 @@
         <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
         <div class="hero-buttons">
             <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.0.0</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.1.0</a>
         </div>
     </div>
 </section>
