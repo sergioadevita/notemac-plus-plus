@@ -195,3 +195,55 @@ input[type="number"] {
   font-size: 12px;
   font-family: -apple-system, system-ui, sans-serif;
 }
+
+/* ===== Mobile Responsive ===== */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .dialog {
+    min-width: unset;
+    width: calc(100vw - 32px);
+    max-width: 600px;
+    padding: 16px;
+  }
+
+  .context-menu {
+    min-width: 160px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .welcome-screen h1 {
+    font-size: 22px;
+  }
+
+  .welcome-screen .shortcuts {
+    gap: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog {
+    width: calc(100vw - 16px);
+    padding: 12px;
+    max-height: 90vh;
+    border-radius: 6px;
+  }
+
+  .context-menu {
+    min-width: 140px;
+  }
+
+  .welcome-screen h1 {
+    font-size: 18px;
+  }
+
+  .welcome-screen .shortcuts {
+    grid-template-columns: 1fr;
+    gap: 4px 12px;
+    font-size: 11px;
+  }
+}

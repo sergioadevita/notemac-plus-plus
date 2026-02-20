@@ -406,6 +406,9 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
         paddingLeft: isElectron ? 8 : 8,
         flexShrink: 0,
         outline: 'none',
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        scrollbarWidth: 'none',
       } as React.CSSProperties}
       tabIndex={0}
     >
@@ -458,7 +461,8 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
               position: 'absolute',
               top: '100%',
               left: 0,
-              minWidth: 280,
+              minWidth: Math.min(280, window.innerWidth - 16),
+              maxWidth: 'calc(100vw - 8px)',
               maxHeight: 'calc(100vh - 80px)',
               overflowY: 'auto',
               backgroundColor: theme.menuBg,

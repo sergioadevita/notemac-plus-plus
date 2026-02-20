@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetTheme, themeColorGroups } from "../Configs/ThemeConfig";
@@ -78,7 +78,8 @@ function useStyles(theme: ThemeColors) {
     dialogMain: {
       backgroundColor: theme.bgSecondary,
       border: `1px solid ${theme.border}`,
-      width: 650,
+      width: '90vw',
+      maxWidth: 650,
       maxHeight: '80vh',
       display: 'flex',
       flexDirection: 'column',
@@ -286,7 +287,7 @@ function AppearanceSection({ theme }: { theme: ThemeColors }) {
       {themeColorGroups.map((group) => (
         <div key={group.label} style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: theme.textMuted, marginBottom: 6, paddingTop: 4 }}>{group.label}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 500 ? '1fr' : '1fr 1fr', gap: '4px 12px' }}>
             {group.keys.map(({ key, label }) => {
               const colorKey = key as string;
               const overrideValue = (settings.customThemeColors as Record<string, string | undefined>)[colorKey];
@@ -326,8 +327,15 @@ function AppearanceSection({ theme }: { theme: ThemeColors }) {
 export function SettingsDialog({ theme }: SettingsDialogProps) {
   const { settings, updateSettings, setShowSettings } = useNotemacStore();
   const [activeSection, setActiveSection] = useState('general');
+  const [isNarrow, setIsNarrow] = useState(window.innerWidth < 600);
   const dialogRef = useRef<HTMLDivElement>(null);
   const styles = useStyles(theme);
+
+  useEffect(() => {
+    const handleResize = () => setIsNarrow(window.innerWidth < 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useFocusTrap(dialogRef, true, () => setShowSettings(false));
 
@@ -433,14 +441,31 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
           </span>
         </div>
 
-        <div style={styles.contentWrapper}>
+        <div style={{
+          ...styles.contentWrapper,
+          ...(isNarrow ? { flexDirection: 'column' } : {}),
+        }}>
           {/* Section tabs */}
-          <div style={styles.sidebarNav}>
+          <div style={{
+            ...styles.sidebarNav,
+            ...(isNarrow ? {
+              width: '100%',
+              flexDirection: 'row',
+              overflowX: 'auto',
+              gap: 0,
+              borderBottom: `1px solid ${theme.border}`,
+              paddingBottom: 4,
+              marginBottom: 8,
+            } : {}),
+          }}>
             {sections.map(section => (
               <div
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                style={styles.sidebarItem(activeSection === section.id)}
+                style={{
+                  ...styles.sidebarItem(activeSection === section.id),
+                  ...(isNarrow ? { whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 } : {}),
+                }}
               >
                 {section.label}
               </div>

@@ -118,6 +118,27 @@ export default function App()
     useNotemacStore.getState().LoadAIState();
   }, []);
 
+  // Auto-collapse sidebar on narrow viewports
+  useEffect(() =>
+  {
+    const handleResize = () =>
+    {
+      if (window.innerWidth < 768)
+      {
+        const panel = useNotemacStore.getState().sidebarPanel;
+        if (null !== panel) useNotemacStore.getState().setSidebarPanel(null);
+      }
+    };
+    // Collapse immediately if starting on mobile
+    if (window.innerWidth < 768)
+    {
+      const panel = useNotemacStore.getState().sidebarPanel;
+      if (null !== panel) useNotemacStore.getState().setSidebarPanel(null);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const activeTab = tabs.find(t => t.id === activeTabId);
   const isDistractionFree = settings.distractionFreeMode;
 

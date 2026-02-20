@@ -107,7 +107,7 @@ export function TabBar({ theme }: TabBarProps) {
                   ? `3px solid ${tabColorValue}`
                   : isActive ? `2px solid ${theme.accent}` : '2px solid transparent',
                 borderBottom: isActive ? 'none' : `1px solid ${theme.border}`,
-                minWidth: UI_TAB_MIN_WIDTH,
+                minWidth: window.innerWidth < 480 ? 60 : UI_TAB_MIN_WIDTH,
                 maxWidth: UI_TAB_MAX_WIDTH,
                 height: UI_TAB_BAR_HEIGHT,
                 position: 'relative',

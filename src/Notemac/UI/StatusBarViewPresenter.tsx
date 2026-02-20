@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import './hover-utilities.css';
@@ -28,6 +28,13 @@ export function StatusBar({ theme }: StatusBarProps) {
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showEncodingPicker, setShowEncodingPicker] = useState(false);
   const [showEOLPicker, setShowEOLPicker] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsNarrow(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // useStyles must be called before any early return to satisfy Rules of Hooks
   const mainStyles = useStyles(theme);
@@ -86,7 +93,8 @@ export function StatusBar({ theme }: StatusBarProps) {
         position: 'absolute',
         bottom: '100%',
         left: 0,
-        minWidth: 180,
+        minWidth: Math.min(180, window.innerWidth - 16),
+        maxWidth: 'calc(100vw - 8px)',
         maxHeight: UI_STATUS_PICKER_MAX_HEIGHT,
         overflowY: 'auto' as const,
         backgroundColor: theme.menuBg,
@@ -152,12 +160,16 @@ export function StatusBar({ theme }: StatusBarProps) {
         <StatusItem title="Cursor Position">
           Ln {activeTab.cursorLine}, Col {activeTab.cursorColumn}
         </StatusItem>
-        <StatusItem title="Character Count">
-          {charCount} chars
-        </StatusItem>
-        <StatusItem title="Word Count">
-          {wordCount} words
-        </StatusItem>
+        {!isNarrow && (
+          <StatusItem title="Character Count">
+            {charCount} chars
+          </StatusItem>
+        )}
+        {!isNarrow && (
+          <StatusItem title="Word Count">
+            {wordCount} words
+          </StatusItem>
+        )}
         <StatusItem title="Line Count">
           {lineCount} lines
         </StatusItem>
@@ -240,6 +252,8 @@ function useStyles(theme: ThemeColors) {
       fontSize: 12,
       flexShrink: 0,
       padding: '0 4px',
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
     } as React.CSSProperties,
     sectionLeft: {
       display: 'flex',
