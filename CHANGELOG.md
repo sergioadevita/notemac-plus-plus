@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026
+
+### Major: Tauri Desktop Shell
+- **Tauri v2 migration**: Added Tauri as the primary desktop shell, reducing packaged app size from ~50MB (Electron) to ~10-15MB by using the system WebView (WKWebView on macOS) instead of bundling Chromium
+- **Rust backend**: Complete Tauri command layer (`src-tauri/`) with file operations (`read_file`, `write_file`, `read_dir`, `file_exists`, `rename_file`), native dialogs (open/save file, open folder, message box), window management (always-on-top, minimize, maximize), and credential storage via OS keychain (`keyring` crate)
+- **Native menu system**: ~100 menu items implemented in Rust matching every Electron menu action — File, Edit, Search, View, Encoding, Language, Settings, Tools, Macro, and Window menus
+- **Platform abstraction layer**: New `PlatformBridge.ts` + `TauriBridge.ts` provide clean `detectPlatform()` and bridge initialization so the React frontend works seamlessly with Tauri, Electron, or plain browser
+- **Frontend integration**: `FileController`, `GitFileSystemAdapter`, `SafeStorageService`, and `AppViewPresenter` updated with Tauri IPC paths alongside existing Electron paths
+- **Tauri E2E tests**: 8 Playwright test suites (`e2e-tauri/`) mirroring all Electron E2E tests — app launch, IPC commands, file operations, UI integration, window management, menu actions, line operations, and native features
+- **CI/CD**: GitHub Actions `tauri-build` job on macOS runner with Rust toolchain and cargo caching
+- **Backward compatible**: Electron shell fully preserved — both desktop shells coexist
+
+### Improved
+- **Documentation**: README updated with Tauri build commands, tech stack entry, comparison table size (10-15MB), and roadmap
+- **`.gitignore`**: Added `src-tauri/target/`, `playwright-report/`, `test-results/`
+- **Test infrastructure**: `test:e2e:all` script now runs web, Electron, and Tauri E2E suites
+
 ## [2.4.0] - 2026
 
 ### Architecture
@@ -284,6 +301,7 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[3.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.0.0
 [2.4.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.4.0
 [2.3.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.3.0
 [2.2.2]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.2.2

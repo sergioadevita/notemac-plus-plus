@@ -27,6 +27,14 @@ interface Window {
   showDirectoryPicker?: (options?: { mode?: string }) => Promise<FileSystemDirectoryHandle>;
   showOpenFilePicker?: (options?: { multiple?: boolean; types?: Array<{ description?: string; accept?: Record<string, string[]> }> }) => Promise<FileSystemFileHandle[]>;
   __editorAction?: (action: string, value?: boolean | string | number) => void;
+  /** Tauri injects this global when running inside a Tauri WebView */
+  __TAURI__?: {
+    invoke: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>;
+    event: {
+      listen: (event: string, handler: (event: { payload: unknown }) => void) => Promise<() => void>;
+      emit: (event: string, payload?: unknown) => Promise<void>;
+    };
+  };
 }
 
 interface HTMLInputElement {

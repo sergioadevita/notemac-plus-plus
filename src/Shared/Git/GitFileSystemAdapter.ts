@@ -2,7 +2,8 @@ import LightningFS from '@isomorphic-git/lightning-fs';
 
 /**
  * Unified file system adapter for isomorphic-git.
- * Abstracts three backends:
+ * Abstracts four backends:
+ * - Tauri: native fs via Tauri invoke commands
  * - Electron: native fs via IPC
  * - Chromium web: File System Access API (real files)
  * - Firefox/Safari: lightning-fs backed by IndexedDB
@@ -25,12 +26,14 @@ export interface FsAdapter
     lstat(filepath: string): Promise<FsStat>;
 }
 
-export type FsBackendType = 'electron' | 'webfs' | 'lightningfs';
+export type FsBackendType = 'tauri' | 'electron' | 'webfs' | 'lightningfs';
 
 // ─── Environment Detection ───────────────────────────────────────
 
 export function DetectFsBackend(): FsBackendType
 {
+    if ('undefined' !== typeof window && (window as any).__TAURI__)
+        return 'tauri';
     if ('undefined' !== typeof window && window.electronAPI)
         return 'electron';
     if ('showDirectoryPicker' in window)
@@ -38,9 +41,20 @@ export function DetectFsBackend(): FsBackendType
     return 'lightningfs';
 }
 
+export function IsTauriEnvironment(): boolean
+{
+    return 'tauri' === DetectFsBackend();
+}
+
 export function IsElectronEnvironment(): boolean
 {
     return 'electron' === DetectFsBackend();
+}
+
+export function IsDesktopNativeEnvironment(): boolean
+{
+    const backend = DetectFsBackend();
+    return 'electron' === backend || 'tauri' === backend;
 }
 
 export function IsWebFsEnvironment(): boolean
@@ -264,10 +278,11 @@ export function GetFsForGit(workspacePath: string, dirHandle?: FileSystemDirecto
 {
     const backend = DetectFsBackend();
 
-    if ('electron' === backend)
+    if ('electron' === backend || 'tauri' === backend)
     {
-        // Electron uses node fs — isomorphic-git can use it directly via require('fs')
-        // We return null here; the electron bridge handles this
+        // Electron uses node fs, Tauri uses native fs commands.
+        // Both handle file I/O in the backend process.
+        // We return null here; the respective bridge handles this.
         return null;
     }
 

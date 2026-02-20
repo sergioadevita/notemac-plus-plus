@@ -4,6 +4,7 @@ import { GetTheme } from "../Configs/ThemeConfig";
 import { HandleKeyDown } from "../Controllers/AppController";
 import { HandleMenuAction } from "../Controllers/MenuActionController";
 import { HandleDragOver, HandleDrop, SetupElectronIPC } from "../Controllers/FileController";
+import { IsDesktopEnvironment } from "../Services/PlatformBridge";
 import { MenuBar } from './MenuBarViewPresenter';
 import { Toolbar } from './ToolbarViewPresenter';
 import { TabBar } from './TabBarViewPresenter';
@@ -116,7 +117,7 @@ export default function App()
   const activeTab = tabs.find(t => t.id === activeTabId);
   const isDistractionFree = settings.distractionFreeMode;
 
-  const isElectron = !!window.electronAPI;
+  const isElectron = IsDesktopEnvironment();
 
   return (
     <div

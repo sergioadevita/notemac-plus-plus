@@ -28,6 +28,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Tauri build artifacts
+src-tauri/target/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Misc
+CHECKPOINT.md
+
 # Python
 __pycache__/
 *.pyc

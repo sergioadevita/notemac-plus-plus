@@ -16,7 +16,8 @@ We are committed to providing a welcoming and inclusive environment. All contrib
 ### Prerequisites
 
 - **Node.js** 18+ and npm
-- **macOS** 10.13+ (for desktop builds) or any platform with a browser (for web development)
+- **macOS** 10.15+ (for desktop builds) or any platform with a browser (for web development)
+- **Rust** toolchain (for Tauri builds): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 - **Xcode Command Line Tools** (macOS): `xcode-select --install`
 
 ### Development Setup
@@ -31,7 +32,8 @@ npm install
 
 # Start the development server
 npm run dev              # Web (http://localhost:5173)
-npm run electron:dev    # Desktop (Electron window)
+npm run tauri:dev        # Desktop (Tauri window — recommended)
+npm run electron:dev     # Desktop (Electron window — legacy)
 ```
 
 ### Running Tests
@@ -53,10 +55,13 @@ npx vitest src/__tests__/TabModel.test.ts
 # Web production build
 ./build-web.sh
 
-# Portable macOS DMG
+# Tauri desktop build (recommended — ~10-15MB)
+npm run tauri:build
+
+# Portable macOS DMG (Electron — legacy, ~50MB)
 ./build-portable-dmg.sh
 
-# Installable macOS DMG
+# Installable macOS DMG (Electron — legacy, ~50MB)
 ./build-install-dmg.sh
 ```
 

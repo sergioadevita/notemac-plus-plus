@@ -2,25 +2,28 @@ import { useNotemacStore } from "../Model/Store";
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 import { HandleMenuAction } from "./MenuActionController";
 import { InitGitForWorkspace } from "./GitController";
+import { IsTauriEnvironment } from "../Services/PlatformBridge";
+import { CreateTauriBridge } from "../Services/TauriBridge";
 
 /**
- * Handles file-related operations: drag-drop, Electron IPC file/folder events.
+ * Handles file-related operations: drag-drop, desktop IPC file/folder events.
+ * Supports both Electron (window.electronAPI) and Tauri (TauriBridge).
  */
 
-interface ElectronFileOpenedData
+interface FileOpenedData
 {
     name: string;
     path: string;
     content: string;
 }
 
-interface ElectronFileSavedData
+interface FileSavedData
 {
     name: string;
     path: string;
 }
 
-interface ElectronFolderData
+interface FolderData
 {
     path: string;
     tree: import('../Commons/Types').FileTreeNode[];
@@ -55,62 +58,92 @@ export async function HandleDrop(e: DragEvent): Promise<void>
     }
 }
 
+// ─── Shared IPC Callbacks ───────────────────────────────────────
+
+function OnFileOpened(data: FileOpenedData): void
+{
+    const store = useNotemacStore.getState();
+    const existing = store.tabs.find(t => t.path === data.path);
+
+    if (existing)
+    {
+        store.setActiveTab(existing.id);
+    }
+    else
+    {
+        store.addTab({
+            name: data.name,
+            path: data.path,
+            content: data.content,
+            language: detectLanguage(data.name),
+            lineEnding: detectLineEnding(data.content),
+        });
+        store.addRecentFile(data.path, data.name);
+    }
+}
+
+function OnFolderOpened(data: FolderData): void
+{
+    const store = useNotemacStore.getState();
+    store.setFileTree(data.tree);
+    store.setWorkspacePath(data.path);
+    store.setSidebarPanel('explorer');
+
+    // Detect git repo in the opened folder
+    InitGitForWorkspace();
+}
+
+function OnMenuAction(action: string, value: boolean | string | number | undefined): void
+{
+    const store = useNotemacStore.getState();
+    HandleMenuAction(action, store.activeTabId, store.tabs, store.zoomLevel, value);
+}
+
+function OnFileSaved(data: FileSavedData): void
+{
+    const store = useNotemacStore.getState();
+    if (null !== store.activeTabId)
+    {
+        store.updateTab(store.activeTabId, {
+            name: data.name,
+            path: data.path,
+            isModified: false,
+            language: detectLanguage(data.name),
+        });
+    }
+}
+
+// ─── Desktop IPC Setup ──────────────────────────────────────────
+
+/**
+ * Sets up desktop IPC listeners (Electron or Tauri).
+ * Kept as `SetupElectronIPC` for backward compatibility with AppViewPresenter imports.
+ */
 export function SetupElectronIPC(): void
 {
+    if (IsTauriEnvironment())
+    {
+        SetupTauriIPC();
+        return;
+    }
+
     if (!window.electronAPI)
         return;
 
-    window.electronAPI.onFileOpened((data: ElectronFileOpenedData) =>
-    {
-        const store = useNotemacStore.getState();
-        const existing = store.tabs.find(t => t.path === data.path);
+    window.electronAPI.onFileOpened(OnFileOpened);
+    window.electronAPI.onFolderOpened(OnFolderOpened);
+    window.electronAPI.onMenuAction(OnMenuAction);
+    window.electronAPI.onFileSaved?.(OnFileSaved);
+}
 
-        if (existing)
-        {
-            store.setActiveTab(existing.id);
-        }
-        else
-        {
-            store.addTab({
-                name: data.name,
-                path: data.path,
-                content: data.content,
-                language: detectLanguage(data.name),
-                lineEnding: detectLineEnding(data.content),
-            });
-            store.addRecentFile(data.path, data.name);
-        }
-    });
+async function SetupTauriIPC(): Promise<void>
+{
+    const bridge = await CreateTauriBridge();
+    if (null === bridge)
+        return;
 
-    window.electronAPI.onFolderOpened((data: ElectronFolderData) =>
-    {
-        const store = useNotemacStore.getState();
-        store.setFileTree(data.tree);
-        store.setWorkspacePath(data.path);
-        store.setSidebarPanel('explorer');
-
-        // Detect git repo in the opened folder
-        InitGitForWorkspace();
-    });
-
-    window.electronAPI.onMenuAction((action: string, value: boolean | string | number | undefined) =>
-    {
-        const store = useNotemacStore.getState();
-        HandleMenuAction(action, store.activeTabId, store.tabs, store.zoomLevel, value);
-    });
-
-    // Handle file-saved events (from Save As dialog in main process)
-    window.electronAPI.onFileSaved?.((data: ElectronFileSavedData) =>
-    {
-        const store = useNotemacStore.getState();
-        if (null !== store.activeTabId)
-        {
-            store.updateTab(store.activeTabId, {
-                name: data.name,
-                path: data.path,
-                isModified: false,
-                language: detectLanguage(data.name),
-            });
-        }
-    });
+    bridge.onFileOpened(OnFileOpened);
+    bridge.onFolderOpened(OnFolderOpened);
+    bridge.onMenuAction(OnMenuAction);
+    bridge.onFileSaved(OnFileSaved);
 }

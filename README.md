@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.4.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-1880%2B%20passing-brightgreen" alt="Tests">
@@ -27,7 +27,7 @@
 
 ---
 
-Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, **built-in Git integration**, an **AI coding assistant** with multi-provider support, an **integrated terminal**, **code snippets**, and much more.
+Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Tauri or Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, **built-in Git integration**, an **AI coding assistant** with multi-provider support, an **integrated terminal**, **code snippets**, and much more.
 
 ## Screenshots
 
@@ -412,7 +412,7 @@ How Notemac++ stacks up against other editors:
 | Feature | Notemac++ | Notepad++ | VS Code | Sublime Text |
 |---|---|---|---|---|
 | **Platform** | macOS / Web | Windows | All | All |
-| **Size** | ~50 MB | ~5 MB | ~300 MB | ~30 MB |
+| **Size** | ~10-15 MB (Tauri) | ~5 MB | ~300 MB | ~30 MB |
 | **Startup Time** | Instant | Fast | Moderate | Fast |
 | **Syntax Languages** | 70+ | 80+ | 200+ | 50+ |
 | **Built-in Git** | Yes | No | Yes | No |
@@ -434,7 +434,7 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
-Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests.
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests. **v3.0.0: Tauri migration — ~75% smaller desktop app (~10-15MB vs ~50MB) using system WebView instead of bundled Chromium, with full platform abstraction layer and 8 new Tauri E2E test suites.**
 
 Planned for future releases:
 
@@ -461,7 +461,9 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 |---|---|---|
 | Web (dev) | `npm run dev` | `localhost:5173` |
 | Web (prod) | `./build-web.sh` | Built + served |
-| Desktop (dev) | `npm run electron:dev` | Live Electron window |
+| Desktop/Electron (dev) | `npm run electron:dev` | Live Electron window |
+| Desktop/Tauri (dev) | `npm run tauri:dev` | Live Tauri window |
+| Desktop/Tauri (build) | `npm run tauri:build` | `src-tauri/target/release/bundle/` |
 | Portable DMG | `./build-portable-dmg.sh` | `release/Notemac++-Portable.dmg` |
 | Installable DMG | `./build-install-dmg.sh` | `release/Notemac++-Installer.dmg` |
 
@@ -478,7 +480,8 @@ See [docs/BUILDING.md](docs/BUILDING.md) for full build documentation.
 | [TypeScript](https://www.typescriptlang.org/) | Type-safe development |
 | [Zustand](https://zustand-demo.pmnd.rs/) + [Immer](https://immerjs.github.io/immer/) | State management |
 | [Vite](https://vitejs.dev/) | Build tooling |
-| [Electron](https://www.electronjs.org/) | Desktop shell |
+| [Electron](https://www.electronjs.org/) | Desktop shell (legacy) |
+| [Tauri](https://tauri.app/) | Desktop shell (lightweight, ~10-15MB vs ~50MB) |
 | [isomorphic-git](https://isomorphic-git.org/) | Git operations (web & desktop) |
 | [Xterm.js](https://xtermjs.org/) | Integrated terminal emulator |
 | OpenAI / Anthropic / Google AI | Multi-provider AI assistant |
