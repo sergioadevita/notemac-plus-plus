@@ -188,7 +188,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             <span>Minimap</span>
             <span>Macro Recording</span>
             <span>Bookmarks</span>
-            <span>7 Color Themes</span>
+            <span>7+ Color Themes</span>
             <span>File Explorer</span>
             <span>Clipboard History</span>
             <span>Encrypted Credentials</span>

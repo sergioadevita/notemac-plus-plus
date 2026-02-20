@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import type { FileTreeNode } from './types';
 import { useEditorStore } from './store/editorStore';
-import { getTheme } from './utils/themes';
+import { getTheme, getCustomTheme } from './utils/themes';
 import { MenuBar } from './components/MenuBar';
 import { Toolbar } from './components/Toolbar';
 import { TabBar } from './components/TabBar';
@@ -74,7 +74,9 @@ export default function App() {
     togglePinTab,
   } = useEditorStore();
 
-  const theme = getTheme(settings.theme);
+  const theme = settings.theme === 'custom'
+    ? getCustomTheme(settings.customThemeBase, settings.customThemeColors as Record<string, string>)
+    : getTheme(settings.theme);
 
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

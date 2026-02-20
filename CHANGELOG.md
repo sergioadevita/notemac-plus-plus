@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-20
+
+### Added
+- **Custom Theme Color Picker**: New color customization system in Preferences > Appearance that lets users customize every color property of any built-in theme
+  - 30 color pickers organized into 8 groups (Backgrounds, Text, Accent & Status, Borders & Scrollbar, Tabs, Menu, Status Bar, Sidebar)
+  - Changing any color automatically creates a "Custom" theme based on the current theme
+  - Base theme selector for choosing which built-in theme to customize from
+  - Individual color reset buttons to revert specific customizations
+  - "Reset All" button to return to the base theme
+  - Override counter showing how many colors have been customized
+  - Resetting the last override automatically switches back to the base theme
+- **30 new tests**: 18 unit tests covering custom theme creation, color merging, metadata validation, and settings defaults; 12 UI tests covering color picker rendering, auto-custom switching, reset behaviors, and state persistence
+
 ## [3.0.0] - 2026
 
 ### Major: Tauri Desktop Shell

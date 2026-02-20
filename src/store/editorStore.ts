@@ -125,6 +125,8 @@ interface EditorState {
 
 const defaultSettings: AppSettings = {
   theme: 'mac-glass',
+  customThemeBase: 'mac-glass',
+  customThemeColors: {},
   fontSize: 14,
   fontFamily: "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace",
   tabSize: 4,

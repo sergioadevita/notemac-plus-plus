@@ -63,8 +63,43 @@ export interface SearchOptions {
   wrapAround: boolean;
 }
 
+export interface CustomThemeColors {
+  bg?: string;
+  bgSecondary?: string;
+  bgTertiary?: string;
+  bgHover?: string;
+  bgActive?: string;
+  text?: string;
+  textSecondary?: string;
+  textMuted?: string;
+  border?: string;
+  accent?: string;
+  accentHover?: string;
+  accentText?: string;
+  danger?: string;
+  warning?: string;
+  success?: string;
+  tabBg?: string;
+  tabActiveBg?: string;
+  tabActiveText?: string;
+  tabBorder?: string;
+  menuBg?: string;
+  menuHover?: string;
+  menuText?: string;
+  statusBarBg?: string;
+  statusBarText?: string;
+  sidebarBg?: string;
+  sidebarText?: string;
+  scrollbarBg?: string;
+  scrollbarThumb?: string;
+  editorBg?: string;
+  findBg?: string;
+}
+
 export interface AppSettings {
-  theme: 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
+  theme: 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula' | 'custom';
+  customThemeBase: 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
+  customThemeColors: CustomThemeColors;
   fontSize: number;
   fontFamily: string;
   tabSize: number;

@@ -1,4 +1,4 @@
-import { TabColor, SidebarPanel, LineEnding, ThemeName, CursorBlinking, CursorStyle, RenderWhitespace } from "./Enums";
+import { TabColor, SidebarPanel, LineEnding, ThemeName, BuiltInThemeName, CursorBlinking, CursorStyle, RenderWhitespace } from "./Enums";
 
 export interface FileTab
 {
@@ -68,9 +68,16 @@ export interface SearchOptions
     wrapAround: boolean;
 }
 
+export interface CustomThemeColors
+{
+    [key: string]: string | undefined;
+}
+
 export interface AppSettings
 {
     theme: ThemeName;
+    customThemeBase: BuiltInThemeName;
+    customThemeColors: CustomThemeColors;
     fontSize: number;
     fontFamily: string;
     tabSize: number;

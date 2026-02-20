@@ -270,6 +270,89 @@ export function getTheme(name: string): ThemeColors {
   return themes[name] || themes['mac-glass'];
 }
 
+export function getThemeNames(): string[] {
+  return Object.keys(themes);
+}
+
+export function getCustomTheme(baseName: string, overrides: Partial<ThemeColors>): ThemeColors {
+  const base = themes[baseName] || themes['mac-glass'];
+  return { ...base, ...overrides, editorMonacoTheme: base.editorMonacoTheme };
+}
+
+/** Returns human-readable labels for each theme color property, grouped by category. */
+export const themeColorGroups: { label: string; keys: { key: keyof ThemeColors; label: string }[] }[] = [
+  {
+    label: 'Backgrounds',
+    keys: [
+      { key: 'bg', label: 'Primary Background' },
+      { key: 'bgSecondary', label: 'Secondary Background' },
+      { key: 'bgTertiary', label: 'Tertiary Background' },
+      { key: 'bgHover', label: 'Hover Background' },
+      { key: 'bgActive', label: 'Active Background' },
+      { key: 'editorBg', label: 'Editor Background' },
+      { key: 'findBg', label: 'Find Panel Background' },
+    ],
+  },
+  {
+    label: 'Text',
+    keys: [
+      { key: 'text', label: 'Primary Text' },
+      { key: 'textSecondary', label: 'Secondary Text' },
+      { key: 'textMuted', label: 'Muted Text' },
+    ],
+  },
+  {
+    label: 'Accent & Status',
+    keys: [
+      { key: 'accent', label: 'Accent Color' },
+      { key: 'accentHover', label: 'Accent Hover' },
+      { key: 'accentText', label: 'Accent Text' },
+      { key: 'danger', label: 'Danger / Error' },
+      { key: 'warning', label: 'Warning' },
+      { key: 'success', label: 'Success' },
+    ],
+  },
+  {
+    label: 'Borders & Scrollbar',
+    keys: [
+      { key: 'border', label: 'Border' },
+      { key: 'scrollbarBg', label: 'Scrollbar Track' },
+      { key: 'scrollbarThumb', label: 'Scrollbar Thumb' },
+    ],
+  },
+  {
+    label: 'Tabs',
+    keys: [
+      { key: 'tabBg', label: 'Tab Background' },
+      { key: 'tabActiveBg', label: 'Active Tab Background' },
+      { key: 'tabActiveText', label: 'Active Tab Text' },
+      { key: 'tabBorder', label: 'Tab Border' },
+    ],
+  },
+  {
+    label: 'Menu',
+    keys: [
+      { key: 'menuBg', label: 'Menu Background' },
+      { key: 'menuHover', label: 'Menu Hover' },
+      { key: 'menuText', label: 'Menu Text' },
+    ],
+  },
+  {
+    label: 'Status Bar',
+    keys: [
+      { key: 'statusBarBg', label: 'Status Bar Background' },
+      { key: 'statusBarText', label: 'Status Bar Text' },
+    ],
+  },
+  {
+    label: 'Sidebar',
+    keys: [
+      { key: 'sidebarBg', label: 'Sidebar Background' },
+      { key: 'sidebarText', label: 'Sidebar Text' },
+    ],
+  },
+];
+
 export function defineMonacoThemes(monaco: typeof import('monaco-editor')) {
   monaco.editor.defineTheme('mac-glass', {
     base: 'vs-dark',

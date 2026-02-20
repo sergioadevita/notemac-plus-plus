@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import type { ThemeColors } from '../utils/themes';
+import { getTheme, themeColorGroups } from '../utils/themes';
 
 interface SettingsDialogProps {
   theme: ThemeColors;
@@ -326,45 +327,14 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
             )}
 
             {activeSection === 'appearance' && (
-              <>
-                <SectionHeader title="Theme" />
-                <SelectField
-                  label="Color Theme"
-                  value={settings.theme}
-                  options={[
-                    { value: 'mac-glass', label: 'Mac Glass (Default)' },
-                    { value: 'dark', label: 'Dark' },
-                    { value: 'light', label: 'Light' },
-                    { value: 'monokai', label: 'Monokai' },
-                    { value: 'dracula', label: 'Dracula' },
-                    { value: 'solarized-dark', label: 'Solarized Dark' },
-                    { value: 'solarized-light', label: 'Solarized Light' },
-                  ]}
-                  onChange={(v) => updateSettings({ theme: v })}
-                />
-
-                <SectionHeader title="Font" />
-                <NumberField
-                  label="Font Size"
-                  value={settings.fontSize}
-                  min={8}
-                  max={32}
-                  onChange={(v) => updateSettings({ fontSize: v })}
-                />
-                <SelectField
-                  label="Font Family"
-                  value={settings.fontFamily}
-                  options={[
-                    { value: "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace", label: 'SF Mono' },
-                    { value: "'Menlo', 'Monaco', 'Courier New', monospace", label: 'Menlo' },
-                    { value: "'Fira Code', 'SF Mono', monospace", label: 'Fira Code' },
-                    { value: "'JetBrains Mono', 'SF Mono', monospace", label: 'JetBrains Mono' },
-                    { value: "'Source Code Pro', 'SF Mono', monospace", label: 'Source Code Pro' },
-                    { value: "'Courier New', monospace", label: 'Courier New' },
-                  ]}
-                  onChange={(v) => updateSettings({ fontFamily: v })}
-                />
-              </>
+              <AppearanceSection
+                theme={theme}
+                settings={settings}
+                updateSettings={updateSettings}
+                SectionHeader={SectionHeader}
+                SelectField={SelectField}
+                NumberField={NumberField}
+              />
             )}
 
             {activeSection === 'advanced' && (
@@ -484,5 +454,261 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ===================================================================
+ * AppearanceSection — Theme selector + color picker grid
+ * =================================================================== */
+
+interface AppearanceSectionProps {
+  theme: ThemeColors;
+  settings: import('../types').AppSettings;
+  updateSettings: (s: Partial<import('../types').AppSettings>) => void;
+  SectionHeader: React.FC<{ title: string }>;
+  SelectField: <T extends string>(props: {
+    label: string; value: T;
+    options: { value: T; label: string }[];
+    onChange: (v: T) => void;
+  }) => React.JSX.Element;
+  NumberField: (props: {
+    label: string; value: number; min: number; max: number;
+    step?: number; onChange: (v: number) => void;
+  }) => React.JSX.Element;
+}
+
+function AppearanceSection({ theme, settings, updateSettings, SectionHeader, SelectField, NumberField }: AppearanceSectionProps) {
+  const isCustom = settings.theme === 'custom';
+
+  // Resolve the "effective" base theme (for showing current colors)
+  const baseTheme = getTheme(isCustom ? settings.customThemeBase : settings.theme);
+
+  // Merge custom overrides on top of base to show effective colors
+  const effectiveColors: ThemeColors = isCustom
+    ? { ...baseTheme, ...settings.customThemeColors as Partial<ThemeColors> }
+    : baseTheme;
+
+  const handleThemeChange = useCallback((v: string) => {
+    if (v === 'custom') {
+      // Switching to custom: clone current theme as the base
+      const currentBase = settings.theme === 'custom' ? settings.customThemeBase : settings.theme;
+      updateSettings({
+        theme: 'custom' as any,
+        customThemeBase: currentBase as any,
+        customThemeColors: {},
+      });
+    } else {
+      updateSettings({
+        theme: v as any,
+        customThemeColors: {},
+      });
+    }
+  }, [settings.theme, settings.customThemeBase, updateSettings]);
+
+  const handleColorChange = useCallback((key: string, value: string) => {
+    // If not already custom, switch to custom mode
+    if (!isCustom) {
+      updateSettings({
+        theme: 'custom' as any,
+        customThemeBase: settings.theme as any,
+        customThemeColors: { [key]: value },
+      });
+    } else {
+      const updated = { ...settings.customThemeColors, [key]: value };
+      updateSettings({ customThemeColors: updated });
+    }
+  }, [isCustom, settings.theme, settings.customThemeColors, updateSettings]);
+
+  const handleResetColor = useCallback((key: string) => {
+    if (isCustom) {
+      const updated = { ...settings.customThemeColors };
+      delete (updated as any)[key];
+      // If no more overrides, revert to base theme
+      if (Object.keys(updated).length === 0) {
+        updateSettings({
+          theme: settings.customThemeBase as any,
+          customThemeColors: {},
+        });
+      } else {
+        updateSettings({ customThemeColors: updated });
+      }
+    }
+  }, [isCustom, settings.customThemeBase, settings.customThemeColors, updateSettings]);
+
+  const handleResetAll = useCallback(() => {
+    if (isCustom) {
+      updateSettings({
+        theme: settings.customThemeBase as any,
+        customThemeColors: {},
+      });
+    }
+  }, [isCustom, settings.customThemeBase, updateSettings]);
+
+  return (
+    <>
+      <SectionHeader title="Theme" />
+      <SelectField
+        label="Color Theme"
+        value={settings.theme}
+        options={[
+          { value: 'mac-glass', label: 'Mac Glass (Default)' },
+          { value: 'dark', label: 'Dark' },
+          { value: 'light', label: 'Light' },
+          { value: 'monokai', label: 'Monokai' },
+          { value: 'dracula', label: 'Dracula' },
+          { value: 'solarized-dark', label: 'Solarized Dark' },
+          { value: 'solarized-light', label: 'Solarized Light' },
+          { value: 'custom', label: 'Custom' },
+        ]}
+        onChange={handleThemeChange}
+      />
+
+      {isCustom && (
+        <SelectField
+          label="Base Theme"
+          value={settings.customThemeBase}
+          options={[
+            { value: 'mac-glass', label: 'Mac Glass' },
+            { value: 'dark', label: 'Dark' },
+            { value: 'light', label: 'Light' },
+            { value: 'monokai', label: 'Monokai' },
+            { value: 'dracula', label: 'Dracula' },
+            { value: 'solarized-dark', label: 'Solarized Dark' },
+            { value: 'solarized-light', label: 'Solarized Light' },
+          ]}
+          onChange={(v) => updateSettings({ customThemeBase: v as any })}
+        />
+      )}
+
+      <SectionHeader title="Font" />
+      <NumberField
+        label="Font Size"
+        value={settings.fontSize}
+        min={8}
+        max={32}
+        onChange={(v) => updateSettings({ fontSize: v })}
+      />
+      <SelectField
+        label="Font Family"
+        value={settings.fontFamily}
+        options={[
+          { value: "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace", label: 'SF Mono' },
+          { value: "'Menlo', 'Monaco', 'Courier New', monospace", label: 'Menlo' },
+          { value: "'Fira Code', 'SF Mono', monospace", label: 'Fira Code' },
+          { value: "'JetBrains Mono', 'SF Mono', monospace", label: 'JetBrains Mono' },
+          { value: "'Source Code Pro', 'SF Mono', monospace", label: 'Source Code Pro' },
+          { value: "'Courier New', monospace", label: 'Courier New' },
+        ]}
+        onChange={(v) => updateSettings({ fontFamily: v })}
+      />
+
+      <SectionHeader title="Theme Colors" />
+
+      {isCustom && Object.keys(settings.customThemeColors).length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0 12px' }}>
+          <span style={{ color: theme.textSecondary, fontSize: 12 }}>
+            {Object.keys(settings.customThemeColors).length} color{Object.keys(settings.customThemeColors).length !== 1 ? 's' : ''} customized
+          </span>
+          <button
+            onClick={handleResetAll}
+            style={{
+              background: 'none',
+              border: `1px solid ${theme.border}`,
+              color: theme.danger,
+              borderRadius: 4,
+              padding: '3px 10px',
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+          >
+            Reset All
+          </button>
+        </div>
+      )}
+
+      {themeColorGroups.map(group => (
+        <div key={group.label} style={{ marginBottom: 12 }}>
+          <div style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: theme.textMuted,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            marginBottom: 6,
+            marginTop: 4,
+          }}>
+            {group.label}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px' }}>
+            {group.keys.map(({ key, label }) => {
+              const colorKey = key as keyof ThemeColors;
+              if (colorKey === 'editorMonacoTheme') return null;
+              const currentVal = (effectiveColors as any)[colorKey] || '#000000';
+              const isOverridden = isCustom && (settings.customThemeColors as any)?.[colorKey] !== undefined;
+
+              return (
+                <div
+                  key={key}
+                  data-testid={`color-picker-${key}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '4px 6px',
+                    borderRadius: 4,
+                    backgroundColor: isOverridden ? `${theme.accent}12` : 'transparent',
+                    position: 'relative',
+                  }}
+                >
+                  <div style={{ position: 'relative', width: 24, height: 24, flexShrink: 0 }}>
+                    <input
+                      type="color"
+                      value={currentVal === 'transparent' ? '#000000' : currentVal}
+                      onChange={(e) => handleColorChange(key, e.target.value)}
+                      data-testid={`color-input-${key}`}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        border: `1px solid ${theme.border}`,
+                        borderRadius: 4,
+                        cursor: 'pointer',
+                        padding: 0,
+                        backgroundColor: 'transparent',
+                      }}
+                    />
+                  </div>
+                  <span style={{
+                    fontSize: 12,
+                    color: isOverridden ? theme.accent : theme.textSecondary,
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {label}
+                  </span>
+                  {isOverridden && (
+                    <span
+                      onClick={() => handleResetColor(key)}
+                      data-testid={`color-reset-${key}`}
+                      style={{
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        color: theme.textMuted,
+                        lineHeight: 1,
+                        padding: '0 2px',
+                      }}
+                      title="Reset to base theme"
+                    >
+                      {'\u00d7'}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </>
   );
 }

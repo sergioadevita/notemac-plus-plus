@@ -285,6 +285,12 @@ export function GetThemeNames(): string[]
     return Object.keys(themes);
 }
 
+export function GetCustomTheme(baseName: string, overrides: Partial<ThemeColors>): ThemeColors
+{
+    const base = themes[baseName] || themes['mac-glass'];
+    return { ...base, ...overrides, editorMonacoTheme: base.editorMonacoTheme };
+}
+
 export function defineMonacoThemes(monaco: typeof import('monaco-editor')): void
 {
     monaco.editor.defineTheme('mac-glass', {
