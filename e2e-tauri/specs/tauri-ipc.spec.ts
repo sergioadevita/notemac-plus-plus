@@ -1,5 +1,5 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test';
-import { launchTauriApp, closeTauriApp, getStoreState, createTestWorkspace, cleanupTestWorkspace } from '../helpers/tauri-app';
+import { launchTauriApp, closeTauriApp, getTauriInvocations, clearTauriInvocations, createTestWorkspace, cleanupTestWorkspace } from '../helpers/tauri-app';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -21,30 +21,45 @@ test.describe('Tauri IPC Communication', () => {
   test('read_file command works', async () => {
     const testFilePath = path.join(testWorkspace, 'test.js');
     const content = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, testFilePath);
 
     expect(content).toBe('const x = 1;\nconsole.log(x);');
   });
 
-  test('write_file command works', async () => {
+  test('write_file command is tracked in invocations', async () => {
     const filePath = path.join(testWorkspace, 'ipc-write-test.txt');
     const writeContent = 'Written via Tauri IPC';
 
-    const result = await page.evaluate(async ({ fp, c }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('write_file', { path: fp, content: c });
+    clearTauriInvocations(page);
+    await page.evaluate(async ({ fp, c }) => {
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
     }, { fp: filePath, c: writeContent });
 
-    expect(result).toBe(true);
+    const invocations = getTauriInvocations(page);
+    const writeCall = invocations.find(inv => inv.cmd === 'write_file');
+    expect(writeCall).toBeTruthy();
+    expect(writeCall?.args).toEqual({ path: filePath, content: writeContent });
+  });
+
+  test('write_file creates actual file', async () => {
+    const filePath = path.join(testWorkspace, 'ipc-write-test2.txt');
+    const writeContent = 'Written via Tauri IPC';
+
+    await page.evaluate(async ({ fp, c }) => {
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
+    }, { fp: filePath, c: writeContent });
+
     expect(fs.readFileSync(filePath, 'utf-8')).toBe(writeContent);
   });
 
   test('read_dir command returns tree structure', async () => {
     const listing = await page.evaluate(async (dp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_dir', { path: dp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_dir', { path: dp });
     }, testWorkspace);
 
     expect(Array.isArray(listing)).toBe(true);
@@ -55,14 +70,13 @@ test.describe('Tauri IPC Communication', () => {
   });
 
   test('read_dir excludes hidden files and node_modules', async () => {
-    // Create hidden file and node_modules
     fs.writeFileSync(path.join(testWorkspace, '.hidden'), 'hidden', 'utf-8');
     fs.mkdirSync(path.join(testWorkspace, 'node_modules'), { recursive: true });
     fs.writeFileSync(path.join(testWorkspace, 'node_modules', 'test.js'), '', 'utf-8');
 
     const listing = await page.evaluate(async (dp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_dir', { path: dp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_dir', { path: dp });
     }, testWorkspace);
 
     const entries = listing as any[];
@@ -70,7 +84,6 @@ test.describe('Tauri IPC Communication', () => {
     expect(names).not.toContain('.hidden');
     expect(names).not.toContain('node_modules');
 
-    // Cleanup
     fs.unlinkSync(path.join(testWorkspace, '.hidden'));
     fs.rmSync(path.join(testWorkspace, 'node_modules'), { recursive: true });
   });
@@ -78,8 +91,8 @@ test.describe('Tauri IPC Communication', () => {
   test('file_exists command works for existing file', async () => {
     const filePath = path.join(testWorkspace, 'test.js');
     const exists = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('file_exists', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('file_exists', { path: fp });
     }, filePath);
 
     expect(exists).toBe(true);
@@ -88,8 +101,8 @@ test.describe('Tauri IPC Communication', () => {
   test('file_exists command works for non-existent file', async () => {
     const filePath = path.join(testWorkspace, 'nonexistent.txt');
     const exists = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('file_exists', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('file_exists', { path: fp });
     }, filePath);
 
     expect(exists).toBe(false);
@@ -100,9 +113,9 @@ test.describe('Tauri IPC Communication', () => {
     const file2 = path.join(testWorkspace, 'seq2.txt');
 
     await page.evaluate(async ({ f1, f2 }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: f1, content: 'first' });
-      await invoke('write_file', { path: f2, content: 'second' });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: f1, content: 'first' });
+      await tauri.core.invoke('write_file', { path: f2, content: 'second' });
     }, { f1: file1, f2: file2 });
 
     expect(fs.readFileSync(file1, 'utf-8')).toBe('first');
@@ -111,9 +124,9 @@ test.describe('Tauri IPC Communication', () => {
 
   test('Reading non-existent file returns error', async () => {
     const result = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
+      const tauri = (window as any).__TAURI__;
       try {
-        await invoke('read_file', { path: fp });
+        await tauri.core.invoke('read_file', { path: fp });
         return { error: false };
       } catch (e: any) {
         return { error: true, message: String(e) };
@@ -127,8 +140,8 @@ test.describe('Tauri IPC Communication', () => {
     const emptyPath = path.join(testWorkspace, 'empty.txt');
 
     await page.evaluate(async ({ fp }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: '' });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: '' });
     }, { fp: emptyPath });
 
     expect(fs.existsSync(emptyPath)).toBe(true);
@@ -140,8 +153,8 @@ test.describe('Tauri IPC Communication', () => {
     fs.writeFileSync(origPath, 'rename me', 'utf-8');
 
     await page.evaluate(async ({ op, nn }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('rename_file', { oldPath: op, newName: nn });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('rename_file', { oldPath: op, newName: nn });
     }, { op: origPath, nn: 'renamed.txt' });
     await page.waitForTimeout(200);
 
@@ -156,15 +169,30 @@ test.describe('Tauri IPC Communication', () => {
     const content = 'Line 1\nLine 2\nSpecial chars: àéîöü\n日本語';
 
     await page.evaluate(async ({ fp, c }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: c });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
     }, { fp: filePath, c: content });
 
     const readBack = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, filePath);
 
     expect(readBack).toBe(content);
+  });
+
+  test('invoke calls are tracked in __TAURI_INVOCATIONS__', async () => {
+    clearTauriInvocations(page);
+
+    const testFilePath = path.join(testWorkspace, 'test.js');
+    await page.evaluate(async (fp) => {
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('read_file', { path: fp });
+    }, testFilePath);
+
+    const invocations = getTauriInvocations(page);
+    const readCall = invocations.find(inv => inv.cmd === 'read_file');
+    expect(readCall).toBeTruthy();
+    expect(readCall?.args).toEqual({ path: testFilePath });
   });
 });

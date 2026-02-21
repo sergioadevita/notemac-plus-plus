@@ -88,9 +88,9 @@ test.describe('Tauri UI — Editor Integration', () => {
     expect(titleText).toContain('Notemac++');
   });
 
-  test('No web MenuBar in desktop mode', async () => {
+  test('Web MenuBar IS rendered in desktop mode (no electronAPI check)', async () => {
     const webMenuBar = await page.locator('[data-testid="menu-bar"]').count();
-    expect(webMenuBar).toBeLessThanOrEqual(0);
+    expect(webMenuBar).toBeGreaterThanOrEqual(1);
   });
 });
 

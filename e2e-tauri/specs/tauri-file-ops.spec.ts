@@ -21,8 +21,8 @@ test.describe('Tauri File Operations', () => {
   test('read_file returns file content via invoke', async () => {
     const testFilePath = path.join(testWorkspace, 'test.js');
     const content = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, testFilePath);
     expect(content).toBe('const x = 1;\nconsole.log(x);');
   });
@@ -30,8 +30,8 @@ test.describe('Tauri File Operations', () => {
   test('write_file creates a new file', async () => {
     const newFilePath = path.join(testWorkspace, 'new-file.txt');
     await page.evaluate(async ({ fp, c }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: c });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
     }, { fp: newFilePath, c: 'Hello from Tauri test' });
     await page.waitForTimeout(300);
 
@@ -44,21 +44,20 @@ test.describe('Tauri File Operations', () => {
     const originalContent = fs.readFileSync(filePath, 'utf-8');
 
     await page.evaluate(async ({ fp, c }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: c });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
     }, { fp: filePath, c: 'Overwritten content' });
     await page.waitForTimeout(300);
 
     expect(fs.readFileSync(filePath, 'utf-8')).toBe('Overwritten content');
 
-    // Restore original
     fs.writeFileSync(filePath, originalContent, 'utf-8');
   });
 
   test('read_dir returns directory listing', async () => {
     const listing = await page.evaluate(async (dp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_dir', { path: dp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_dir', { path: dp });
     }, testWorkspace);
 
     const entries = listing as any[];
@@ -73,8 +72,8 @@ test.describe('Tauri File Operations', () => {
 
   test('read_dir includes subdirectories', async () => {
     const listing = await page.evaluate(async (dp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_dir', { path: dp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_dir', { path: dp });
     }, testWorkspace);
 
     const entries = listing as any[];
@@ -87,8 +86,8 @@ test.describe('Tauri File Operations', () => {
 
   test('read_file with different file types', async () => {
     const jsonContent = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, path.join(testWorkspace, 'test.json'));
 
     expect(jsonContent).toBe('{"key": "value"}');
@@ -96,8 +95,8 @@ test.describe('Tauri File Operations', () => {
 
   test('read_file for Python file', async () => {
     const pyContent = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, path.join(testWorkspace, 'test.py'));
 
     expect(pyContent).toBe('x = 1\nprint(x)');
@@ -108,14 +107,14 @@ test.describe('Tauri File Operations', () => {
     const content = 'Line 1\nLine 2\nSpecial chars: àéîöü\n日本語';
 
     await page.evaluate(async ({ fp, c }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: c });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: c });
     }, { fp: filePath, c: content });
     await page.waitForTimeout(200);
 
     const readBack = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, filePath);
 
     expect(readBack).toBe(content);
@@ -127,8 +126,8 @@ test.describe('Tauri File Operations', () => {
     fs.writeFileSync(largePath, lines, 'utf-8');
 
     const content = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('read_file', { path: fp });
+      const tauri = (window as any).__TAURI__;
+      return await tauri.core.invoke('read_file', { path: fp });
     }, largePath) as string;
 
     expect(content.split('\n').length).toBe(1000);
@@ -136,9 +135,9 @@ test.describe('Tauri File Operations', () => {
 
   test('Reading non-existent file throws error', async () => {
     const result = await page.evaluate(async (fp) => {
-      const { invoke } = await import('@tauri-apps/api/core');
+      const tauri = (window as any).__TAURI__;
       try {
-        await invoke('read_file', { path: fp });
+        await tauri.core.invoke('read_file', { path: fp });
         return { error: false };
       } catch (e: any) {
         return { error: true, message: String(e) };
@@ -169,10 +168,10 @@ test.describe('Tauri File Operations', () => {
     const file2 = path.join(testWorkspace, 'concurrent2.txt');
 
     await page.evaluate(async ({ f1, f2 }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
+      const tauri = (window as any).__TAURI__;
       await Promise.all([
-        invoke('write_file', { path: f1, content: 'content 1' }),
-        invoke('write_file', { path: f2, content: 'content 2' }),
+        tauri.core.invoke('write_file', { path: f1, content: 'content 1' }),
+        tauri.core.invoke('write_file', { path: f2, content: 'content 2' }),
       ]);
     }, { f1: file1, f2: file2 });
     await page.waitForTimeout(300);
@@ -185,8 +184,8 @@ test.describe('Tauri File Operations', () => {
     const emptyPath = path.join(testWorkspace, 'empty.txt');
 
     await page.evaluate(async ({ fp }) => {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_file', { path: fp, content: '' });
+      const tauri = (window as any).__TAURI__;
+      await tauri.core.invoke('write_file', { path: fp, content: '' });
     }, { fp: emptyPath });
     await page.waitForTimeout(200);
 
