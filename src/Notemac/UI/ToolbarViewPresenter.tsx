@@ -176,9 +176,7 @@ export function Toolbar({ theme, onAction }: ToolbarProps) {
       padding: '0 8px',
       gap: 2,
       flexShrink: 0,
-      overflowX: 'auto',
-      overflowY: 'hidden',
-      scrollbarWidth: 'none',
+      flexWrap: 'wrap' as const,
     }}>
       <ToolbarButton icon={Icons.newFile(iconColor)} title="New (Cmd+N)" onClick={() => onAction('new')} theme={theme} />
       <ToolbarButton icon={Icons.open(iconColor)} title="Open (Cmd+O)" onClick={() => onAction('open')} theme={theme} />

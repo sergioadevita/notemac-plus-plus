@@ -252,8 +252,6 @@ function useStyles(theme: ThemeColors) {
       fontSize: 12,
       flexShrink: 0,
       padding: '0 4px',
-      overflowX: 'auto',
-      scrollbarWidth: 'none',
     } as React.CSSProperties,
     sectionLeft: {
       display: 'flex',
