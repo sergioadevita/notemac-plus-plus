@@ -7,12 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  unit-tests:
+    name: Unit Tests & Type Check
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
 
     steps:
       - name: Checkout code
@@ -21,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
 
       - name: Install dependencies
         run: npm ci
@@ -29,13 +26,77 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Run unit tests
+        run: npx vitest run
+
+  e2e-web:
+    name: Web E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         run: npm run build
 
-      - name: Run tests
-        run: npx vitest run
+      - name: Run web E2E tests
+        run: npx playwright test
 
-  tauri-build:
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-web-results
+          path: test-results/
+          retention-days: 7
+
+  e2e-electron:
+    name: Electron E2E Tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run Electron E2E tests
+        run: npx playwright test --config=playwright-electron.config.ts
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-electron-results
+          path: test-results/
+          retention-days: 7
+
+  e2e-tauri:
+    name: Tauri E2E Tests
     runs-on: macos-latest
 
     steps:
@@ -58,49 +119,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Build frontend
         run: npm run build
 
-      - name: Build Tauri app
+      - name: Build Tauri binary
         run: npm run tauri:build
 
       - name: Verify Tauri binary exists
         run: ls -la src-tauri/target/release/bundle/macos/
 
-      - name: Report Tauri app size
-        run: du -sh src-tauri/target/release/bundle/macos/*.app src-tauri/target/release/bundle/dmg/*.dmg
+      - name: Run Tauri E2E tests
+        run: npx playwright test --config=playwright-tauri.config.ts
 
-  tauri-build:
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
         with:
-          node-version: 20.x
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Build Tauri app
-        run: npm run tauri:build
-
-      - name: Verify Tauri binary exists
-        run: ls -la src-tauri/target/release/bundle/macos/
+          name: playwright-tauri-results
+          path: test-results/
+          retention-days: 7
 
       - name: Report Tauri app size
         run: du -sh src-tauri/target/release/bundle/macos/*.app src-tauri/target/release/bundle/dmg/*.dmg
