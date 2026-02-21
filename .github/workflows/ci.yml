@@ -125,6 +125,9 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Install tauri-driver
+        run: cargo install tauri-driver
+
       - name: Build Tauri binary
         run: npm run tauri:build
 
