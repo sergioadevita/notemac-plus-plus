@@ -27,57 +27,63 @@ test.describe('Electron AI — State Management', () => {
   test('AI can be enabled/disabled', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setAIEnabled(true);
+      store?.getState()?.SetAiEnabled(true);
     });
+
     let state = await getStoreState(page);
     expect(state.aiEnabled).toBe(true);
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setAIEnabled(false);
+      store?.getState()?.SetAiEnabled(false);
     });
+
     state = await getStoreState(page);
     expect(state.aiEnabled).toBe(false);
   });
 
   test('built-in providers are available', async () => {
     const state = await getStoreState(page);
-    expect(state.aiProviders).toBeTruthy();
-    expect(Array.isArray(state.aiProviders)).toBe(true);
-    expect(state.aiProviders.length).toBeGreaterThan(0);
-    const providerNames = state.aiProviders.map((p: any) => p.name);
-    expect(providerNames).toContain('OpenAI');
+    expect(state.providers).toBeTruthy();
+    expect(state.providers.length).toBeGreaterThan(0);
+    const providerIds = state.providers.map((p: any) => p.id);
+    expect(providerIds).toContain('openai');
   });
 
   test('active provider can be changed', async () => {
-    await page.evaluate(() => {
-      const store = (window as any).__ZUSTAND_STORE__;
-      const providers = store?.getState()?.aiProviders;
-      if (providers?.length > 0) {
-        store?.getState()?.setActiveProvider(providers[0].id);
-      }
-    });
     const state = await getStoreState(page);
-    expect(state.activeProviderId).toBeTruthy();
+    const firstProvider = state.providers[0];
+
+    await page.evaluate((id: string) => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.SetActiveProvider(id);
+    }, firstProvider.id);
+
+    const newState = await getStoreState(page);
+    expect(newState.activeProviderId).toBe(firstProvider.id);
   });
 
   test('active model can be changed', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setActiveModel('gpt-4');
+      store?.getState()?.SetActiveModel('test-model-123');
     });
+
     const state = await getStoreState(page);
-    expect(state.activeModel).toBe('gpt-4');
+    expect(state.activeModelId).toBe('test-model-123');
   });
 
   test('ai-settings dialog opens', async () => {
     await triggerMenuAction(electronApp, 'ai-settings');
-    const state = await getStoreState(page);
-    expect(state.showAISettings).toBe(true);
+    await page.waitForTimeout(200);
 
+    const state = await getStoreState(page);
+    expect(state.showAiSettings).toBe(true);
+
+    // Close it
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setShowAISettings(false);
+      store?.getState()?.SetShowAiSettings(false);
     });
   });
 });
@@ -97,84 +103,129 @@ test.describe('Electron AI — Conversations', () => {
 
   test('no conversations exist initially', async () => {
     const state = await getStoreState(page);
-    expect(state.aiConversations).toEqual([]);
+    expect(state.conversations).toBeTruthy();
+    expect(state.conversations.length).toBe(0);
+    expect(state.activeConversationId).toBeNull();
   });
 
-  test('add conversation creates a new one', async () => {
+  test('conversation can be added', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.addConversation('Test Conversation');
+      store?.getState()?.AddConversation({
+        id: 'conv-1',
+        title: 'Test Conversation',
+        messages: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        providerId: 'openai',
+        modelId: 'gpt-4o-mini',
+      });
     });
+
     const state = await getStoreState(page);
-    expect(state.aiConversations.length).toBe(1);
-    expect(state.aiConversations[0].title).toBe('Test Conversation');
-    expect(state.aiConversations[0].messages).toEqual([]);
+    expect(state.conversations.length).toBe(1);
+    expect(state.conversations[0].id).toBe('conv-1');
+    expect(state.activeConversationId).toBe('conv-1');
   });
 
-  test('add user message to conversation', async () => {
+  test('message can be added to conversation', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const convId = store?.getState()?.aiConversations[0]?.id;
-      if (convId) {
-        store?.getState()?.addMessage(convId, { role: 'user', content: 'Hello AI' });
-      }
+      store?.getState()?.AddMessageToConversation('conv-1', {
+        id: 'msg-1',
+        role: 'user',
+        content: 'Hello AI!',
+        timestamp: Date.now(),
+      });
     });
+
     const state = await getStoreState(page);
-    expect(state.aiConversations[0].messages.length).toBe(1);
-    expect(state.aiConversations[0].messages[0].role).toBe('user');
-    expect(state.aiConversations[0].messages[0].content).toBe('Hello AI');
+    const conv = state.conversations.find((c: any) => c.id === 'conv-1');
+    expect(conv.messages.length).toBe(1);
+    expect(conv.messages[0].content).toBe('Hello AI!');
+    expect(conv.messages[0].role).toBe('user');
   });
 
-  test('add assistant message to conversation', async () => {
+  test('assistant message can be added', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const convId = store?.getState()?.aiConversations[0]?.id;
-      if (convId) {
-        store?.getState()?.addMessage(convId, { role: 'assistant', content: 'Hello human!' });
-      }
+      store?.getState()?.AddMessageToConversation('conv-1', {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'Hello! How can I help?',
+        timestamp: Date.now(),
+      });
     });
+
     const state = await getStoreState(page);
-    expect(state.aiConversations[0].messages.length).toBe(2);
-    expect(state.aiConversations[0].messages[1].role).toBe('assistant');
+    const conv = state.conversations.find((c: any) => c.id === 'conv-1');
+    expect(conv.messages.length).toBe(2);
+    expect(conv.messages[1].role).toBe('assistant');
   });
 
-  test('update last message simulates streaming', async () => {
+  test('last message content can be updated (streaming)', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const convId = store?.getState()?.aiConversations[0]?.id;
-      if (convId) {
-        store?.getState()?.updateLastMessage(convId, 'Hello human! How can I help?');
-      }
+      store?.getState()?.UpdateLastMessage('conv-1', 'Updated streaming content...');
     });
+
     const state = await getStoreState(page);
-    const lastMsg = state.aiConversations[0].messages[state.aiConversations[0].messages.length - 1];
-    expect(lastMsg.content).toBe('Hello human! How can I help?');
+    const conv = state.conversations.find((c: any) => c.id === 'conv-1');
+    expect(conv.messages[conv.messages.length - 1].content).toBe('Updated streaming content...');
   });
 
   test('streaming state can be toggled', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setIsStreaming(true);
+      store?.getState()?.SetIsAiStreaming(true);
+      store?.getState()?.SetAiStreamContent('partial response...');
     });
+
     let state = await getStoreState(page);
-    expect(state.isStreaming).toBe(true);
+    expect(state.isAiStreaming).toBe(true);
+    expect(state.aiStreamContent).toBe('partial response...');
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setIsStreaming(false);
+      store?.getState()?.SetIsAiStreaming(false);
+      store?.getState()?.SetAiStreamContent('');
     });
+
     state = await getStoreState(page);
-    expect(state.isStreaming).toBe(false);
+    expect(state.isAiStreaming).toBe(false);
   });
 
-  test('remove conversation', async () => {
+  test('conversation can be removed', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const convId = store?.getState()?.aiConversations[0]?.id;
-      if (convId) store?.getState()?.removeConversation(convId);
+      store?.getState()?.RemoveConversation('conv-1');
     });
+
     const state = await getStoreState(page);
-    expect(state.aiConversations.length).toBe(0);
+    expect(state.conversations.length).toBe(0);
+  });
+
+  test('active conversation switches on removal', async () => {
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.AddConversation({
+        id: 'conv-a', title: 'A', messages: [], createdAt: Date.now(), updatedAt: Date.now(), providerId: 'openai', modelId: 'gpt-4',
+      });
+      store?.getState()?.AddConversation({
+        id: 'conv-b', title: 'B', messages: [], createdAt: Date.now(), updatedAt: Date.now(), providerId: 'openai', modelId: 'gpt-4',
+      });
+    });
+
+    let state = await getStoreState(page);
+    expect(state.activeConversationId).toBe('conv-b');
+
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.RemoveConversation('conv-b');
+    });
+
+    state = await getStoreState(page);
+    expect(state.activeConversationId).toBe('conv-a');
   });
 });
 
@@ -193,73 +244,104 @@ test.describe('Electron AI — Inline Suggestions & Context', () => {
 
   test('inline suggestion is enabled by default', async () => {
     const state = await getStoreState(page);
-    expect(state.inlineSuggestionsEnabled).toBe(true);
+    expect(state.inlineSuggestionEnabled).toBe(true);
   });
 
-  test('inline suggestion can be disabled and re-enabled', async () => {
+  test('inline suggestion can be disabled/enabled', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setInlineSuggestionsEnabled(false);
+      store?.getState()?.SetInlineSuggestionEnabled(false);
     });
+
     let state = await getStoreState(page);
-    expect(state.inlineSuggestionsEnabled).toBe(false);
+    expect(state.inlineSuggestionEnabled).toBe(false);
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setInlineSuggestionsEnabled(true);
+      store?.getState()?.SetInlineSuggestionEnabled(true);
     });
+
     state = await getStoreState(page);
-    expect(state.inlineSuggestionsEnabled).toBe(true);
+    expect(state.inlineSuggestionEnabled).toBe(true);
   });
 
-  test('set and clear inline suggestion', async () => {
+  test('inline suggestion can be set and cleared', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setCurrentSuggestion('console.log("hello")');
+      store?.getState()?.SetCurrentInlineSuggestion({
+        text: 'function hello() {}',
+        position: { lineNumber: 1, column: 1 },
+        providerId: 'openai',
+      });
     });
+
     let state = await getStoreState(page);
-    expect(state.currentSuggestion).toBe('console.log("hello")');
+    expect(state.currentInlineSuggestion).toBeTruthy();
+    expect(state.currentInlineSuggestion.text).toBe('function hello() {}');
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setCurrentSuggestion(null);
+      store?.getState()?.SetCurrentInlineSuggestion(null);
     });
+
     state = await getStoreState(page);
-    expect(state.currentSuggestion).toBeNull();
+    expect(state.currentInlineSuggestion).toBeNull();
   });
 
-  test('add and remove context items', async () => {
+  test('AI context items can be added and removed', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.addContextItem({ type: 'file', path: '/test.ts', content: 'const x = 1;' });
+      store?.getState()?.AddAiContextItem({ type: 'file', name: 'test.ts', content: 'const x = 1;' });
+      store?.getState()?.AddAiContextItem({ type: 'selection', name: 'selected text', content: 'hello' });
     });
+
     let state = await getStoreState(page);
-    expect(state.contextItems.length).toBe(1);
-    expect(state.contextItems[0].type).toBe('file');
+    expect(state.aiContextItems.length).toBe(2);
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const itemId = store?.getState()?.contextItems[0]?.id;
-      if (itemId) store?.getState()?.removeContextItem(itemId);
+      store?.getState()?.RemoveAiContextItem(0);
     });
+
     state = await getStoreState(page);
-    expect(state.contextItems.length).toBe(0);
+    expect(state.aiContextItems.length).toBe(1);
+    expect(state.aiContextItems[0].name).toBe('selected text');
+
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.ClearAiContext();
+    });
+
+    state = await getStoreState(page);
+    expect(state.aiContextItems.length).toBe(0);
   });
 
-  test('operation error can be set and cleared', async () => {
+  test('commit message draft can be set', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setAIError('API rate limit exceeded');
+      store?.getState()?.SetCommitMessageDraft('feat: add new feature');
     });
+
+    const state = await getStoreState(page);
+    expect(state.commitMessageDraft).toBe('feat: add new feature');
+  });
+
+  test('AI operation error can be set and cleared', async () => {
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.SetAiOperationError('API rate limit exceeded');
+    });
+
     let state = await getStoreState(page);
-    expect(state.aiError).toBe('API rate limit exceeded');
+    expect(state.aiOperationError).toBe('API rate limit exceeded');
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setAIError(null);
+      store?.getState()?.SetAiOperationError(null);
     });
+
     state = await getStoreState(page);
-    expect(state.aiError).toBeNull();
+    expect(state.aiOperationError).toBeNull();
   });
 });
 
@@ -278,61 +360,69 @@ test.describe('Electron AI — Provider Management', () => {
 
   test('custom provider can be added', async () => {
     const before = await getStoreState(page);
-    const countBefore = before.aiProviders.length;
+    const beforeCount = before.providers.length;
 
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.addCustomProvider({
-        name: 'Local LLM',
-        baseUrl: 'http://localhost:11434',
-        models: ['llama3'],
+      store?.getState()?.AddProvider({
+        id: 'custom-provider',
+        name: 'Custom LLM',
+        baseUrl: 'http://localhost:8080',
         isBuiltIn: false,
+        models: [{ id: 'custom-model', name: 'Custom Model', providerId: 'custom-provider', contextWindow: 4096, supportsStreaming: true, supportsFIM: false }],
       });
     });
 
-    const state = await getStoreState(page);
-    expect(state.aiProviders.length).toBe(countBefore + 1);
-    const custom = state.aiProviders.find((p: any) => p.name === 'Local LLM');
-    expect(custom).toBeTruthy();
+    const after = await getStoreState(page);
+    expect(after.providers.length).toBe(beforeCount + 1);
+    expect(after.providers.find((p: any) => p.id === 'custom-provider')).toBeTruthy();
   });
 
   test('custom provider can be removed', async () => {
-    const before = await getStoreState(page);
-    const custom = before.aiProviders.find((p: any) => p.name === 'Local LLM');
-
-    await page.evaluate((id: string) => {
+    await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.removeProvider(id);
-    }, custom.id);
+      store?.getState()?.RemoveProvider('custom-provider');
+    });
 
     const state = await getStoreState(page);
-    const found = state.aiProviders.find((p: any) => p.name === 'Local LLM');
-    expect(found).toBeFalsy();
+    expect(state.providers.find((p: any) => p.id === 'custom-provider')).toBeFalsy();
   });
 
-  test('credential can be set and removed', async () => {
+  test('built-in provider cannot be removed', async () => {
+    const before = await getStoreState(page);
+    const builtInId = before.providers.find((p: any) => p.isBuiltIn)?.id;
+
+    if (builtInId) {
+      await page.evaluate((id: string) => {
+        const store = (window as any).__ZUSTAND_STORE__;
+        store?.getState()?.RemoveProvider(id);
+      }, builtInId);
+
+      const after = await getStoreState(page);
+      expect(after.providers.find((p: any) => p.id === builtInId)).toBeTruthy();
+    }
+  });
+
+  test('credential can be set for provider', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const providers = store?.getState()?.aiProviders;
-      if (providers?.length > 0) {
-        store?.getState()?.setProviderCredential(providers[0].id, 'sk-test-key-123');
-      }
+      store?.getState()?.SetCredentialForProvider('openai', 'sk-test-key-123', false);
     });
 
-    let state = await getStoreState(page);
-    const cred = state.aiCredentials?.[state.aiProviders[0].id];
+    const state = await getStoreState(page);
+    const cred = state.credentials.find((c: any) => c.providerId === 'openai');
     expect(cred).toBeTruthy();
+    expect(cred.apiKey).toBe('sk-test-key-123');
+  });
 
+  test('credential can be removed', async () => {
     await page.evaluate(() => {
       const store = (window as any).__ZUSTAND_STORE__;
-      const providers = store?.getState()?.aiProviders;
-      if (providers?.length > 0) {
-        store?.getState()?.removeProviderCredential(providers[0].id);
-      }
+      store?.getState()?.RemoveCredentialForProvider('openai');
     });
 
-    state = await getStoreState(page);
-    const credAfter = state.aiCredentials?.[state.aiProviders[0].id];
-    expect(credAfter).toBeFalsy();
+    const state = await getStoreState(page);
+    const cred = state.credentials.find((c: any) => c.providerId === 'openai');
+    expect(cred).toBeFalsy();
   });
 });
