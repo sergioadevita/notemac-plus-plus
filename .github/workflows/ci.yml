@@ -127,3 +127,73 @@ jobs:
           name: playwright-tauri-results
           path: test-results/
           retention-days: 7
+
+  tauri-build:
+    name: Tauri Binary Build & Rust Tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run Rust unit tests
+        working-directory: src-tauri
+        run: cargo test --lib --verbose
+
+      - name: Build Tauri binary (debug)
+        working-directory: src-tauri
+        run: cargo build --verbose
+
+      - name: Verify binary exists
+        run: |
+          BINARY="src-tauri/target/debug/notemac-plus-plus"
+          if [ ! -f "$BINARY" ]; then
+            echo "::error::Binary not found at $BINARY"
+            ls -la src-tauri/target/debug/ | head -20
+            exit 1
+          fi
+          echo "Binary found: $(ls -lh $BINARY | awk '{print $5}')"
+          file "$BINARY"
+
+      - name: Verify Tauri config consistency
+        run: |
+          CARGO_VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          TAURI_VERSION=$(node -e "console.log(require('./src-tauri/tauri.conf.json').version)")
+          PKG_VERSION=$(node -e "console.log(require('./package.json').version)")
+
+          echo "Cargo.toml version:    $CARGO_VERSION"
+          echo "tauri.conf.json version: $TAURI_VERSION"
+          echo "package.json version:  $PKG_VERSION"
+
+          if [ "$TAURI_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Version mismatch: tauri.conf.json ($TAURI_VERSION) != package.json ($PKG_VERSION)"
+            exit 1
+          fi
+
+          echo "Frontend versions match ✓"
+          echo "Cargo version: $CARGO_VERSION (Rust crate version, may differ from frontend)"
