@@ -39,30 +39,31 @@ const mockTheme: ThemeColors = {
 };
 
 // Mock the store and helpers
-vi.mock('../Notemac/Model/Store', () => ({
-  useNotemacStore: {
-    getState: vi.fn(() => ({
-      setSidebarPanel: vi.fn(),
+vi.mock('../Notemac/Model/Store', () => {
+  const storeFn = vi.fn(() => ({
+    addTab: vi.fn(),
+    recentFiles: [
+      { name: 'test.js', path: '/home/user/test.js' },
+      { name: 'config.json', path: '/home/user/config.json' },
+    ],
+  }));
+  (storeFn as any).getState = vi.fn(() => ({
+    setSidebarPanel: vi.fn(),
+  }));
+  (storeFn as any).subscribe = vi.fn();
+  (storeFn as any).setState = vi.fn();
+  (storeFn as any).getInitialState = vi.fn();
+  return {
+    useNotemacStore: storeFn,
+    useNotemacStoreShallow: vi.fn(() => ({
+      addTab: vi.fn(),
+      recentFiles: [
+        { name: 'test.js', path: '/home/user/test.js' },
+        { name: 'config.json', path: '/home/user/config.json' },
+      ],
     })),
-    subscribe: vi.fn(),
-    setState: vi.fn(),
-    getInitialState: vi.fn(),
-  },
-  useNotemacStoreShallow: vi.fn(() => ({
-    addTab: vi.fn(),
-    recentFiles: [
-      { name: 'test.js', path: '/home/user/test.js' },
-      { name: 'config.json', path: '/home/user/config.json' },
-    ],
-  })),
-  useNotemacStore: vi.fn(() => ({
-    addTab: vi.fn(),
-    recentFiles: [
-      { name: 'test.js', path: '/home/user/test.js' },
-      { name: 'config.json', path: '/home/user/config.json' },
-    ],
-  })),
-}));
+  };
+});
 
 vi.mock('../../Shared/Helpers/FileHelpers', () => ({
   detectLanguage: vi.fn(() => 'javascript'),

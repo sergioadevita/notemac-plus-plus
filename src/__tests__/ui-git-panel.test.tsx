@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GitPanelViewPresenter } from '../Notemac/UI/GitPanelViewPresenter';
 import type { ThemeColors } from '../Notemac/Configs/ThemeConfig';
 
@@ -60,6 +60,8 @@ vi.mock('../Notemac/Controllers/GitController', () => ({
   InitializeRepository: vi.fn(),
   GetStagedDiff: vi.fn(),
 }));
+
+import { CreateCommit } from '../Notemac/Controllers/GitController';
 
 vi.mock('../Notemac/Controllers/AIActionController', () => ({
   GenerateCommitMessage: vi.fn(),
@@ -319,14 +321,17 @@ describe('GitPanelViewPresenter', () => {
     expect(screen.getByText(/↓1/)).toBeTruthy();
   });
 
-  it('allows commit with keyboard shortcut', () => {
+  it('allows commit with keyboard shortcut', async () => {
     render(<GitPanelViewPresenter theme={mockTheme} />);
 
     const textarea = screen.getByPlaceholderText(/Commit message/) as HTMLTextAreaElement;
     fireEvent.change(textarea, { target: { value: 'Test commit' } });
     fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true });
 
-    expect(textarea.value).toBe('Test commit');
+    // Wait for async state updates triggered by CreateCommit to settle
+    await waitFor(() => {
+      expect(CreateCommit).toHaveBeenCalled();
+    });
   });
 
   it('shows AI generate commit message button', () => {
