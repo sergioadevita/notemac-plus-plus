@@ -51,8 +51,20 @@ for (const file of fs.readdirSync(screenshotsSource)) {
   );
 }
 
+// 6. Copy SEO files (sitemap.xml, robots.txt)
+fs.copyFileSync(
+  path.resolve(__dirname, '..', 'sitemap.xml'),
+  path.join(dist, 'sitemap.xml')
+);
+fs.copyFileSync(
+  path.resolve(__dirname, '..', 'robots.txt'),
+  path.join(dist, 'robots.txt')
+);
+
 console.log('Deploy build ready:');
 console.log('  dist/index.html       (landing page)');
 console.log('  dist/Icons/            (icon assets)');
 console.log('  dist/docs/            (documentation viewer + screenshots)');
 console.log('  dist/app/              (web app)');
+console.log('  dist/sitemap.xml      (SEO sitemap)');
+console.log('  dist/robots.txt       (SEO robots)');
