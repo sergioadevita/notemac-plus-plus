@@ -96,7 +96,7 @@ jobs:
           retention-days: 7
 
   e2e-tauri:
-    name: Tauri E2E Tests
+    name: Tauri E2E Tests (WebKit)
     runs-on: macos-latest
 
     steps:
@@ -108,31 +108,14 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
       - name: Install dependencies
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps webkit
 
       - name: Build frontend
         run: npm run build
-
-      - name: Install tauri-driver
-        run: cargo install tauri-driver
-
-      - name: Build Tauri binary
-        run: npm run tauri:build
-
-      - name: Verify Tauri binary exists
-        run: ls -la src-tauri/target/release/bundle/macos/
 
       - name: Run Tauri E2E tests
         run: npx playwright test --config=playwright-tauri.config.ts
@@ -144,6 +127,3 @@ jobs:
           name: playwright-tauri-results
           path: test-results/
           retention-days: 7
-
-      - name: Report Tauri app size
-        run: du -sh src-tauri/target/release/bundle/macos/*.app src-tauri/target/release/bundle/dmg/*.dmg
