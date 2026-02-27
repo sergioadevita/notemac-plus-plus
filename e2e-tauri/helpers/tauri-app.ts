@@ -539,7 +539,8 @@ export async function triggerMenuAction(page: Page, action: string, value?: any)
 
       // ── Editor-handled actions (line ops, transforms, etc.) ──
       default: {
-        const editorAction = (window as any).__EDITOR_ACTION_DISPATCH__;
+        // The app sets window.__editorAction from EditorPanelViewPresenter
+        const editorAction = (window as any).__editorAction;
         if (editorAction) {
           editorAction(a, v);
         }

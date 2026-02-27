@@ -196,6 +196,9 @@ export async function StartGitHubOAuth(): Promise<OAuthState | null>
  */
 export async function PollGitHubOAuthToken(deviceCode: string): Promise<string | null>
 {
+    if ('Iv1.CONFIGURE_YOUR_APP' === GITHUB_OAUTH_CLIENT_ID)
+        return null;
+
     try
     {
         const response = await fetch('https://github.com/login/oauth/access_token', {

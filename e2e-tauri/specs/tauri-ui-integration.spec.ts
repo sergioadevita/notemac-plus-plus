@@ -291,11 +291,13 @@ test.describe('Tauri UI — Keyboard Shortcuts', () => {
     await closeTauriApp(context);
   });
 
-  test('Ctrl+N creates new tab', async () => {
+  test('Ctrl/Cmd+N creates new tab', async () => {
     await page.locator('.monaco-editor').first().click();
     await page.waitForTimeout(200);
     const before = await getTabCount(page);
-    await page.keyboard.press('Control+n');
+    // macOS uses Meta (Cmd), Linux/Windows uses Control
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+    await page.keyboard.press(`${modifier}+n`);
     await page.waitForTimeout(300);
     const after = await getTabCount(page);
     expect(after).toBe(before + 1);
