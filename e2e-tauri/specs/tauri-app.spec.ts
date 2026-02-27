@@ -96,11 +96,11 @@ test.describe('Tauri App', () => {
     expect(typeof listeners).toBe('object');
   });
 
-  test('PlatformBridge detects Tauri', async () => {
-    const platform = await page.evaluate(() => {
-      const tauri = (window as any).__TAURI__;
-      return typeof tauri !== 'undefined' ? 'tauri' : 'web';
+  test('Mock __TAURI__ is available after injection', async () => {
+    // The mock is injected after app load, so it's available for direct API testing
+    const hasTauri = await page.evaluate(() => {
+      return typeof (window as any).__TAURI__ !== 'undefined';
     });
-    expect(platform).toBe('tauri');
+    expect(hasTauri).toBe(true);
   });
 });

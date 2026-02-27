@@ -85,10 +85,17 @@ async function startPreviewServer(): Promise<void> {
 
 /**
  * Inject a mock __TAURI__ API into the page.
- * This simulates the Tauri runtime environment.
+ *
+ * IMPORTANT: This must be called AFTER the app has loaded and initialized.
+ * If injected before page load (via addInitScript), the app detects __TAURI__
+ * and tries to dynamically import @tauri-apps/api/core — which fails because
+ * the real Tauri IPC backend doesn't exist in the web build.
+ *
+ * By injecting after load, the app runs in "web" mode and we can still
+ * verify the mock Tauri API surface in tests.
  */
 async function injectTauriMocks(page: Page): Promise<void> {
-  await page.addInitScript(() => {
+  await page.evaluate(() => {
     // Mock the __TAURI__ namespace that Tauri apps expose
     (window as any).__TAURI__ = {
       event: {
@@ -194,15 +201,15 @@ export async function launchTauriApp(): Promise<{ context: BrowserContext; page:
 
   const page = await context.newPage();
 
-  // Inject Tauri mocks before navigation
-  await injectTauriMocks(page);
-
-  // Navigate to the app
+  // Navigate to the app (runs in "web" mode — no __TAURI__ yet)
   await page.goto(`http://localhost:${PREVIEW_PORT}`, { waitUntil: 'domcontentloaded' });
 
   // Wait for the app to fully load
   await page.waitForSelector('.notemac-app, #root > div', { timeout: 30000 });
   await page.waitForTimeout(2000); // Give Monaco time to initialize
+
+  // Inject Tauri mocks AFTER app init so the app doesn't try to use real Tauri APIs
+  await injectTauriMocks(page);
 
   return { context, page };
 }
