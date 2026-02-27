@@ -1,5 +1,5 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test';
-import { launchTauriApp, closeTauriApp, getStoreState, getTabCount, triggerMenuAction, createTestWorkspace, cleanupTestWorkspace } from '../helpers/tauri-app';
+import { launchTauriApp, closeTauriApp, getStoreState, getTabCount, triggerMenuAction, createTestWorkspace, cleanupTestWorkspace, injectRealFsMock } from '../helpers/tauri-app';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -11,6 +11,7 @@ test.describe('Tauri File Operations', () => {
   test.beforeAll(async () => {
     testWorkspace = createTestWorkspace();
     ({ context, page } = await launchTauriApp());
+    await injectRealFsMock(page);
   });
 
   test.afterAll(async () => {

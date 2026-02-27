@@ -1,5 +1,5 @@
 import { Page, BrowserContext, Browser, webkit } from 'playwright';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -16,16 +16,8 @@ const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
  * Tauri uses on macOS) with a mock __TAURI__ API injected. This tests the full
  * frontend in WebKit with Tauri API calls interceptable and verifiable.
  *
- * Why not launch the Tauri binary directly?
- * - Tauri uses WKWebView, not Chromium — `chromium.launchPersistentContext` hangs
- * - WEBKIT_INSPECTOR_SERVER requires macOS-specific setup unreliable in CI
- * - The frontend code is identical; only the IPC bridge differs
- *
- * This approach validates:
- * - Frontend runs correctly in WebKit (same engine as Tauri)
- * - All store operations work
- * - Menu actions dispatch correctly
- * - Tauri API surface is exercised
+ * IMPORTANT: Uses a SINGLE shared preview server and browser instance across
+ * all test files to avoid memory exhaustion on CI runners.
  */
 
 let previewServer: ChildProcess | null = null;
@@ -57,14 +49,43 @@ async function waitForServer(port: number, maxWait: number = 15000): Promise<voi
 }
 
 /**
+ * Check if preview server is already running.
+ */
+async function isServerRunning(port: number): Promise<boolean> {
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const req = http.get(`http://localhost:${port}`, (res) => {
+        res.resume();
+        resolve();
+      });
+      req.on('error', reject);
+      req.setTimeout(500, () => { req.destroy(); reject(new Error('timeout')); });
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Start the Vite preview server (serves the built dist/ folder).
+ * Only starts if not already running.
  */
 async function startPreviewServer(): Promise<void> {
-  // Verify dist/ exists
+  if (await isServerRunning(PREVIEW_PORT)) {
+    return;
+  }
+
   const distPath = path.join(PROJECT_ROOT, 'dist');
   if (!fs.existsSync(distPath)) {
     throw new Error('dist/ not found. Build the app first with: npm run build');
   }
+
+  // Kill any lingering process on the port
+  try {
+    execSync(`lsof -ti:${PREVIEW_PORT} | xargs kill -9 2>/dev/null`, { stdio: 'ignore' });
+    await new Promise(r => setTimeout(r, 500));
+  } catch {}
 
   previewServer = spawn('npx', ['vite', 'preview', '--port', String(PREVIEW_PORT), '--host'], {
     cwd: PROJECT_ROOT,
@@ -90,17 +111,12 @@ async function startPreviewServer(): Promise<void> {
  * If injected before page load (via addInitScript), the app detects __TAURI__
  * and tries to dynamically import @tauri-apps/api/core — which fails because
  * the real Tauri IPC backend doesn't exist in the web build.
- *
- * By injecting after load, the app runs in "web" mode and we can still
- * verify the mock Tauri API surface in tests.
  */
 async function injectTauriMocks(page: Page): Promise<void> {
   await page.evaluate(() => {
-    // Mock the __TAURI__ namespace that Tauri apps expose
     (window as any).__TAURI__ = {
       event: {
         listen: async (event: string, handler: Function) => {
-          // Store listeners for test invocation
           const listeners = (window as any).__TAURI_LISTENERS__ || {};
           if (!listeners[event]) listeners[event] = [];
           listeners[event].push(handler);
@@ -119,12 +135,10 @@ async function injectTauriMocks(page: Page): Promise<void> {
       },
       core: {
         invoke: async (cmd: string, args?: any) => {
-          // Track invocations for test assertions
           const invocations = (window as any).__TAURI_INVOCATIONS__ || [];
           invocations.push({ cmd, args, timestamp: Date.now() });
           (window as any).__TAURI_INVOCATIONS__ = invocations;
 
-          // Mock responses for common commands
           switch (cmd) {
             case 'read_file':
               return args?.path ? `Mock content for ${args.path}` : '';
@@ -142,6 +156,10 @@ async function injectTauriMocks(page: Page): Promise<void> {
             case 'save_file_dialog':
               return '/mock/saved.txt';
             case 'set_always_on_top':
+            case 'minimize_window':
+            case 'maximize_window':
+            case 'unmaximize_window':
+            case 'close_window':
               return undefined;
             case 'is_safe_storage_available':
               return true;
@@ -149,6 +167,12 @@ async function injectTauriMocks(page: Page): Promise<void> {
               return btoa(args?.plaintext || '');
             case 'safe_storage_decrypt':
               try { return atob(args?.encrypted || ''); } catch { return ''; }
+            case 'get_monitor':
+              return { width: 1920, height: 1080, scaleFactor: 1 };
+            case 'file_exists':
+              return false;
+            case 'rename_file':
+              return true;
             default:
               console.warn(`[tauri-mock] Unknown command: ${cmd}`);
               return null;
@@ -157,7 +181,7 @@ async function injectTauriMocks(page: Page): Promise<void> {
       },
       window: {
         getCurrentWindow: () => ({
-          setAlwaysOnTop: async (value: boolean) => { /* no-op */ },
+          setAlwaysOnTop: async () => {},
           innerSize: async () => ({ width: 1200, height: 800 }),
           outerSize: async () => ({ width: 1200, height: 800 }),
           innerPosition: async () => ({ x: 0, y: 0 }),
@@ -179,66 +203,136 @@ async function injectTauriMocks(page: Page): Promise<void> {
       },
     };
 
-    // Initialize invocation tracker
     (window as any).__TAURI_INVOCATIONS__ = [];
     (window as any).__TAURI_LISTENERS__ = {};
   });
 }
 
 /**
+ * Inject real file-system backed Tauri mock that does actual I/O.
+ * Used by file-ops and ipc tests that need real file operations.
+ * Uses page.exposeFunction to bridge Node.js fs into the browser.
+ */
+export async function injectRealFsMock(page: Page): Promise<void> {
+  await page.exposeFunction('__nodeReadFile', async (filePath: string) => {
+    if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+    return fs.readFileSync(filePath, 'utf-8');
+  });
+
+  await page.exposeFunction('__nodeWriteFile', async (filePath: string, content: string) => {
+    fs.writeFileSync(filePath, content, 'utf-8');
+    return true;
+  });
+
+  await page.exposeFunction('__nodeReadDir', async (dirPath: string) => {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    return entries
+      .filter(e => !e.name.startsWith('.') && e.name !== 'node_modules')
+      .map(e => {
+        const fullPath = path.join(dirPath, e.name);
+        if (e.isDirectory()) {
+          const children = fs.readdirSync(fullPath, { withFileTypes: true })
+            .filter(c => !c.name.startsWith('.') && c.name !== 'node_modules')
+            .map(c => ({
+              name: c.name,
+              path: path.join(fullPath, c.name),
+              isDirectory: c.isDirectory(),
+              children: c.isDirectory() ? [] : undefined,
+            }));
+          return { name: e.name, path: fullPath, isDirectory: true, children };
+        }
+        return { name: e.name, path: fullPath, isDirectory: false };
+      });
+  });
+
+  await page.exposeFunction('__nodeFileExists', async (filePath: string) => {
+    return fs.existsSync(filePath);
+  });
+
+  await page.exposeFunction('__nodeRenameFile', async (oldPath: string, newName: string) => {
+    const dir = path.dirname(oldPath);
+    const newPath = path.join(dir, newName);
+    fs.renameSync(oldPath, newPath);
+    return true;
+  });
+
+  // Override invoke to use real FS for file commands
+  await page.evaluate(() => {
+    const originalInvoke = (window as any).__TAURI__.core.invoke;
+    (window as any).__TAURI__.core.invoke = async (cmd: string, args?: any) => {
+      const invocations = (window as any).__TAURI_INVOCATIONS__ || [];
+      invocations.push({ cmd, args, timestamp: Date.now() });
+      (window as any).__TAURI_INVOCATIONS__ = invocations;
+
+      switch (cmd) {
+        case 'read_file':
+          return (window as any).__nodeReadFile(args?.path);
+        case 'write_file':
+          return (window as any).__nodeWriteFile(args?.path, args?.content);
+        case 'read_dir':
+          return (window as any).__nodeReadDir(args?.path);
+        case 'file_exists':
+          return (window as any).__nodeFileExists(args?.path);
+        case 'rename_file':
+          return (window as any).__nodeRenameFile(args?.oldPath, args?.newName);
+        default:
+          // Remove duplicate tracking since originalInvoke also tracks
+          invocations.pop();
+          return originalInvoke(cmd, args);
+      }
+    };
+  });
+}
+
+/**
  * Launch the Tauri test environment and return a Playwright Page.
- * Uses WebKit browser (same engine as Tauri on macOS) with mocked Tauri APIs.
+ * Reuses browser instance and preview server across calls.
  */
 export async function launchTauriApp(): Promise<{ context: BrowserContext; page: Page }> {
-  // Start preview server for the built frontend
   await startPreviewServer();
 
-  // Launch WebKit (same engine Tauri uses on macOS via WKWebView)
-  browser = await webkit.launch({ headless: true });
+  if (!browser || !browser.isConnected()) {
+    browser = await webkit.launch({ headless: true });
+  }
+
   const context = await browser.newContext({
     viewport: { width: 1200, height: 800 },
   });
 
   const page = await context.newPage();
 
-  // Navigate to the app (runs in "web" mode — no __TAURI__ yet)
   await page.goto(`http://localhost:${PREVIEW_PORT}`, { waitUntil: 'domcontentloaded' });
-
-  // Wait for the app to fully load
   await page.waitForSelector('.notemac-app, #root > div', { timeout: 30000 });
-  await page.waitForTimeout(2000); // Give Monaco time to initialize
+  await page.waitForTimeout(2000);
 
-  // Inject Tauri mocks AFTER app init so the app doesn't try to use real Tauri APIs
   await injectTauriMocks(page);
 
   return { context, page };
 }
 
 /**
- * Clean up all processes.
+ * Clean up a context (keeps browser and preview server alive for reuse).
  */
 export async function closeTauriApp(context?: BrowserContext): Promise<void> {
   if (context) {
     await context.close().catch(() => {});
   }
-  if (browser) {
-    await browser.close().catch(() => {});
-    browser = null;
-  }
+}
+
+// Clean up on process exit
+process.on('exit', () => {
   if (previewServer) {
     previewServer.kill('SIGTERM');
     previewServer = null;
-    // Kill any lingering preview server
-    try {
-      const { execSync } = await import('child_process');
-      execSync(`lsof -ti:${PREVIEW_PORT} | xargs kill -9 2>/dev/null`, { stdio: 'ignore' });
-    } catch {}
   }
-}
+  try {
+    execSync(`lsof -ti:${PREVIEW_PORT} | xargs kill -9 2>/dev/null`, { stdio: 'ignore' });
+  } catch {}
+});
 
 /**
  * Trigger a menu action by dispatching via the Zustand store.
- * Simulates what the Rust menu handler does: emit('menu-action', { action, value }).
+ * This mirrors the real MenuActionController.HandleMenuAction() dispatch.
  */
 export async function triggerMenuAction(page: Page, action: string, value?: any): Promise<void> {
   await page.evaluate(({ a, v }) => {
@@ -246,35 +340,211 @@ export async function triggerMenuAction(page: Page, action: string, value?: any)
     if (!store) return;
 
     const state = store.getState();
-    const handlers: Record<string, () => void> = {
-      'new': () => store.getState().addTab({ name: `new ${state.tabs.length + 1}`, content: '' }),
-      'close-tab': () => { if (state.activeTabId) store.getState().closeTab(state.activeTabId); },
-      'close-all': () => state.tabs.forEach((t: any) => store.getState().closeTab(t.id)),
-      'close-others': () => state.tabs.filter((t: any) => t.id !== state.activeTabId).forEach((t: any) => store.getState().closeTab(t.id)),
-      'find': () => store.getState().setShowFindReplace(true, 'find'),
-      'replace': () => store.getState().setShowFindReplace(true, 'replace'),
-      'goto-line': () => store.getState().setShowGoToLine(true),
-      'preferences': () => store.getState().setShowSettings(true),
-      'about': () => store.getState().setShowAbout(true),
-      'toggle-sidebar': () => {
-        const current = store.getState().sidebarPanel;
-        store.getState().setSidebarPanel(current ? null : 'explorer');
-      },
-      'zoom-in': () => store.getState().setZoomLevel(state.zoomLevel + 1),
-      'zoom-out': () => store.getState().setZoomLevel(state.zoomLevel - 1),
-      'zoom-reset': () => store.getState().setZoomLevel(0),
-      'toggle-terminal': () => store.getState().setShowTerminalPanel(!state.showTerminalPanel),
-      'toggle-word-wrap': () => store.getState().updateSettings({ wordWrap: !state.settings?.wordWrap }),
-    };
+    const activeTabId = state.activeTabId;
 
-    if (handlers[a]) {
-      handlers[a]();
-    } else if (a === 'encoding' && v && state.activeTabId) {
-      store.getState().updateTab(state.activeTabId, { encoding: v });
-    } else if (a === 'language' && v && state.activeTabId) {
-      store.getState().updateTab(state.activeTabId, { language: v });
-    } else if (a === 'line-ending' && v && state.activeTabId) {
-      store.getState().updateTab(state.activeTabId, { lineEnding: v });
+    switch (a) {
+      // ── File actions ──
+      case 'new':
+        store.getState().addTab();
+        break;
+      case 'close-tab':
+        if (activeTabId) store.getState().closeTab(activeTabId);
+        break;
+      case 'close-all':
+        store.getState().closeAllTabs();
+        break;
+      case 'close-others':
+        if (activeTabId) store.getState().closeOtherTabs(activeTabId);
+        break;
+      case 'close-tabs-to-left':
+        if (activeTabId) store.getState().closeTabsToLeft(activeTabId);
+        break;
+      case 'close-tabs-to-right':
+        if (activeTabId) store.getState().closeTabsToRight(activeTabId);
+        break;
+      case 'close-unchanged':
+        store.getState().closeUnchangedTabs();
+        break;
+      case 'close-all-but-pinned':
+        store.getState().closeAllButPinned();
+        break;
+      case 'restore-last-closed':
+        store.getState().restoreLastClosedTab();
+        break;
+      case 'pin-tab':
+        if (activeTabId) store.getState().togglePinTab(activeTabId);
+        break;
+      case 'save-all':
+        break; // no-op in web mode
+      case 'delete-file':
+        if (activeTabId) store.getState().closeTab(activeTabId);
+        break;
+
+      // ── Search actions ──
+      case 'find':
+        store.getState().setShowFindReplace(true, 'find');
+        break;
+      case 'replace':
+        store.getState().setShowFindReplace(true, 'replace');
+        break;
+      case 'find-in-files':
+        store.getState().setShowFindReplace(true, 'findInFiles');
+        break;
+      case 'mark':
+        store.getState().setShowFindReplace(true, 'mark');
+        break;
+      case 'incremental-search':
+        store.getState().setShowIncrementalSearch(true);
+        break;
+      case 'goto-line':
+        store.getState().setShowGoToLine(true);
+        break;
+      case 'find-char-in-range':
+        store.getState().setShowCharInRange(true);
+        break;
+
+      // ── View actions ──
+      case 'zoom-in':
+        store.getState().setZoomLevel(state.zoomLevel + 1);
+        break;
+      case 'zoom-out':
+        store.getState().setZoomLevel(state.zoomLevel - 1);
+        break;
+      case 'zoom-reset':
+        store.getState().setZoomLevel(0);
+        break;
+      case 'toggle-sidebar':
+        store.getState().toggleSidebar();
+        break;
+      case 'show-doc-list':
+        store.getState().setSidebarPanel('docList');
+        break;
+      case 'show-function-list':
+        store.getState().setSidebarPanel('functions');
+        break;
+      case 'show-project-panel':
+        store.getState().setSidebarPanel('project');
+        break;
+      case 'show-git-panel':
+        store.getState().setSidebarPanel('git');
+        break;
+      case 'ai-chat':
+        store.getState().setSidebarPanel('ai');
+        break;
+      case 'distraction-free':
+        store.getState().updateSettings({ distractionFreeMode: v as boolean | undefined });
+        break;
+      case 'always-on-top':
+        store.getState().updateSettings({ alwaysOnTop: v as boolean | undefined });
+        break;
+      case 'split-right':
+        if (activeTabId) store.getState().setSplitView('vertical', activeTabId);
+        break;
+      case 'split-down':
+        if (activeTabId) store.getState().setSplitView('horizontal', activeTabId);
+        break;
+      case 'close-split':
+        store.getState().setSplitView('none');
+        break;
+      case 'show-summary':
+        store.getState().setShowSummary(true);
+        break;
+      case 'toggle-monitoring':
+        if (activeTabId) {
+          const tab = state.tabs.find((t: any) => t.id === activeTabId);
+          if (tab) store.getState().updateTab(activeTabId, { isMonitoring: !tab.isMonitoring });
+        }
+        break;
+      case 'word-wrap':
+        store.getState().updateSettings({ wordWrap: v as boolean | undefined });
+        break;
+      case 'show-whitespace':
+        store.getState().updateSettings({ showWhitespace: v as boolean | undefined, renderWhitespace: v ? 'all' : 'none' });
+        break;
+      case 'show-eol':
+        store.getState().updateSettings({ showEOL: v as boolean | undefined });
+        break;
+      case 'toggle-minimap':
+        store.getState().updateSettings({ showMinimap: v as boolean | undefined });
+        break;
+
+      // ── Language / Encoding ──
+      case 'language':
+        if (activeTabId) store.getState().updateTab(activeTabId, { language: v as string | undefined });
+        break;
+      case 'encoding':
+        if (activeTabId) store.getState().updateTab(activeTabId, { encoding: v as string | undefined });
+        break;
+      case 'line-ending':
+        if (activeTabId) store.getState().updateTab(activeTabId, { lineEnding: v });
+        break;
+
+      // ── Macro ──
+      case 'macro-start':
+        store.getState().startRecordingMacro();
+        break;
+      case 'macro-stop':
+        store.getState().stopRecordingMacro();
+        break;
+      case 'macro-playback':
+        if (store.getState().playbackMacro) store.getState().playbackMacro();
+        break;
+
+      // ── Dialogs ──
+      case 'preferences':
+        store.getState().setShowSettings(true);
+        break;
+      case 'about':
+        store.getState().setShowAbout(true);
+        break;
+      case 'run-command':
+        store.getState().setShowRunCommand(true);
+        break;
+      case 'column-editor':
+        store.getState().setShowColumnEditor(true);
+        break;
+      case 'shortcut-mapper':
+        store.getState().setShowShortcutMapper(true);
+        break;
+      case 'command-palette':
+        store.getState().setShowCommandPalette(true);
+        break;
+      case 'quick-open':
+        store.getState().setShowQuickOpen(true);
+        break;
+      case 'compare-files':
+        store.getState().setShowDiffViewer(true);
+        break;
+      case 'snippet-manager':
+        store.getState().setShowSnippetManager(true);
+        break;
+      case 'toggle-terminal':
+        store.getState().setShowTerminalPanel(!state.showTerminalPanel);
+        break;
+      case 'clone-repository':
+        store.getState().setShowCloneDialog(true);
+        break;
+      case 'git-settings':
+        store.getState().setShowGitSettings(true);
+        break;
+      case 'ai-settings':
+        store.getState().SetShowAiSettings(true);
+        break;
+      case 'clipboard-history':
+        store.getState().setSidebarPanel('clipboardHistory');
+        break;
+      case 'char-panel':
+        store.getState().setSidebarPanel('charPanel');
+        break;
+
+      // ── Editor-handled actions (line ops, transforms, etc.) ──
+      default: {
+        const editorAction = (window as any).__EDITOR_ACTION_DISPATCH__;
+        if (editorAction) {
+          editorAction(a, v);
+        }
+        break;
+      }
     }
   }, { a: action, v: value });
   await new Promise(r => setTimeout(r, 300));
@@ -340,7 +610,6 @@ export function createTestWorkspace(): string {
   }
   fs.mkdirSync(tmpDir, { recursive: true });
 
-  // Create test files
   fs.writeFileSync(path.join(tmpDir, 'test.js'), 'const x = 1;\nconsole.log(x);', 'utf-8');
   fs.writeFileSync(path.join(tmpDir, 'test.py'), 'x = 1\nprint(x)', 'utf-8');
   fs.writeFileSync(path.join(tmpDir, 'test.txt'), 'Hello World\nLine 2\nLine 3', 'utf-8');

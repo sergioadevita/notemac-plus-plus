@@ -151,11 +151,16 @@ test.describe('Tauri UI — Tab Operations', () => {
   });
 
   test('close-tabs-to-left works', async () => {
+    // Reset to clean state first
+    await triggerMenuAction(page, 'close-all');
+    await page.waitForTimeout(200);
+
     await triggerMenuAction(page, 'new');
     await triggerMenuAction(page, 'new');
     await triggerMenuAction(page, 'new');
     await page.waitForTimeout(300);
 
+    // Active tab is the last one; close-tabs-to-left removes all before it
     await triggerMenuAction(page, 'close-tabs-to-left');
     await page.waitForTimeout(300);
 
@@ -164,15 +169,21 @@ test.describe('Tauri UI — Tab Operations', () => {
   });
 
   test('close-tabs-to-right works', async () => {
+    // Reset to clean state first
+    await triggerMenuAction(page, 'close-all');
+    await page.waitForTimeout(200);
+
     await triggerMenuAction(page, 'new');
     await triggerMenuAction(page, 'new');
     await triggerMenuAction(page, 'new');
     await page.waitForTimeout(200);
 
+    // Click the first tab to make it active
     const tabElements = page.locator('[draggable="true"]');
     await tabElements.first().click();
     await page.waitForTimeout(200);
 
+    // close-tabs-to-right removes all tabs after the active one
     await triggerMenuAction(page, 'close-tabs-to-right');
     await page.waitForTimeout(300);
 

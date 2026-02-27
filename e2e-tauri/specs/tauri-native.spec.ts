@@ -157,7 +157,7 @@ test.describe('Tauri Native Features', () => {
   });
 
   test('Mock invoke tracking stores all calls', async () => {
-    clearTauriInvocations(page);
+    await clearTauriInvocations(page);
 
     await page.evaluate(async () => {
       const tauri = (window as any).__TAURI__;
@@ -165,7 +165,7 @@ test.describe('Tauri Native Features', () => {
       await tauri.core.invoke('set_always_on_top', { value: true });
     });
 
-    const invocations = getTauriInvocations(page);
+    const invocations = await getTauriInvocations(page);
     expect(invocations.length).toBeGreaterThanOrEqual(2);
     expect(invocations.some(inv => inv.cmd === 'is_safe_storage_available')).toBe(true);
     expect(invocations.some(inv => inv.cmd === 'set_always_on_top')).toBe(true);
