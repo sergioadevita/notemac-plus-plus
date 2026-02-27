@@ -572,7 +572,7 @@
             <span class="name">Notemac<span class="plus-sign">++</span></span>
             <span class="version-badge">v3.2.0</span>
         </h1>
-        <p class="tagline">A powerful text editor for macOS & Web, inspired by Notepad++</p>
+        <p class="tagline">A powerful text and source code editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
             Now 75% smaller with Tauri — just ~10 MB
@@ -607,7 +607,7 @@
             <div class="stat-label">Desktop App</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">8</div>
+            <div class="stat-num">7</div>
             <div class="stat-label">Themes</div>
         </div>
         <div class="stat-item">
@@ -620,12 +620,27 @@
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
     <h2 class="section-title">What's <span>New</span></h2>
-    <p class="section-subtitle">Tauri desktop shell, custom theme color picker, and mobile-responsive layouts — all in v3.2.0.</p>
+    <p class="section-subtitle">Comprehensive test coverage, custom themes, and a Tauri-powered desktop shell.</p>
     <div class="new-feature-highlight">
         <div class="new-card full-width">
-            <span class="badge">Major</span>
+            <span class="badge">v3.2.0</span>
+            <h3>1,728 Unit Tests — Full Coverage</h3>
+            <p>1:1 source-to-test file mapping across 91 test suites. Every production module has a dedicated test file, plus dead code removal and zero test warnings.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.1.0</span>
+            <h3>Custom Theme Color Picker</h3>
+            <p>30 color pickers organized into 8 groups let you customize every aspect of the UI. Derive from any built-in theme, reset individual colors, and see changes live.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.0.0</span>
             <h3>Tauri Desktop Shell</h3>
-            <p>Replaced Chromium with the system's native WebView. The desktop app dropped from ~50 MB to ~10-15 MB — a 75% reduction — with no feature loss. Built on Rust for memory safety and performance.</p>
+            <p>Replaced Chromium with the system's native WebView. The desktop app dropped from ~50 MB to ~10-15 MB — a 75% reduction — built on Rust for memory safety.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">Architecture</span>
+            <h3>Platform Abstraction Layer</h3>
+            <p>Clean PlatformBridge abstraction lets the frontend work seamlessly with Tauri, Electron, or plain browser — zero code changes needed.</p>
         </div>
         <div class="new-card">
             <span class="badge">Backend</span>
@@ -634,23 +649,8 @@
         </div>
         <div class="new-card">
             <span class="badge">Testing</span>
-            <h3>8 New E2E Test Suites</h3>
+            <h3>8 Tauri E2E Test Suites</h3>
             <p>Complete Playwright test coverage for the Tauri shell — matching every existing Electron test across app launch, IPC, file ops, UI, menus, and more.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">Architecture</span>
-            <h3>Platform Abstraction Layer</h3>
-            <p>Clean PlatformBridge abstraction lets the frontend work seamlessly with Tauri, Electron, or plain browser — zero code changes needed.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">Menus</span>
-            <h3>~100 Native Menu Items</h3>
-            <p>Every File, Edit, Search, View, Encoding, Language, Settings, Tools, Macro, and Window menu action — implemented natively in Rust.</p>
-        </div>
-        <div class="new-card full-width">
-            <span class="badge">v3.2.0</span>
-            <h3>Custom Theme Color Picker</h3>
-            <p>30 color pickers organized into 8 groups let you customize every aspect of the UI. Derive from any built-in theme, reset individual colors, and see changes live.</p>
         </div>
     </div>
 </section>
@@ -707,7 +707,7 @@
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#127752;</div>
-            <h3>8 Themes + Custom</h3>
+            <h3>7 Themes + Custom</h3>
             <p>7 built-in themes plus a custom theme color picker with 30 color controls. Mix and match to create your own.</p>
         </div>
         <div class="feature-card">
@@ -719,6 +719,56 @@
             <div class="feature-icon">&#128203;</div>
             <h3>Compare Files</h3>
             <p>Side-by-side diff comparison of any two files with Monaco's built-in diff editor.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128194;</div>
+            <h3>Tabs & Workspace</h3>
+            <p>Drag-drop tabs, pin favorites, color-code groups, restore previous sessions, and manage multiple files with ease.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128450;</div>
+            <h3>Sidebar & Panels</h3>
+            <p>File Explorer, Document List, Function List, Clipboard History, Character Panel, and Search Results — all docked.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128268;</div>
+            <h3>Quick Open</h3>
+            <p>Fuzzy file finder (Cmd+P) to jump to any file in your project instantly.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#9638;</div>
+            <h3>Column Editor</h3>
+            <p>Multi-line vertical editing for aligning text, inserting sequences, and bulk column operations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128295;</div>
+            <h3>Line Operations</h3>
+            <p>Sort, deduplicate, trim, reverse, join, split, and transform lines in bulk.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128736;</div>
+            <h3>Tools</h3>
+            <p>Hash generation (MD5, SHA-256, SHA-512), Base64 encode/decode, URL encode/decode, JSON format and minify.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128289;</div>
+            <h3>Case Conversion</h3>
+            <p>UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe transforms.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128065;</div>
+            <h3>Distraction-Free Mode</h3>
+            <p>Hide all UI chrome for focused writing. Plus Always on Top to keep the editor above other windows.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128206;</div>
+            <h3>Monitoring (tail -f)</h3>
+            <p>Live file watching with auto-scroll — perfect for log files and real-time output.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#127760;</div>
+            <h3>Encoding & Line Endings</h3>
+            <p>UTF-8, UTF-16, ISO-8859, Windows-1252, and more. Convert between LF, CRLF, and CR line endings.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#128274;</div>
