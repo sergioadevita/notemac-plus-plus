@@ -142,7 +142,7 @@ test.describe('Electron Clipboard History', () => {
   test('clipboard-history sidebar panel can be shown', async () => {
     await triggerMenuAction(electronApp, 'clipboard-history');
     const state = await getStoreState(page);
-    expect(state.sidebarPanel).toBe('clipboard-history');
+    expect(state.sidebarPanel).toBe('clipboardHistory');
   });
 });
 
@@ -162,7 +162,7 @@ test.describe('Electron Character Panel', () => {
   test('char-panel opens character panel sidebar', async () => {
     await triggerMenuAction(electronApp, 'char-panel');
     const state = await getStoreState(page);
-    expect(state.sidebarPanel).toBe('char-panel');
+    expect(state.sidebarPanel).toBe('charPanel');
   });
 
   test('sidebar can switch between panels', async () => {
@@ -172,7 +172,7 @@ test.describe('Electron Character Panel', () => {
 
     await triggerMenuAction(electronApp, 'char-panel');
     state = await getStoreState(page);
-    expect(state.sidebarPanel).toBe('char-panel');
+    expect(state.sidebarPanel).toBe('charPanel');
   });
 });
 
