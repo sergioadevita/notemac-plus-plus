@@ -131,7 +131,7 @@ export const CRED_DEFAULT_GIT_EXPIRY_HOURS = 8;
 export const CRED_ENCRYPTION_KEY_ID = "NotemacCryptoKey_v1";
 
 // GitHub OAuth
-export const GITHUB_OAUTH_CLIENT_ID = 'Iv1.CONFIGURE_YOUR_APP';
+export const GITHUB_OAUTH_CLIENT_ID = 'Ov23liKlcw6aVGKoxH6i';
 export const GITHUB_OAUTH_SCOPE = "repo";
 
 // UI - Layout

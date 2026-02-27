@@ -182,8 +182,49 @@ describe('AuthController — OAuth Functions', () =>
         vi.clearAllMocks();
     });
 
-    it('StartGitHubOAuth returns null with default client ID', async () =>
+    it('StartGitHubOAuth calls device code endpoint', async () =>
     {
+        global.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    device_code: 'test-device-code',
+                    user_code: 'ABCD-1234',
+                    verification_uri: 'https://github.com/login/device',
+                    expires_in: 900,
+                    interval: 5,
+                }),
+            } as Response),
+        );
+
+        const { StartGitHubOAuth } = await import('../Notemac/Controllers/AuthController');
+
+        const result = await StartGitHubOAuth();
+
+        expect(result).not.toBeNull();
+        expect(result!.deviceCode).toBe('test-device-code');
+        expect(result!.userCode).toBe('ABCD-1234');
+        expect(result!.verificationUri).toBe('https://github.com/login/device');
+        expect(result!.expiresIn).toBe(900);
+        expect(result!.interval).toBe(5);
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            'https://github.com/login/device/code',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Accept': 'application/json',
+                }),
+            }),
+        );
+    });
+
+    it('StartGitHubOAuth returns null on HTTP error', async () =>
+    {
+        global.fetch = vi.fn(() =>
+            Promise.resolve({ ok: false } as Response),
+        );
+
         const { StartGitHubOAuth } = await import('../Notemac/Controllers/AuthController');
 
         const result = await StartGitHubOAuth();
@@ -191,11 +232,64 @@ describe('AuthController — OAuth Functions', () =>
         expect(null === result).toBe(true);
     });
 
-    it('PollGitHubOAuthToken returns null with default client ID', async () =>
+    it('StartGitHubOAuth returns null on network error', async () =>
     {
+        global.fetch = vi.fn(() =>
+            Promise.reject(new Error('Network error')),
+        );
+
+        const { StartGitHubOAuth } = await import('../Notemac/Controllers/AuthController');
+
+        const result = await StartGitHubOAuth();
+
+        expect(null === result).toBe(true);
+    });
+
+    it('PollGitHubOAuthToken returns token on success', async () =>
+    {
+        global.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    access_token: 'gho_test_token_12345',
+                    token_type: 'bearer',
+                    scope: 'repo',
+                }),
+            } as Response),
+        );
+
+        const mockStore = {
+            SetGitCredentials: vi.fn(),
+        };
+        (useNotemacStore.getState as any).mockReturnValue(mockStore);
+
         const { PollGitHubOAuthToken } = await import('../Notemac/Controllers/AuthController');
 
-        const result = await PollGitHubOAuthToken('fake-device-code');
+        const result = await PollGitHubOAuthToken('device-code-123');
+
+        expect(result).toBe('gho_test_token_12345');
+        expect(mockStore.SetGitCredentials).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'oauth',
+                token: 'gho_test_token_12345',
+            }),
+        );
+    });
+
+    it('PollGitHubOAuthToken returns null when still pending', async () =>
+    {
+        global.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    error: 'authorization_pending',
+                }),
+            } as Response),
+        );
+
+        const { PollGitHubOAuthToken } = await import('../Notemac/Controllers/AuthController');
+
+        const result = await PollGitHubOAuthToken('device-code-123');
 
         expect(null === result).toBe(true);
     });
