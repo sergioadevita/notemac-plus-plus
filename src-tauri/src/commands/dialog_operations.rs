@@ -164,3 +164,157 @@ pub async fn save_file_dialog(
 
     Ok(())
 }
+
+// ─── Path Cleaning Helper ───────────────────────────────────────
+
+/// Strips the file:// protocol prefix from a path string if present.
+/// Used by dialog operations to normalize file paths from OS dialogs.
+pub fn clean_file_path(path: &str) -> &str
+{
+    if path.starts_with("file://")
+    {
+        &path[7..]
+    }
+    else
+    {
+        path
+    }
+}
+
+// ─── Tests ─────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    // ── Path cleaning ────────────────────────────────────────────
+
+    #[test]
+    fn clean_path_strips_file_protocol()
+    {
+        assert_eq!(clean_file_path("file:///Users/test/file.txt"), "/Users/test/file.txt");
+    }
+
+    #[test]
+    fn clean_path_preserves_normal_path()
+    {
+        assert_eq!(clean_file_path("/Users/test/file.txt"), "/Users/test/file.txt");
+    }
+
+    #[test]
+    fn clean_path_handles_empty_string()
+    {
+        assert_eq!(clean_file_path(""), "");
+    }
+
+    #[test]
+    fn clean_path_handles_file_protocol_only()
+    {
+        assert_eq!(clean_file_path("file://"), "");
+    }
+
+    #[test]
+    fn clean_path_preserves_spaces_in_path()
+    {
+        assert_eq!(
+            clean_file_path("file:///Users/test/My Documents/file.txt"),
+            "/Users/test/My Documents/file.txt"
+        );
+    }
+
+    #[test]
+    fn clean_path_preserves_unicode_path()
+    {
+        assert_eq!(
+            clean_file_path("file:///Users/日本語/ファイル.txt"),
+            "/Users/日本語/ファイル.txt"
+        );
+    }
+
+    // ── Data type serialization ──────────────────────────────────
+
+    #[test]
+    fn opened_file_data_serializes_correctly()
+    {
+        let data = OpenedFileData {
+            path: "/tmp/test.txt".into(),
+            content: "hello world".into(),
+            name: "test.txt".into(),
+        };
+
+        let json = serde_json::to_value(&data).unwrap();
+        assert_eq!(json["path"], "/tmp/test.txt");
+        assert_eq!(json["content"], "hello world");
+        assert_eq!(json["name"], "test.txt");
+    }
+
+    #[test]
+    fn folder_data_serializes_correctly()
+    {
+        let data = FolderData {
+            path: "/tmp/project".into(),
+            tree: vec![
+                FileTreeNode {
+                    name: "src".into(),
+                    path: "/tmp/project/src".into(),
+                    is_directory: true,
+                    children: Some(vec![]),
+                },
+                FileTreeNode {
+                    name: "README.md".into(),
+                    path: "/tmp/project/README.md".into(),
+                    is_directory: false,
+                    children: None,
+                },
+            ],
+        };
+
+        let json = serde_json::to_value(&data).unwrap();
+        assert_eq!(json["path"], "/tmp/project");
+        assert_eq!(json["tree"][0]["name"], "src");
+        assert_eq!(json["tree"][0]["isDirectory"], true);
+        assert_eq!(json["tree"][1]["name"], "README.md");
+        assert_eq!(json["tree"][1]["isDirectory"], false);
+    }
+
+    #[test]
+    fn file_saved_data_serializes_correctly()
+    {
+        let data = FileSavedData {
+            path: "/tmp/saved.txt".into(),
+            name: "saved.txt".into(),
+        };
+
+        let json = serde_json::to_value(&data).unwrap();
+        assert_eq!(json["path"], "/tmp/saved.txt");
+        assert_eq!(json["name"], "saved.txt");
+    }
+
+    #[test]
+    fn opened_file_data_clone_works()
+    {
+        let data = OpenedFileData {
+            path: "/tmp/test.txt".into(),
+            content: "hello".into(),
+            name: "test.txt".into(),
+        };
+
+        let cloned = data.clone();
+        assert_eq!(cloned.path, data.path);
+        assert_eq!(cloned.content, data.content);
+        assert_eq!(cloned.name, data.name);
+    }
+
+    #[test]
+    fn folder_data_empty_tree()
+    {
+        let data = FolderData {
+            path: "/tmp/empty".into(),
+            tree: vec![],
+        };
+
+        let json = serde_json::to_value(&data).unwrap();
+        assert_eq!(json["tree"].as_array().unwrap().len(), 0);
+    }
+}

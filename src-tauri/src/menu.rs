@@ -358,68 +358,421 @@ pub fn build_menu(app: &AppHandle) -> Result<Menu<tauri::Wry>, tauri::Error>
 
 // ─── Menu Event Handler ─────────────────────────────────────────
 
+// ─── Menu Event Routing ─────────────────────────────────────────
+
+/// Parsed result of a menu event ID.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MenuEventAction
+{
+    /// Encoding change: action="encoding", value=encoding name
+    Encoding(String),
+    /// Language change: action="language", value=language name
+    Language(String),
+    /// Line ending change: action="line-ending", value=uppercased ending
+    LineEnding(String),
+    /// Checkbox toggle: action=event_id, no value
+    Checkbox(String),
+    /// Dialog command: open file or folder picker
+    Dialog(String),
+    /// Generic action: ID maps directly to action string
+    Action(String),
+}
+
+/// List of menu item IDs that represent checkbox toggles.
+pub const CHECKBOX_IDS: &[&str] = &[
+    "word-wrap", "show-whitespace", "show-eol", "show-non-printable",
+    "show-wrap-symbol", "indent-guide", "show-line-numbers", "toggle-minimap",
+    "distraction-free", "always-on-top",
+];
+
+/// Pure function: parses a menu event ID into a structured action.
+/// This contains all the routing logic, separated from side effects.
+pub fn parse_menu_event(event_id: &str) -> MenuEventAction
+{
+    // Encoding items: "encoding-utf-8" → Encoding("utf-8")
+    if let Some(encoding) = event_id.strip_prefix("encoding-")
+    {
+        return MenuEventAction::Encoding(encoding.to_string());
+    }
+
+    // Language items: "lang-javascript" → Language("javascript")
+    if let Some(lang) = event_id.strip_prefix("lang-")
+    {
+        return MenuEventAction::Language(lang.to_string());
+    }
+
+    // Line ending items: "line-ending-lf" → LineEnding("LF")
+    if let Some(le) = event_id.strip_prefix("line-ending-")
+    {
+        return MenuEventAction::LineEnding(le.to_uppercase());
+    }
+
+    // Checkbox items
+    if CHECKBOX_IDS.contains(&event_id)
+    {
+        return MenuEventAction::Checkbox(event_id.to_string());
+    }
+
+    // Dialog commands
+    if event_id == "open" || event_id == "open-folder"
+    {
+        return MenuEventAction::Dialog(event_id.to_string());
+    }
+
+    // All other items: generic action
+    MenuEventAction::Action(event_id.to_string())
+}
+
 /// Maps menu item IDs to action strings and emits them to the frontend.
 /// For items with values (encoding, language, line-ending), we parse the
 /// ID prefix and send the value separately.
 pub fn handle_menu_event(app: &AppHandle, event_id: &str)
 {
-    // Encoding items: "encoding-utf-8" → action="encoding", value="utf-8"
-    if let Some(encoding) = event_id.strip_prefix("encoding-")
+    match parse_menu_event(event_id)
     {
-        emit_action(app, "encoding", Some(serde_json::Value::String(encoding.to_string())));
-        return;
-    }
-
-    // Language items: "lang-javascript" → action="language", value="javascript"
-    if let Some(lang) = event_id.strip_prefix("lang-")
-    {
-        emit_action(app, "language", Some(serde_json::Value::String(lang.to_string())));
-        return;
-    }
-
-    // Line ending items: "line-ending-lf" → action="line-ending", value="LF"
-    if let Some(le) = event_id.strip_prefix("line-ending-")
-    {
-        let value = le.to_uppercase();
-        emit_action(app, "line-ending", Some(serde_json::Value::String(value)));
-        return;
-    }
-
-    // Checkbox items — emit with boolean value (toggled)
-    let checkbox_ids = [
-        "word-wrap", "show-whitespace", "show-eol", "show-non-printable",
-        "show-wrap-symbol", "indent-guide", "show-line-numbers", "toggle-minimap",
-        "distraction-free", "always-on-top",
-    ];
-
-    if checkbox_ids.contains(&event_id)
-    {
-        // For checkbox items, we emit the action without a value.
-        // The frontend maintains the toggle state.
-        emit_action(app, event_id, None);
-        return;
-    }
-
-    // File open/folder open need special handling (dialog commands)
-    match event_id
-    {
-        "open" => {
-            let app_clone = app.clone();
-            tauri::async_runtime::spawn(async move {
-                let _ = crate::commands::dialog_operations::open_file_dialog(app_clone).await;
-            });
-            return;
+        MenuEventAction::Encoding(enc) => {
+            emit_action(app, "encoding", Some(serde_json::Value::String(enc)));
         },
-        "open-folder" => {
-            let app_clone = app.clone();
-            tauri::async_runtime::spawn(async move {
-                let _ = crate::commands::dialog_operations::open_folder_dialog(app_clone).await;
-            });
-            return;
+        MenuEventAction::Language(lang) => {
+            emit_action(app, "language", Some(serde_json::Value::String(lang)));
         },
-        _ => {}
+        MenuEventAction::LineEnding(le) => {
+            emit_action(app, "line-ending", Some(serde_json::Value::String(le)));
+        },
+        MenuEventAction::Checkbox(id) => {
+            emit_action(app, &id, None);
+        },
+        MenuEventAction::Dialog(id) => {
+            match id.as_str()
+            {
+                "open" => {
+                    let app_clone = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = crate::commands::dialog_operations::open_file_dialog(app_clone).await;
+                    });
+                },
+                "open-folder" => {
+                    let app_clone = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = crate::commands::dialog_operations::open_folder_dialog(app_clone).await;
+                    });
+                },
+                _ => {}
+            }
+        },
+        MenuEventAction::Action(id) => {
+            emit_action(app, &id, None);
+        },
+    }
+}
+
+// ─── Tests ─────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    // ── Encoding parsing ─────────────────────────────────────────
+
+    #[test]
+    fn parse_encoding_utf8()
+    {
+        assert_eq!(
+            parse_menu_event("encoding-utf-8"),
+            MenuEventAction::Encoding("utf-8".into())
+        );
     }
 
-    // All other items: ID maps directly to action string
-    emit_action(app, event_id, None);
+    #[test]
+    fn parse_encoding_utf8_bom()
+    {
+        assert_eq!(
+            parse_menu_event("encoding-utf-8-bom"),
+            MenuEventAction::Encoding("utf-8-bom".into())
+        );
+    }
+
+    #[test]
+    fn parse_encoding_utf16le()
+    {
+        assert_eq!(
+            parse_menu_event("encoding-utf-16le"),
+            MenuEventAction::Encoding("utf-16le".into())
+        );
+    }
+
+    #[test]
+    fn parse_encoding_windows_1252()
+    {
+        assert_eq!(
+            parse_menu_event("encoding-windows-1252"),
+            MenuEventAction::Encoding("windows-1252".into())
+        );
+    }
+
+    // ── Language parsing ─────────────────────────────────────────
+
+    #[test]
+    fn parse_language_javascript()
+    {
+        assert_eq!(
+            parse_menu_event("lang-javascript"),
+            MenuEventAction::Language("javascript".into())
+        );
+    }
+
+    #[test]
+    fn parse_language_typescript()
+    {
+        assert_eq!(
+            parse_menu_event("lang-typescript"),
+            MenuEventAction::Language("typescript".into())
+        );
+    }
+
+    #[test]
+    fn parse_language_rust()
+    {
+        assert_eq!(
+            parse_menu_event("lang-rust"),
+            MenuEventAction::Language("rust".into())
+        );
+    }
+
+    #[test]
+    fn parse_language_plaintext()
+    {
+        assert_eq!(
+            parse_menu_event("lang-plaintext"),
+            MenuEventAction::Language("plaintext".into())
+        );
+    }
+
+    // ── Line ending parsing ──────────────────────────────────────
+
+    #[test]
+    fn parse_line_ending_lf()
+    {
+        assert_eq!(
+            parse_menu_event("line-ending-lf"),
+            MenuEventAction::LineEnding("LF".into())
+        );
+    }
+
+    #[test]
+    fn parse_line_ending_crlf()
+    {
+        assert_eq!(
+            parse_menu_event("line-ending-crlf"),
+            MenuEventAction::LineEnding("CRLF".into())
+        );
+    }
+
+    #[test]
+    fn parse_line_ending_cr()
+    {
+        assert_eq!(
+            parse_menu_event("line-ending-cr"),
+            MenuEventAction::LineEnding("CR".into())
+        );
+    }
+
+    // ── Checkbox parsing ─────────────────────────────────────────
+
+    #[test]
+    fn parse_checkbox_word_wrap()
+    {
+        assert_eq!(
+            parse_menu_event("word-wrap"),
+            MenuEventAction::Checkbox("word-wrap".into())
+        );
+    }
+
+    #[test]
+    fn parse_checkbox_show_whitespace()
+    {
+        assert_eq!(
+            parse_menu_event("show-whitespace"),
+            MenuEventAction::Checkbox("show-whitespace".into())
+        );
+    }
+
+    #[test]
+    fn parse_checkbox_always_on_top()
+    {
+        assert_eq!(
+            parse_menu_event("always-on-top"),
+            MenuEventAction::Checkbox("always-on-top".into())
+        );
+    }
+
+    #[test]
+    fn parse_all_checkbox_ids()
+    {
+        for id in CHECKBOX_IDS
+        {
+            assert_eq!(
+                parse_menu_event(id),
+                MenuEventAction::Checkbox(id.to_string()),
+                "Failed for checkbox: {}",
+                id
+            );
+        }
+    }
+
+    // ── Dialog parsing ───────────────────────────────────────────
+
+    #[test]
+    fn parse_dialog_open()
+    {
+        assert_eq!(
+            parse_menu_event("open"),
+            MenuEventAction::Dialog("open".into())
+        );
+    }
+
+    #[test]
+    fn parse_dialog_open_folder()
+    {
+        assert_eq!(
+            parse_menu_event("open-folder"),
+            MenuEventAction::Dialog("open-folder".into())
+        );
+    }
+
+    // ── Generic action parsing ───────────────────────────────────
+
+    #[test]
+    fn parse_generic_save()
+    {
+        assert_eq!(
+            parse_menu_event("save"),
+            MenuEventAction::Action("save".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_new()
+    {
+        assert_eq!(
+            parse_menu_event("new"),
+            MenuEventAction::Action("new".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_close_tab()
+    {
+        assert_eq!(
+            parse_menu_event("close-tab"),
+            MenuEventAction::Action("close-tab".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_find()
+    {
+        assert_eq!(
+            parse_menu_event("find"),
+            MenuEventAction::Action("find".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_sort_asc()
+    {
+        assert_eq!(
+            parse_menu_event("sort-asc"),
+            MenuEventAction::Action("sort-asc".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_toggle_comment()
+    {
+        assert_eq!(
+            parse_menu_event("toggle-comment"),
+            MenuEventAction::Action("toggle-comment".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_base64_encode()
+    {
+        assert_eq!(
+            parse_menu_event("base64-encode"),
+            MenuEventAction::Action("base64-encode".into())
+        );
+    }
+
+    #[test]
+    fn parse_generic_macro_start()
+    {
+        assert_eq!(
+            parse_menu_event("macro-start"),
+            MenuEventAction::Action("macro-start".into())
+        );
+    }
+
+    // ── Edge cases ───────────────────────────────────────────────
+
+    #[test]
+    fn parse_empty_string()
+    {
+        assert_eq!(
+            parse_menu_event(""),
+            MenuEventAction::Action("".into())
+        );
+    }
+
+    #[test]
+    fn parse_unknown_action()
+    {
+        assert_eq!(
+            parse_menu_event("some-unknown-action"),
+            MenuEventAction::Action("some-unknown-action".into())
+        );
+    }
+
+    #[test]
+    fn encoding_prefix_not_confused_with_similar()
+    {
+        // "encoding" without hyphen should be generic action
+        assert_eq!(
+            parse_menu_event("encoding"),
+            MenuEventAction::Action("encoding".into())
+        );
+    }
+
+    #[test]
+    fn lang_prefix_not_confused_with_similar()
+    {
+        // "language" should not match "lang-" prefix
+        assert_eq!(
+            parse_menu_event("language"),
+            MenuEventAction::Action("language".into())
+        );
+    }
+
+    // ── MenuEventAction coverage ─────────────────────────────────
+
+    #[test]
+    fn all_menu_categories_have_coverage()
+    {
+        // Verify all 6 variants are reachable
+        let cases: Vec<(&str, MenuEventAction)> = vec![
+            ("encoding-utf-8", MenuEventAction::Encoding("utf-8".into())),
+            ("lang-python", MenuEventAction::Language("python".into())),
+            ("line-ending-lf", MenuEventAction::LineEnding("LF".into())),
+            ("word-wrap", MenuEventAction::Checkbox("word-wrap".into())),
+            ("open", MenuEventAction::Dialog("open".into())),
+            ("save", MenuEventAction::Action("save".into())),
+        ];
+
+        for (input, expected) in cases
+        {
+            assert_eq!(parse_menu_event(input), expected, "Failed for: {}", input);
+        }
+    }
 }
