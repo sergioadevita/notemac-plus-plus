@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notemac++ Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #1a1520;
+            --bg-mid: #221c2a;
+            --bg-surface: #2a2233;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --orange: #e8863a;
+            --orange-light: #f5a04e;
+            --amber: #f5c242;
+            --green: #6cd97e;
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(255, 255, 255, 0.58);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--bg-mid);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .navbar-logo img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .navbar-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav a:hover {
+            color: var(--orange);
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-mid);
+            border-right: 1px solid var(--glass-border);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .sidebar-nav a:hover {
+            color: var(--text-primary);
+            background: var(--glass-bg);
+        }
+
+        .sidebar-nav a.active {
+            color: var(--orange);
+            background: rgba(232, 134, 58, 0.1);
+            border-left: 3px solid var(--orange);
+            padding-left: calc(1rem - 3px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section Header */
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        /* Content Styles */
+        .content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .content ul, .content ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content a {
+            color: var(--orange);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .content a:hover {
+            color: var(--orange-light);
+            text-decoration: underline;
+        }
+
+        /* Code Blocks */
+        .content code {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--green);
+        }
+
+        .content pre {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .content pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--green);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Blockquotes */
+        .content blockquote {
+            border-left: 4px solid var(--orange);
+            padding-left: 1.5rem;
+            margin-left: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Tables */
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .content th {
+            background: rgba(232, 134, 58, 0.15);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--orange);
+            border-bottom: 2px solid var(--glass-border);
+        }
+
+        .content td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+
+        .content tr:last-child td {
+            border-bottom: none;
+        }
+
+        .content tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Strong and Emphasis */
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .content em {
+            color: var(--orange-light);
+        }
+
+        /* Horizontal Rule */
+        .content hr {
+            border: none;
+            height: 1px;
+            background: var(--glass-border);
+            margin: 2rem 0;
+        }
+
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(232, 134, 58, 0.1);
+            border: 1px solid var(--orange);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: var(--orange);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+                padding: 1.5rem;
+                max-height: 200px;
+                overflow-x: auto;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .sidebar-section {
+                margin-bottom: 0;
+            }
+
+            .main-content {
+                padding: 2rem;
+            }
+
+            .section-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .navbar-nav {
+                gap: 1rem;
+                font-size: 0.875rem;
+            }
+
+            .content h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--glass-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--glass-border);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="../" class="navbar-logo">
+                <img src="../Icons/icon.png" alt="Notemac++">
+                <span>Notemac++</span>
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a href="../">Home</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Documentation</div>
+                <div class="sidebar-nav">
+                    <a href="#" data-section="features" class="nav-link active">Features</a>
+                    <a href="#" data-section="architecture" class="nav-link">Architecture</a>
+                    <a href="#" data-section="keybindings" class="nav-link">Keybindings</a>
+                    <a href="#" data-section="building" class="nav-link">Building</a>
+                    <a href="#" data-section="testing" class="nav-link">Testing</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Features Section -->
+            <section id="features" class="content-section active">
+                <div class="section-header">
+                    <h1>Features</h1>
+                    <p>Explore the capabilities of Notemac++</p>
+                </div>
+                <div class="content" id="features-content">
+                    <div class="loading">Loading features documentation...</div>
+                </div>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="content-section">
+                <div class="section-header">
+                    <h1>Architecture</h1>
+                    <p>Understanding the system design</p>
+                </div>
+                <div class="content" id="architecture-content">
+                    <div class="loading">Loading architecture documentation...</div>
+                </div>
+            </section>
+
+            <!-- Keybindings Section -->
+            <section id="keybindings" class="content-section">
+                <div class="section-header">
+                    <h1>Keybindings</h1>
+                    <p>Keyboard shortcuts and commands</p>
+                </div>
+                <div class="content" id="keybindings-content">
+                    <div class="loading">Loading keybindings documentation...</div>
+                </div>
+            </section>
+
+            <!-- Building Section -->
+            <section id="building" class="content-section">
+                <div class="section-header">
+                    <h1>Building</h1>
+                    <p>Build instructions and setup</p>
+                </div>
+                <div class="content" id="building-content">
+                    <div class="loading">Loading building documentation...</div>
+                </div>
+            </section>
+
+            <!-- Testing Section -->
+            <section id="testing" class="content-section">
+                <div class="section-header">
+                    <h1>Testing</h1>
+                    <p>Testing and quality assurance</p>
+                </div>
+                <div class="content" id="testing-content">
+                    <div class="loading">Loading testing documentation...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Configure marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+        });
+
+        // Documentation sections and their corresponding markdown files
+        const sections = {
+            features: 'https://raw.githubusercontent.com/sergioadevita/notemac-plus-plus/main/docs/FEATURES.md',
+            architecture: 'https://raw.githubusercontent.com/sergioadevita/notemac-plus-plus/main/docs/ARCHITECTURE.md',
+            keybindings: 'https://raw.githubusercontent.com/sergioadevita/notemac-plus-plus/main/docs/KEYBINDINGS.md',
+            building: 'https://raw.githubusercontent.com/sergioadevita/notemac-plus-plus/main/docs/BUILDING.md',
+            testing: 'https://raw.githubusercontent.com/sergioadevita/notemac-plus-plus/main/docs/TESTING.md'
+        };
+
+        // Cache for loaded content
+        const contentCache = {};
+
+        // Load markdown content from GitHub
+        async function loadContent(section) {
+            const contentDiv = document.getElementById(`${section}-content`);
+
+            if (contentCache[section]) {
+                contentDiv.innerHTML = contentCache[section];
+                return;
+            }
+
+            const url = sections[section];
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const markdown = await response.text();
+                const html = marked.parse(markdown);
+                contentCache[section] = html;
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="error">Error loading ${section} documentation. Please ensure the markdown file exists at the repository.</div>`;
+                console.error(`Error loading ${section}:`, error);
+            }
+        }
+
+        // Handle section navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+
+                // Update active states
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+
+                // Load content
+                loadContent(section);
+
+                // Scroll to top
+                document.querySelector('.main-content').scrollTop = 0;
+            });
+        });
+
+        // Load initial section
+        loadContent('features');
+    </script>
+</body>
+</html>

@@ -33,7 +33,14 @@ for (const file of fs.readdirSync(iconsSource)) {
   fs.copyFileSync(path.join(iconsSource, file), path.join(iconsDest, file));
 }
 
-// 4. Copy docs/screenshots/ directory
+// 4. Copy docs/index.html (documentation viewer)
+fs.mkdirSync(path.join(dist, 'docs'), { recursive: true });
+fs.copyFileSync(
+  path.resolve(__dirname, '..', 'docs', 'index.html'),
+  path.join(dist, 'docs', 'index.html')
+);
+
+// 5. Copy docs/screenshots/ directory
 const screenshotsSource = path.resolve(__dirname, '..', 'docs', 'screenshots');
 const screenshotsDest = path.join(dist, 'docs', 'screenshots');
 fs.mkdirSync(screenshotsDest, { recursive: true });
@@ -47,5 +54,5 @@ for (const file of fs.readdirSync(screenshotsSource)) {
 console.log('Deploy build ready:');
 console.log('  dist/index.html       (landing page)');
 console.log('  dist/Icons/            (icon assets)');
-console.log('  dist/docs/screenshots/ (screenshot assets)');
+console.log('  dist/docs/            (documentation viewer + screenshots)');
 console.log('  dist/app/              (web app)');
