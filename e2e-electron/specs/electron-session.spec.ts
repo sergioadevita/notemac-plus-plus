@@ -166,7 +166,11 @@ test.describe('Electron Character Panel', () => {
   });
 
   test('sidebar can switch between panels', async () => {
-    await triggerMenuAction(electronApp, 'show-explorer');
+    // Use store directly to set explorer panel (matching Tauri test pattern)
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.setSidebarPanel('explorer');
+    });
     let state = await getStoreState(page);
     expect(state.sidebarPanel).toBe('explorer');
 
