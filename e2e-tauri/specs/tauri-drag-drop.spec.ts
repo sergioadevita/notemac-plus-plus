@@ -404,7 +404,7 @@ test.describe('Tauri Tab Context Operations', () => {
     }, tabId);
 
     state = await getStoreState(page);
-    expect(state.tabs[0].color).toBe('color1');
+    expect(state.tabs[0].tabColor).toBe('color1');
 
     // Clear color
     await page.evaluate((id: string) => {
@@ -413,7 +413,7 @@ test.describe('Tauri Tab Context Operations', () => {
     }, tabId);
 
     state = await getStoreState(page);
-    expect(state.tabs[0].color).toBe('none');
+    expect(state.tabs[0].tabColor).toBe('none');
   });
 
   test('restoreLastClosedTab restores a closed tab', async () => {
