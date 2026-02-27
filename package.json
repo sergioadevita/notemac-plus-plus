@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node -e \"const fs=require('fs');const p=require('path');fs.mkdirSync('dist/app',{recursive:true});fs.readdirSync('dist').filter(f=>f!=='app').forEach(f=>{fs.renameSync(p.join('dist',f),p.join('dist/app',f))});fs.copyFileSync('landing-page.html','dist/index.html');\"",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
     "electron:build": "vite build && electron-builder --mac",
