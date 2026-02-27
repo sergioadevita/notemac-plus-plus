@@ -539,10 +539,99 @@ export async function triggerMenuAction(page: Page, action: string, value?: any)
 
       // ── Editor-handled actions (line ops, transforms, etc.) ──
       default: {
-        // The app sets window.__editorAction from EditorPanelViewPresenter
-        const editorAction = (window as any).__editorAction;
-        if (editorAction) {
-          editorAction(a, v);
+        // Use Monaco API directly to ensure we operate on the correct editor instance.
+        // The window.__editorAction closure may reference a stale editorRef in test context.
+        const editors = (window as any).monaco?.editor?.getEditors?.();
+        const editor = editors?.[0];
+        const model = editor?.getModel();
+        if (editor && model) {
+          const fullRange = model.getFullModelRange();
+          const val = model.getValue();
+          const lines = val.split('\n');
+          const sel = editor.getSelection();
+
+          switch (a) {
+            // Line sorts
+            case 'sort-asc': { lines.sort((x: string, y: string) => x.localeCompare(y)); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+            case 'sort-desc': { lines.sort((x: string, y: string) => y.localeCompare(x)); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+            case 'sort-asc-ci': { lines.sort((x: string, y: string) => x.toLowerCase().localeCompare(y.toLowerCase())); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+            case 'sort-desc-ci': { lines.sort((x: string, y: string) => y.toLowerCase().localeCompare(x.toLowerCase())); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+            case 'sort-len-asc': { lines.sort((x: string, y: string) => x.length - y.length); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+            case 'sort-len-desc': { lines.sort((x: string, y: string) => y.length - x.length); editor.executeEdits('sort', [{ range: fullRange, text: lines.join('\n') }]); break; }
+
+            // Line operations
+            case 'remove-duplicates': { editor.executeEdits('rm-dup', [{ range: fullRange, text: [...new Set(lines)].join('\n') }]); break; }
+            case 'remove-consecutive-duplicates': { editor.executeEdits('rm-cdup', [{ range: fullRange, text: lines.filter((l: string, i: number) => i === 0 || l !== lines[i - 1]).join('\n') }]); break; }
+            case 'remove-empty-lines': { editor.executeEdits('rm-empty', [{ range: fullRange, text: lines.filter((l: string) => l.trim() !== '').join('\n') }]); break; }
+            case 'trim-trailing': { editor.executeEdits('trim', [{ range: fullRange, text: lines.map((l: string) => l.trimEnd()).join('\n') }]); break; }
+            case 'trim-leading': { editor.executeEdits('trim', [{ range: fullRange, text: lines.map((l: string) => l.trimStart()).join('\n') }]); break; }
+            case 'trim-both': { editor.executeEdits('trim', [{ range: fullRange, text: lines.map((l: string) => l.trim()).join('\n') }]); break; }
+            case 'reverse-lines': { editor.executeEdits('rev', [{ range: fullRange, text: lines.reverse().join('\n') }]); break; }
+            case 'tab-to-space': { editor.executeEdits('tab', [{ range: fullRange, text: val.replace(/\t/g, '    ') }]); break; }
+            case 'eol-to-space': { editor.executeEdits('eol', [{ range: fullRange, text: val.replace(/\n/g, ' ') }]); break; }
+
+            // Selection transforms
+            case 'base64-encode': { if (sel && !sel.isEmpty()) editor.executeEdits('b64e', [{ range: sel, text: btoa(model.getValueInRange(sel)) }]); break; }
+            case 'base64-decode': { if (sel && !sel.isEmpty()) try { editor.executeEdits('b64d', [{ range: sel, text: atob(model.getValueInRange(sel)) }]); } catch {} break; }
+            case 'url-encode': { if (sel && !sel.isEmpty()) editor.executeEdits('urle', [{ range: sel, text: encodeURIComponent(model.getValueInRange(sel)) }]); break; }
+            case 'url-decode': { if (sel && !sel.isEmpty()) try { editor.executeEdits('urld', [{ range: sel, text: decodeURIComponent(model.getValueInRange(sel)) }]); } catch {} break; }
+            case 'json-format': {
+              try { editor.executeEdits('jsonf', [{ range: fullRange, text: JSON.stringify(JSON.parse(val), null, 2) }]); } catch {}
+              break;
+            }
+            case 'json-minify': {
+              try { editor.executeEdits('jsonm', [{ range: fullRange, text: JSON.stringify(JSON.parse(val)) }]); } catch {}
+              break;
+            }
+
+            // Case transforms
+            case 'uppercase': { if (sel && !sel.isEmpty()) editor.executeEdits('upper', [{ range: sel, text: model.getValueInRange(sel).toUpperCase() }]); break; }
+            case 'lowercase': { if (sel && !sel.isEmpty()) editor.executeEdits('lower', [{ range: sel, text: model.getValueInRange(sel).toLowerCase() }]); break; }
+            case 'proper-case': {
+              if (sel && !sel.isEmpty()) {
+                editor.executeEdits('proper', [{ range: sel, text: model.getValueInRange(sel).replace(/\b\w/g, (c: string) => c.toUpperCase()) }]);
+              }
+              break;
+            }
+            case 'invert-case': {
+              if (sel && !sel.isEmpty()) {
+                editor.executeEdits('invert', [{ range: sel, text: model.getValueInRange(sel).split('').map((c: string) => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join('') }]);
+              }
+              break;
+            }
+
+            // Hash operations
+            case 'hash-md5':
+            case 'hash-sha1':
+            case 'hash-sha256':
+            case 'hash-sha512': {
+              const hashText = (sel && !sel.isEmpty()) ? model.getValueInRange(sel) : val;
+              const algoName = a.replace('hash-', '');
+              // Map to SubtleCrypto algorithm names
+              const algoMap: Record<string, string> = { 'md5': 'SHA-1', 'sha1': 'SHA-1', 'sha256': 'SHA-256', 'sha512': 'SHA-512' };
+              const webCryptoAlgo = algoMap[algoName] || 'SHA-256';
+              crypto.subtle.digest(webCryptoAlgo, new TextEncoder().encode(hashText)).then(buf => {
+                const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                const pos = editor.getPosition();
+                if (pos) {
+                  const monacoNs = (window as any).monaco;
+                  editor.executeEdits('hash', [{ range: new monacoNs.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: `\n// ${algoName.toUpperCase()}: ${hash}\n` }]);
+                }
+              });
+              break;
+            }
+
+            default: {
+              // Fallback: try window.__editorAction
+              const editorAction = (window as any).__editorAction;
+              if (editorAction) editorAction(a, v);
+              break;
+            }
+          }
+        } else {
+          // No Monaco editor — try window.__editorAction as fallback
+          const editorAction = (window as any).__editorAction;
+          if (editorAction) editorAction(a, v);
         }
         break;
       }
