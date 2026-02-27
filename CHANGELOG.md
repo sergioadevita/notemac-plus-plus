@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-02-27
+
+### Added
+- **Comprehensive test coverage**: 1,728 unit tests across 91 test suites — every source file with testable logic now has a dedicated test file
+- **Test naming convention**: All test files renamed to match their source file (`SourceFileName.test.ts(x)`), making it instant to find the test for any source file
+- **Integration test convention**: Integration/deep tests use `.integration.` in the file name (e.g., `AIModel.integration.test.ts`)
+- **New test files**: Split multi-source test files into individual per-source files — 7 Git controller tests, 6 dialog tests, 3 persistence service tests, and more
+- **TabModel consolidated test**: Merged duplicate tab test suites into a single comprehensive 56-test file
+
+### Improved
+- **Dead code removal**: Removed all unused exports, imports, and unreachable code paths identified during test audit
+- **Test warnings eliminated**: Fixed React `act()` warnings and duplicate object key warnings in test suites
+- **Documentation**: Complete rewrite of `docs/TESTING.md` with accurate test counts, file names, and categorized tables
+
 ## [3.1.0] - 2026-02-20
 
 ### Added
@@ -315,6 +329,8 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[3.2.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.2.0
+[3.1.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.1.0
 [3.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.0.0
 [2.4.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.4.0
 [2.3.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v2.3.0

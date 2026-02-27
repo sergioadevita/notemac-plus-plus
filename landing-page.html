@@ -373,7 +373,7 @@
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
             <span class="name">Notemac++</span>
-            <span class="version-badge">v3.1.0</span>
+            <span class="version-badge">v3.2.0</span>
         </h1>
         <p class="tagline">A powerful text editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
@@ -402,7 +402,7 @@
             <div class="stat-label">Languages</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">961</div>
+            <div class="stat-num">1,728</div>
             <div class="stat-label">Unit Tests</div>
         </div>
         <div class="stat-item">
@@ -410,7 +410,7 @@
             <div class="stat-label">Desktop App</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">6</div>
+            <div class="stat-num">7+</div>
             <div class="stat-label">Themes</div>
         </div>
         <div class="stat-item">
@@ -422,33 +422,33 @@
 
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
-    <h2 class="section-title">What's <span>New in v3.1.0</span></h2>
-    <p class="section-subtitle">The biggest release yet. Notemac++ now ships with Tauri for a dramatically smaller, faster desktop experience.</p>
+    <h2 class="section-title">What's <span>New in v3.2.0</span></h2>
+    <p class="section-subtitle">Complete test coverage and quality milestone — every source file now has a dedicated test.</p>
     <div class="new-feature-highlight">
         <div class="new-card full-width">
             <span class="badge">Major</span>
-            <h3>Tauri Desktop Shell</h3>
-            <p>Replaced Chromium with the system's native WebView. The desktop app dropped from ~50 MB to ~10-15 MB — a 75% reduction — with no feature loss. Built on Rust for memory safety and performance.</p>
+            <h3>1,728 Unit Tests Across 91 Suites</h3>
+            <p>Every source file with testable logic now has its own dedicated test file. Test files follow a 1:1 naming convention matching their source — find any test instantly.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Backend</span>
-            <h3>Rust Command Layer</h3>
-            <p>File operations, native dialogs, window management, and OS keychain credential storage — all implemented in Rust with full type safety.</p>
+            <span class="badge">Quality</span>
+            <h3>Dead Code Removed</h3>
+            <p>Comprehensive audit eliminated all unused exports, imports, and unreachable code paths across the entire codebase.</p>
         </div>
         <div class="new-card">
             <span class="badge">Testing</span>
-            <h3>8 New E2E Test Suites</h3>
-            <p>Complete Playwright test coverage for the Tauri shell — matching every existing Electron test across app launch, IPC, file ops, UI, menus, and more.</p>
+            <h3>Test Warning Fixes</h3>
+            <p>Eliminated React act() warnings and duplicate object key warnings — zero failures, zero warnings in the entire test suite.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Architecture</span>
-            <h3>Platform Abstraction Layer</h3>
-            <p>Clean PlatformBridge abstraction lets the frontend work seamlessly with Tauri, Electron, or plain browser — zero code changes needed.</p>
+            <span class="badge">Convention</span>
+            <h3>1:1 Source-to-Test Mapping</h3>
+            <p>All test files renamed to match their source file (e.g., AIModel.test.ts tests AIModel.ts). Integration tests use .integration. naming.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Menus</span>
-            <h3>~100 Native Menu Items</h3>
-            <p>Every File, Edit, Search, View, Encoding, Language, Settings, Tools, Macro, and Window menu action — implemented natively in Rust.</p>
+            <span class="badge">Docs</span>
+            <h3>Updated Documentation</h3>
+            <p>Complete rewrite of TESTING.md, README, CHANGELOG, and landing page with accurate counts and file references.</p>
         </div>
     </div>
 </section>
@@ -591,7 +591,7 @@
     <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
     <div class="hero-buttons">
         <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-        <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-secondary">Download v3.1.0</a>
+        <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-secondary">Download v3.2.0</a>
     </div>
 </section>
 

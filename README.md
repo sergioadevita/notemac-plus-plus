@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.1.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.2.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-1880%2B%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-2651%2B%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -404,7 +404,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 961 unit tests (39 suites, Vitest)
+└── __tests__/                  # 1,728 unit tests (91 suites, Vitest)
 ```
 
 ## Testing
@@ -413,7 +413,7 @@ src/
 npx vitest run
 ```
 
-961 unit tests across 39 test suites, ~709 web E2E tests across 36 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
+1,728 unit tests across 91 test suites, ~709 web E2E tests across 36 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
 
 ```bash
 npx playwright test          # E2E tests
@@ -450,12 +450,11 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
-Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests. **v3.0.0: Tauri migration — ~75% smaller desktop app (~10-15MB vs ~50MB) using system WebView instead of bundled Chromium, with full platform abstraction layer and 8 new Tauri E2E test suites.**
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests. v3.0.0: Tauri migration — ~75% smaller desktop app (~10-15MB vs ~50MB) using system WebView instead of bundled Chromium, with full platform abstraction layer and 8 new Tauri E2E test suites. v3.1.0: Custom theme color picker with 30 color pickers across 8 groups. **v3.2.0: Comprehensive test coverage — 1,728 unit tests across 91 suites with 1:1 source-to-test file mapping, plus dead code removal and test warning fixes.**
 
 Planned for future releases:
 
 - **Plugin System** — Extensibility through custom plugins
-- **Custom Theme Editor** — Create and share your own themes
 - **Print Support** — Format and print documents
 - **Collaborative Editing** — Real-time multi-user editing
 - **Remote File Editing** — Edit files over SSH/SFTP

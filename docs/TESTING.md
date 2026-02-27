@@ -16,49 +16,143 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 **1,884 total tests** across three test layers:
 
-### Unit Tests — 961 tests across 39 suites (Vitest)
+### Unit Tests — 1,728 tests across 91 suites (Vitest)
+
+#### Configs & Settings
 
 | Suite | File | Tests | Covers |
 |---|---|---|---|
-| Helpers | `helpers.test.ts` | 46 | `detectLanguage` (30 extensions + edge cases), `detectLineEnding`, `convertLineEnding`, `generateId` |
-| Tabs | `store-tabs.test.ts` | 36 | `addTab`, `closeTab`, `closeAllTabs`, `closeOtherTabs`, `closeTabsToLeft/Right`, `closeUnchangedTabs`, `closeAllButPinned`, `restoreLastClosedTab`, tab navigation, `updateTab`, `updateTabContent`, `togglePinTab`, `setTabColor`, `moveTab`, `addRecentFile` |
-| UI State | `store-ui.test.ts` | 31 | Sidebar, zoom, split view, clipboard history, dialog toggles, settings, session save/load |
-| Configs | `configs.test.ts` | 21 | `EditorConfig`, `ThemeConfig` (all 7 themes), `Constants` |
-| Search | `store-search.test.ts` | 13 | Search state, find options, marks, bookmarks |
-| Search Deep | `search-model-deep.test.ts` | 10 | Advanced search patterns, regex, whole word matching |
-| Macros | `store-macro.test.ts` | 9 | Recording, playback, action logging, saved macros |
-| Macros Deep | `macro-deep.test.ts` | 18 | Multi-step macros, action replay, edge cases |
-| File Tree | `store-filetree.test.ts` | 7 | Tree nodes, expansion state, workspace root |
-| Git Store | `store-git.test.ts` | 30 | Git state management, branch tracking, staging |
-| Git Commands | `git-commands.test.ts` | 14 | Clone, commit, push, pull, branch operations |
-| Git Adapter | `git-adapter.test.ts` | 15 | HTTP/SSH protocol handling, credential passing |
-| Git Config | `git-config.test.ts` | 9 | Remote management, auth settings |
-| Git Controllers | `git-controllers.test.ts` | 93 | Commit, push, pull, branch, merge, stash controllers |
-| Git Deep | `git-deep.test.ts` | 40 | Diff viewer, conflict resolution, history |
-| AI Store | `store-ai.test.ts` | 19 | Provider selection, conversation management, settings |
-| AI Integration | `ai-integration.test.ts` | 51 | Multi-provider chat, completions, streaming |
-| AI Config | `ai-config.test.ts` | 13 | API key management, model configuration |
-| AI Action Controller | `ai-action-controller.test.ts` | 51 | Explain code, fix error, convert language, commit messages |
-| AI Model Deep | `ai-model-deep.test.ts` | 20 | Token estimation, context windowing |
-| LLM Controller | `llm-controller.test.ts` | 19 | Request routing, error handling, retry logic |
-| Completion Controller | `completion-controller.test.ts` | 48 | Autocomplete, inline suggestions, debouncing |
-| App Controller | `app-controller.test.ts` | 24 | Keyboard shortcuts, event handling, focus management |
-| Menu Action Controller | `menu-action-controller.test.ts` | 25 | Menu item dispatch, action routing |
-| File Controller | `file-controller.test.ts` | 17 | Open, save, save-as, file type detection |
-| Auth Controller | `auth-controller.test.ts` | 15 | OAuth flow, token refresh, credential storage |
-| Browser Workspace | `browser-workspace.test.ts` | 9 | File System Access API, directory handles |
-| Browser Workspace Controller | `browser-workspace-controller.test.ts` | 30 | File tree sync, watch, read/write operations |
-| Credential Security | `credential-security.test.ts` | 25 | Encryption/decryption, session-only mode, auto-expiry |
-| Snippet Controller | `snippet-controller.test.ts` | 15 | CRUD operations, language filtering, insertion |
-| Editor Panel | `editor-panel.test.ts` | 43 | Monaco integration, tab sync, action dispatch |
-| Sidebar FileTree Deep | `sidebar-filetree-deep.test.ts` | 32 | Nested trees, expand/collapse, drag-drop |
-| Dialogs Deep | `dialogs-deep.test.ts` | 15 | Settings, about, shortcut mapper state |
-| Tab Model Deep | `tab-model-deep.test.ts` | 15 | Tab lifecycle, pinning, color coding |
-| Error Boundary | `error-boundary.test.tsx` | 14 | Error catching, fallback rendering, recovery |
-| Focus Trap | `focus-trap.test.tsx` | 16 | Keyboard navigation, tab cycling, escape handling |
-| UI Toolbar | `ui-toolbar.test.tsx` | 20 | Button rendering, action dispatch, icon display |
-| UI StatusBar | `ui-statusbar.test.tsx` | 14 | Cursor position, encoding, language display |
-| UI Welcome | `ui-welcome.test.tsx` | 19 | Welcome screen, recent files, quick actions |
+| Editor Config | `EditorConfig.test.ts` | 12 | Default font size, tab size, font family, themes, cursor style, render whitespace |
+| Encoding Config | `EncodingConfig.test.ts` | 11 | Default encodings, UTF-8 configuration |
+| Git Config | `GitConfig.test.ts` | 9 | Default Git settings, author, credentials, persistence keys |
+| Language Config | `LanguageConfig.test.ts` | 17 | Language detection, language-specific defaults |
+| Shortcut Config | `ShortcutConfig.test.ts` | 7 | Keyboard shortcut definitions, categories |
+| Theme Config | `ThemeConfig.test.ts` | 14 | Theme validation, color definitions, custom themes |
+
+#### Controllers
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| App Controller | `AppController.test.ts` | 24 | Keyboard shortcuts, event handling, focus management, menu dispatch |
+| Auth Controller | `AuthController.test.ts` | 18 | OAuth flow, token refresh, credential storage, logout |
+| Completion Controller | `CompletionController.test.ts` | 48 | Autocomplete, inline suggestions, debouncing, language support |
+| File Controller | `FileController.test.ts` | 17 | Open, save, save-as, file type detection, encoding |
+| LLM Controller | `LLMController.test.ts` | 19 | Context building, token estimation, text truncation, code block extraction |
+| Menu Action Controller | `MenuActionController.test.ts` | 25 | Menu item dispatch, action routing, keyboard shortcuts, submenu handling |
+| Snippet Controller | `SnippetController.test.ts` | 15 | CRUD operations, language filtering, insertion, persistence |
+
+#### Git Controllers
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| Git Auto Fetch Controller | `GitAutoFetchController.test.ts` | 5 | Auto-fetch timer, polling intervals, start/stop |
+| Git Branch Controller | `GitBranchController.test.ts` | 13 | Branch creation, deletion, switching, renaming, tracking |
+| Git Commit Controller | `GitCommitController.test.ts` | 8 | Commit creation, message validation, staging amend |
+| Git File System Adapter | `GitFileSystemAdapter.test.ts` | 15 | File read/write operations, path normalization, directory traversal |
+| Git Init Controller | `GitInitController.test.ts` | 16 | Repository initialization, empty repo detection |
+| Git Log Controller | `GitLogController.test.ts` | 9 | Commit history retrieval, date parsing, log filtering |
+| Git Model | `GitModel.test.ts` | 29 | Git state management, branch tracking, staging, diff status |
+| Git Remote Controller | `GitRemoteController.test.ts` | 15 | Remote management, push, pull, fetch operations |
+| Git Status Controller | `GitStatusController.test.ts` | 15 | File status tracking, modified/untracked/staged detection |
+
+#### Models (Zustand Stores)
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| App View Presenter | `AppViewPresenter.test.tsx` | 18 | Main layout rendering, modal management |
+| File Tree Model | `FileTreeModel.test.ts` | 7 | Tree node structure, expansion state, parent tracking |
+| Macro Model | `MacroModel.test.ts` | 9 | Recording, playback, action logging, saved macros |
+| Search Model | `SearchModel.test.ts` | 13 | Search state, find options, marks, bookmarks, history |
+| Snippet Model | `SnippetModel.test.ts` | 10 | Snippet storage, CRUD, language categories |
+| Tab Model | `TabModel.test.ts` | 56 | Tab creation, closing, switching, pinning, color coding, restoration |
+| UI Model | `UIModel.test.ts` | 40 | Sidebar, zoom, split view, clipboard history, dialog toggles, settings |
+
+#### Services & Helpers
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| Browser Workspace | `BrowserWorkspace.integration.test.ts` | 9 | File System Access API, directory handles, persistence |
+| Browser Workspace Controller | `BrowserWorkspaceController.test.ts` | 30 | File tree sync, watch, read/write operations |
+| Credential Storage Service | `CredentialStorageService.test.ts` | 25 | Encryption/decryption, session-only mode, auto-expiry |
+| Editor Globals | `EditorGlobals.test.ts` | 13 | Monaco editor instance management, global state |
+| File Helpers | `FileHelpers.test.ts` | 44 | Language detection (30+ extensions), line endings, encoding conversion |
+| Fuzzy Search Helpers | `FuzzySearchHelpers.test.ts` | 20 | String matching, fuzzy matching, ranking, case sensitivity |
+| Id Helpers | `IdHelpers.test.ts` | 2 | ID generation, uniqueness |
+| Persistence Service | `PersistenceService.test.ts` | 23 | Local storage, session storage, state persistence, cleanup |
+| Platform Bridge | `PlatformBridge.test.ts` | 13 | Platform detection (web/Tauri/Electron), desktop checks |
+| Safe Storage Service | `SafeStorageService.test.ts` | 4 | Electron safe storage, encryption, decryption |
+| Secure Encryption Service | `SecureEncryptionService.test.ts` | 6 | Encryption/decryption, key initialization, availability checks |
+| Tauri Bridge | `TauriBridge.test.ts` | 6 | Tauri API integration, IPC communication |
+| Text Helpers | `TextHelpers.test.ts` | 33 | String manipulation, trimming, case conversion, formatting |
+
+#### Hooks
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| useAIContextMenu | `useAIContextMenu.test.ts` | 13 | Context menu rendering, AI action dispatch |
+| useEditorActions | `useEditorActions.test.ts` | 76 | Line operations, text transformation, macro integration |
+| useEditorEvents | `useEditorEvents.test.ts` | 23 | Monaco events, selection tracking, content changes |
+| useEditorSetup | `useEditorSetup.test.ts` | 13 | Editor initialization, settings application |
+| useFocusTrap | `useFocusTrap.test.tsx` | 16 | Keyboard navigation, tab cycling, escape handling |
+| useMacroPlayback | `useMacroPlayback.test.ts` | 17 | Action replay, execution timing, error handling |
+
+#### UI Components
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| AIChatPanelViewPresenter | `AIChatPanelViewPresenter.test.tsx` | 21 | Chat rendering, message display, input handling, streaming |
+| AISettingsViewPresenter | `AISettingsViewPresenter.test.tsx` | 29 | Provider settings, API key management, model selection |
+| AppViewPresenter | `AppViewPresenter.test.tsx` | 18 | Layout, modal management, app state |
+| CommandPaletteViewPresenter | `CommandPaletteViewPresenter.test.tsx` | 12 | Command search, filtering, keyboard navigation |
+| DiffViewerViewPresenter | `DiffViewerViewPresenter.test.tsx` | 9 | Diff display, syntax highlighting, file comparison |
+| EditorPanelViewPresenter | `EditorPanelViewPresenter.test.tsx` | 18 | Monaco editor integration, tab sync, action dispatch |
+| ErrorBoundary | `ErrorBoundary.test.tsx` | 14 | Error catching, fallback rendering, error recovery |
+| FeedbackPopupViewPresenter | `FeedbackPopupViewPresenter.test.tsx` | 9 | Feedback display, auto-dismiss, styling |
+| FindReplaceViewPresenter | `FindReplaceViewPresenter.test.tsx` | 15 | Find panel, replace functionality, regex support |
+| GitPanelViewPresenter | `GitPanelViewPresenter.test.tsx` | 32 | Git status display, branch info, commit UI, diff integration |
+| GitSettingsViewPresenter | `GitSettingsViewPresenter.test.tsx` | 26 | Git configuration UI, author settings, remote management |
+| MenuBarViewPresenter | `MenuBarViewPresenter.test.tsx` | 13 | Menu rendering, dropdown navigation, action dispatch |
+| QuickOpenViewPresenter | `QuickOpenViewPresenter.test.tsx` | 12 | File quick open, search filtering, keyboard shortcuts |
+| SidebarViewPresenter | `SidebarViewPresenter.test.tsx` | 12 | Sidebar panels, panel toggle, badge display |
+| StatusBarViewPresenter | `StatusBarViewPresenter.test.tsx` | 14 | Cursor position, encoding, language, line ending display |
+| TabBarViewPresenter | `TabBarViewPresenter.test.tsx` | 26 | Tab rendering, close buttons, drag-drop indicators |
+| TerminalPanelViewPresenter | `TerminalPanelViewPresenter.test.tsx` | 15 | Terminal rendering, command execution, output display |
+| ToolbarViewPresenter | `ToolbarViewPresenter.test.tsx` | 20 | Button rendering, action dispatch, icon display |
+| WelcomeScreenViewPresenter | `WelcomeScreenViewPresenter.test.tsx` | 19 | Welcome screen, recent files, quick actions |
+
+#### Dialogs
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| AboutDialogViewPresenter | `AboutDialogViewPresenter.test.tsx` | 11 | About modal, version display, styling |
+| Character Range Dialog | `CharInRangeDialogViewPresenter.test.tsx` | 12 | Character code input, validation, display |
+| Clone Repository Dialog | `CloneRepositoryViewPresenter.test.tsx` | 12 | Repository URL input, authentication, progress |
+| Column Editor Dialog | `ColumnEditorDialogViewPresenter.test.tsx` | 12 | Column operation configuration, text input |
+| Go To Line Dialog | `GoToLineDialogViewPresenter.test.tsx` | 10 | Line number input, validation, navigation |
+| Run Command Dialog | `RunCommandDialogViewPresenter.test.tsx` | 9 | Command execution, input handling, output |
+| Settings Dialog | `SettingsDialogViewPresenter.test.tsx` | 30 | All settings tabs (General, Editor, Appearance, Advanced, Keybindings) |
+| Shortcut Mapper Dialog | `ShortcutMapperDialogViewPresenter.test.tsx` | 23 | Shortcut display, filtering, category tabs |
+| Snippet Manager Dialog | `SnippetManagerViewPresenter.test.tsx` | 11 | Snippet list, editor, CRUD operations |
+| Summary Dialog | `SummaryDialogViewPresenter.test.tsx` | 8 | Summary display, styling |
+
+#### Integration Tests
+
+| Suite | File | Tests | Covers |
+|---|---|---|---|
+| AI Integration | `AIIntegration.test.ts` | 51 | Multi-provider chat, completions, streaming, token counting |
+| AI Action Controller | `AIActionController.test.ts` | 51 | Explain code, fix error, convert language, commit messages |
+| AI Model | `AIModel.integration.test.ts` | 20 | Token estimation, context windowing, provider integration |
+| Browser Workspace | `BrowserWorkspace.integration.test.ts` | 9 | File System Access API, directory handles, persistence |
+| Dialogs | `Dialogs.integration.test.ts` | 15 | Dialog interactions, state management, navigation |
+| Editor Panel | `EditorPanelViewPresenter.integration.test.ts` | 43 | Monaco integration, tab sync, action dispatch |
+| File Tree Model | `FileTreeModel.integration.test.ts` | 32 | Nested trees, expand/collapse, drag-drop |
+| Git Integration | `Git.integration.test.ts` | 40 | Commit, push, pull, branch, merge, stash workflows |
+| Macro Model | `MacroModel.integration.test.ts` | 18 | Multi-step macros, action replay, edge cases |
+| OAuth Integration | `OAuthIntegration.test.ts` | 6 | GitHub OAuth device flow, token polling |
+| Search Model | `SearchModel.integration.test.ts` | 10 | Advanced search patterns, regex, whole word matching |
+| Tab Model | `TabModel.integration.test.ts` | 15 | Tab lifecycle, pinning, color coding, restoration |
+| Command Registry | `CommandRegistry.test.ts` | 7 | Command registration, category management |
+| Editor Panel Params | `EditorPanelViewPresenterParams.test.ts` | 5 | Parameter defaults, state management |
 
 ### Web E2E Tests — ~709 tests across 36 spec files (Playwright)
 
@@ -134,7 +228,7 @@ Test files are excluded from the main `tsconfig.json` compilation (`"exclude": [
 
 Tests follow these conventions:
 
-- Unit test files go in `src/__tests__/` with the pattern `<module>.test.ts`
+- Unit test files go in `src/__tests__/` with the pattern `SourceFileName.test.ts(x)` — matching the source file they test
 - Web E2E spec files go in `e2e/specs/` with the pattern `<feature>.spec.ts`
 - Electron E2E spec files go in `e2e-electron/specs/` with the pattern `electron-<feature>.spec.ts`
 - Use `describe` blocks to group related tests

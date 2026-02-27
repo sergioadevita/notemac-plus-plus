@@ -19,6 +19,7 @@ vi.mock('../../Shared/Helpers/FileHelpers', async (importOriginal) => {
             if (filename.endsWith('.ts')) return 'typescript';
             if (filename.endsWith('.js')) return 'javascript';
             if (filename.endsWith('.py')) return 'python';
+            if (filename.endsWith('.css')) return 'css';
             return 'plaintext';
         },
     };
@@ -84,12 +85,39 @@ describe('TabModel — addTab', () => {
 
         expect(state.tabs[0].language).toBe('python');
     });
+
+    it('detects CSS language from filename', () => {
+        const store = useNotemacStore.getState();
+        store.addTab({ name: 'style.css' });
+        const state = useNotemacStore.getState();
+
+        expect(state.tabs[0].language).toBe('css');
+    });
+
+    it('defaults to utf-8 encoding and LF line ending', () => {
+        const store = useNotemacStore.getState();
+        store.addTab();
+        const state = useNotemacStore.getState();
+
+        expect(state.tabs[0].encoding).toBe('utf-8');
+        expect(state.tabs[0].lineEnding).toBe('LF');
+    });
+
+    it('initializes tab with empty bookmarks, marks, and hiddenLines', () => {
+        const store = useNotemacStore.getState();
+        store.addTab();
+        const tab = useNotemacStore.getState().tabs[0];
+
+        expect(tab.bookmarks).toEqual([]);
+        expect(tab.marks).toEqual([]);
+        expect(tab.hiddenLines).toEqual([]);
+    });
 });
 
 describe('TabModel — closeTab', () => {
     beforeEach(() => resetStore());
 
-    it('closes a tab', () => {
+    it('closes a tab and moves it to closedTabs', () => {
         const store = useNotemacStore.getState();
         const id = store.addTab({ name: 'test.ts' });
         store.closeTab(id);
@@ -99,7 +127,7 @@ describe('TabModel — closeTab', () => {
         expect(state.closedTabs.length).toBe(1);
     });
 
-    it('moves closed tab to closedTabs', () => {
+    it('moves closed tab to closedTabs with content preserved', () => {
         const store = useNotemacStore.getState();
         const id = store.addTab({ name: 'test.ts', content: 'hello' });
         store.closeTab(id);
@@ -393,6 +421,20 @@ describe('TabModel — setTabColor', () => {
         store.setTabColor(id, 'red');
         expect(useNotemacStore.getState().tabs[0].tabColor).toBe('red');
     });
+
+    it('changes tab color', () => {
+        const store = useNotemacStore.getState();
+        const id = store.addTab();
+
+        store.setTabColor(id, 'color1');
+        expect(useNotemacStore.getState().tabs[0].tabColor).toBe('color1');
+
+        store.setTabColor(id, 'color3');
+        expect(useNotemacStore.getState().tabs[0].tabColor).toBe('color3');
+
+        store.setTabColor(id, 'none');
+        expect(useNotemacStore.getState().tabs[0].tabColor).toBe('none');
+    });
 });
 
 describe('TabModel — moveTab', () => {
@@ -411,7 +453,7 @@ describe('TabModel — moveTab', () => {
     });
 });
 
-describe('TabModel — nextTab and prevTab', () => {
+describe('TabModel — nextTab', () => {
     beforeEach(() => resetStore());
 
     it('cycles to next tab', () => {
@@ -432,6 +474,27 @@ describe('TabModel — nextTab and prevTab', () => {
         expect(useNotemacStore.getState().activeTabId).toBe(id1);
     });
 
+    it('cycles through multiple tabs', () => {
+        const store = useNotemacStore.getState();
+        const id1 = store.addTab({ name: 'tab1' });
+        const id2 = store.addTab({ name: 'tab2' });
+        const id3 = store.addTab({ name: 'tab3' });
+
+        store.setActiveTab(id1);
+        store.nextTab();
+        expect(useNotemacStore.getState().activeTabId).toBe(id2);
+
+        store.nextTab();
+        expect(useNotemacStore.getState().activeTabId).toBe(id3);
+
+        store.nextTab();
+        expect(useNotemacStore.getState().activeTabId).toBe(id1);
+    });
+});
+
+describe('TabModel — prevTab', () => {
+    beforeEach(() => resetStore());
+
     it('cycles to previous tab', () => {
         const store = useNotemacStore.getState();
         const id1 = store.addTab({ name: 'first.ts' });
@@ -450,10 +513,32 @@ describe('TabModel — nextTab and prevTab', () => {
         expect(useNotemacStore.getState().activeTabId).toBe(id2);
     });
 
-    it('does nothing with single tab', () => {
+    it('cycles backwards through tabs', () => {
+        const store = useNotemacStore.getState();
+        const id1 = store.addTab({ name: 'tab1' });
+        const id2 = store.addTab({ name: 'tab2' });
+        const id3 = store.addTab({ name: 'tab3' });
+
+        store.setActiveTab(id1);
+        store.prevTab();
+        expect(useNotemacStore.getState().activeTabId).toBe(id3);
+    });
+});
+
+describe('TabModel — tab cycling with single tab', () => {
+    beforeEach(() => resetStore());
+
+    it('does nothing with single tab on nextTab', () => {
         const store = useNotemacStore.getState();
         const id = store.addTab({ name: 'test.ts' });
         store.nextTab();
+        expect(useNotemacStore.getState().activeTabId).toBe(id);
+    });
+
+    it('does nothing with single tab on prevTab', () => {
+        const store = useNotemacStore.getState();
+        const id = store.addTab({ name: 'test.ts' });
+        store.prevTab();
         expect(useNotemacStore.getState().activeTabId).toBe(id);
     });
 });
@@ -476,9 +561,29 @@ describe('TabModel — goToTab', () => {
         store.goToTab(5);
         expect(useNotemacStore.getState().activeTabId).toBe(id);
     });
+
+    it('handles negative index', () => {
+        const store = useNotemacStore.getState();
+        const id = store.addTab({ name: 'test.ts' });
+        store.goToTab(-1);
+        expect(useNotemacStore.getState().activeTabId).toBe(id);
+    });
+
+    it('goes to first and last tabs', () => {
+        const store = useNotemacStore.getState();
+        const id1 = store.addTab({ name: 'tab1' });
+        const id2 = store.addTab({ name: 'tab2' });
+        const id3 = store.addTab({ name: 'tab3' });
+
+        store.goToTab(0);
+        expect(useNotemacStore.getState().activeTabId).toBe(id1);
+
+        store.goToTab(2);
+        expect(useNotemacStore.getState().activeTabId).toBe(id3);
+    });
 });
 
-describe('TabModel — moveTabForward and moveTabBackward', () => {
+describe('TabModel — moveTabForward', () => {
     beforeEach(() => resetStore());
 
     it('moves tab forward', () => {
@@ -503,6 +608,21 @@ describe('TabModel — moveTabForward and moveTabBackward', () => {
         expect(state.tabs[1].id).toBe(id2);
     });
 
+    it('moves active tab one position right', () => {
+        const store = useNotemacStore.getState();
+        const id1 = store.addTab({ name: 'a' });
+        store.addTab({ name: 'b' });
+        store.setActiveTab(id1);
+
+        store.moveTabForward();
+        const names = useNotemacStore.getState().tabs.map(t => t.name);
+        expect(names).toEqual(['b', 'a']);
+    });
+});
+
+describe('TabModel — moveTabBackward', () => {
+    beforeEach(() => resetStore());
+
     it('moves tab backward', () => {
         const store = useNotemacStore.getState();
         const id1 = store.addTab({ name: 'first.ts' });
@@ -523,6 +643,17 @@ describe('TabModel — moveTabForward and moveTabBackward', () => {
         const state = useNotemacStore.getState();
 
         expect(state.tabs[0].id).toBe(id1);
+    });
+
+    it('moves active tab one position left', () => {
+        const store = useNotemacStore.getState();
+        store.addTab({ name: 'a' });
+        const id2 = store.addTab({ name: 'b' });
+        store.setActiveTab(id2);
+
+        store.moveTabBackward();
+        const names = useNotemacStore.getState().tabs.map(t => t.name);
+        expect(names).toEqual(['b', 'a']);
     });
 });
 
@@ -547,5 +678,14 @@ describe('TabModel — addRecentFile', () => {
 
         expect(state.recentFiles[0].path).toBe('/path/file1.ts');
         expect(state.recentFiles.length).toBe(2);
+    });
+
+    it('limits recent files list', () => {
+        const store = useNotemacStore.getState();
+        for (let i = 0, maxCount = 25; i < maxCount; i++) {
+            store.addRecentFile(`/path/${i}`, `file${i}`);
+        }
+        const state = useNotemacStore.getState();
+        expect(state.recentFiles.length).toBe(20);
     });
 });
