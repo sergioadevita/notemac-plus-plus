@@ -291,6 +291,7 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 
 &nbsp;
 
+- **Compare Files**: Side-by-side diff comparison of any two files with Monaco diff editor
 - **Distraction-Free Mode**: Hides all UI chrome for focused writing
 - **Always on Top**: Keep the editor above other windows
 - **Monitoring (tail -f)**: Live file watching with auto-scroll
@@ -441,6 +442,7 @@ How Notemac++ stacks up against other editors:
 | **Code Snippets** | Yes | No (plugins) | Yes | Yes |
 | **Mark System** | Yes (5 colors) | Yes (5 styles) | No | No |
 | **Column Editor** | Yes | Yes | Via Extensions | Yes |
+| **Compare Files** | Yes | Via Plugin | Yes | Via Plugin |
 | **Themes** | 7 | 30+ | 1000+ | 25+ |
 | **Plugins** | Planned | 200+ | 30K+ | 5K+ |
 | **Runs in Browser** | Yes | No | Yes (vscode.dev) | No |
@@ -454,10 +456,28 @@ Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet m
 
 Planned for future releases:
 
-- **Plugin System** — Extensibility through custom plugins
+**Editor Enhancements**
+- **Breadcrumb Navigation** — File path and symbol breadcrumbs above the editor
+- **Sticky Scroll** — Pin function/class headers while scrolling
+- **Code Formatting** — Prettier and language-specific formatters
+- **Linting & Diagnostics** — Inline errors and warnings with quick-fix actions
+- **Emmet Support** — HTML/CSS abbreviation expansion
 - **Print Support** — Format and print documents
+
+**Git & Collaboration**
+- **Git Blame View** — Line-by-line blame annotations with commit history
+- **Git Stash Management** — Stash, pop, and list UI in the Git panel
+- **Merge Conflict Resolution** — Visual 3-way merge tool
 - **Collaborative Editing** — Real-time multi-user editing
+
+**Advanced Features**
+- **Plugin System** — Extensibility through custom plugins
+- **Workspace & Project Settings** — Per-folder editor and formatter settings
+- **Custom Language Definitions** — User-defined syntax highlighting and grammars
+- **Task Runner** — Run build, test, and lint tasks from project config
 - **Remote File Editing** — Edit files over SSH/SFTP
+- **Hex Editor** — Binary and hex viewer/editor
+- **Debug Support** — Breakpoints and step-through debugging
 
 Have a feature request? Open an [issue](https://github.com/sergioadevita/notemac-plus-plus/issues) or [discussion](https://github.com/sergioadevita/notemac-plus-plus/discussions).
 
