@@ -22,3 +22,7 @@ serde_json = "1"
 keyring = { version = "3", features = ["apple-native"] }
 base64 = "0.22"
 walkdir = "2"
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
