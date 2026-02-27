@@ -95,21 +95,21 @@ test.describe('Tauri Safe Storage (Mocked)', () => {
       });
     });
 
-    expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
-    // Mock returns base64 encoded
-    expect(result).toContain('encrypted:');
+    // Mock returns base64 encoded (btoa)
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).not.toBe('my-secret-token'); // should be different from plaintext
   });
 
   test('safe_storage_decrypt returns original string', async () => {
+    // Mock decrypt does atob(), so pass valid base64
     const result = await page.evaluate(async () => {
       return await (window as any).__TAURI__?.core?.invoke('safe_storage_decrypt', {
-        encrypted: 'encrypted:bXktc2VjcmV0LXRva2Vu'
+        encrypted: 'bXktc2VjcmV0LXRva2Vu'
       });
     });
 
-    expect(result).toBeTruthy();
-    expect(typeof result).toBe('string');
+    expect(result).toBe('my-secret-token');
   });
 
   test('encrypt and decrypt round-trip works', async () => {
@@ -117,7 +117,8 @@ test.describe('Tauri Safe Storage (Mocked)', () => {
       const tauri = (window as any).__TAURI__;
       const original = 'ghp_testtoken123456';
       const encrypted = await tauri?.core?.invoke('safe_storage_encrypt', { plaintext: original });
-      const decrypted = await tauri?.core?.invoke('safe_storage_decrypt', { encrypted });
+      // decrypt expects the raw base64 (what encrypt returns)
+      const decrypted = await tauri?.core?.invoke('safe_storage_decrypt', { encrypted: encrypted });
       return { original, encrypted, decrypted };
     });
 
@@ -131,7 +132,7 @@ test.describe('Tauri Safe Storage (Mocked)', () => {
     await page.evaluate(async () => {
       const tauri = (window as any).__TAURI__;
       await tauri?.core?.invoke('safe_storage_encrypt', { plaintext: 'track-me' });
-      await tauri?.core?.invoke('safe_storage_decrypt', { encrypted: 'encrypted:dHJhY2stbWU=' });
+      await tauri?.core?.invoke('safe_storage_decrypt', { encrypted: 'dHJhY2stbWU=' });
     });
 
     const invocations = await getTauriInvocations(page);

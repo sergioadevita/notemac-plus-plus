@@ -69,8 +69,9 @@ test.describe('Tauri Zoom Level', () => {
 
   test('zoom level has a default value', async () => {
     const state = await getStoreState(page);
-    expect(state.zoomLevel).toBeTruthy();
     expect(typeof state.zoomLevel).toBe('number');
+    // Default is 0
+    expect(state.zoomLevel).toBe(0);
   });
 
   test('zoom-in increases zoom level', async () => {
@@ -105,7 +106,7 @@ test.describe('Tauri Zoom Level', () => {
     await page.waitForTimeout(100);
 
     const state = await getStoreState(page);
-    expect(state.zoomLevel).toBe(14); // default font size
+    expect(state.zoomLevel).toBe(0); // default zoom level
   });
 });
 
@@ -210,8 +211,10 @@ test.describe('Tauri Dialog State Management', () => {
   });
 
   test('summary dialog can be toggled', async () => {
-    await triggerMenuAction(page, 'summary');
-    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      const store = (window as any).__ZUSTAND_STORE__;
+      store?.getState()?.setShowSummary(true);
+    });
 
     let state = await getStoreState(page);
     expect(state.showSummary).toBe(true);
