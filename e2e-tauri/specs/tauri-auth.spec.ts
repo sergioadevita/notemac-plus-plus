@@ -157,7 +157,7 @@ test.describe('Tauri Git Operation State', () => {
 
   test('git operation defaults to not in progress', async () => {
     const state = await getStoreState(page);
-    expect(state.gitOperationInProgress).toBe(false);
+    expect(state.isGitOperationInProgress).toBe(false);
     expect(state.currentGitOperation).toBeNull();
   });
 
@@ -169,7 +169,7 @@ test.describe('Tauri Git Operation State', () => {
     });
 
     const state = await getStoreState(page);
-    expect(state.gitOperationInProgress).toBe(true);
+    expect(state.isGitOperationInProgress).toBe(true);
     expect(state.currentGitOperation).toBe('clone');
   });
 
@@ -192,7 +192,7 @@ test.describe('Tauri Git Operation State', () => {
     });
 
     const state = await getStoreState(page);
-    expect(state.gitOperationInProgress).toBe(false);
+    expect(state.isGitOperationInProgress).toBe(false);
     expect(state.currentGitOperation).toBeNull();
   });
 
@@ -243,7 +243,7 @@ test.describe('Tauri Git Repository State', () => {
 
   test('repo initialized defaults to false', async () => {
     const state = await getStoreState(page);
-    expect(state.repoInitialized).toBe(false);
+    expect(state.isRepoInitialized).toBe(false);
   });
 
   test('repo initialized can be set', async () => {
@@ -253,7 +253,7 @@ test.describe('Tauri Git Repository State', () => {
     });
 
     const state = await getStoreState(page);
-    expect(state.repoInitialized).toBe(true);
+    expect(state.isRepoInitialized).toBe(true);
   });
 
   test('current branch can be set', async () => {

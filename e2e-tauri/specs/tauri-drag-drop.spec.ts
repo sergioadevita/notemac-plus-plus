@@ -400,20 +400,20 @@ test.describe('Tauri Tab Context Operations', () => {
 
     await page.evaluate((id: string) => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setTabColor(id, 'red');
+      store?.getState()?.setTabColor(id, 'color1');
     }, tabId);
 
     state = await getStoreState(page);
-    expect(state.tabs[0].color).toBe('red');
+    expect(state.tabs[0].color).toBe('color1');
 
     // Clear color
     await page.evaluate((id: string) => {
       const store = (window as any).__ZUSTAND_STORE__;
-      store?.getState()?.setTabColor(id, null);
+      store?.getState()?.setTabColor(id, 'none');
     }, tabId);
 
     state = await getStoreState(page);
-    expect(state.tabs[0].color).toBeFalsy();
+    expect(state.tabs[0].color).toBe('none');
   });
 
   test('restoreLastClosedTab restores a closed tab', async () => {
