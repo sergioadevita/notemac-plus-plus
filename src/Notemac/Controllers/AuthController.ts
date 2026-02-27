@@ -152,7 +152,7 @@ export interface OAuthState
  */
 export async function StartGitHubOAuth(): Promise<OAuthState | null>
 {
-    if (!GITHUB_OAUTH_CLIENT_ID || 'Iv1.CONFIGURE_YOUR_APP' === GITHUB_OAUTH_CLIENT_ID)
+    if (!GITHUB_OAUTH_CLIENT_ID || (GITHUB_OAUTH_CLIENT_ID as string) === 'Iv1.CONFIGURE_YOUR_APP')
     {
         console.warn('[OAuth] GitHub OAuth client ID not configured. Set VITE_GITHUB_OAUTH_CLIENT_ID or update Constants.ts.');
         return null;
@@ -196,7 +196,7 @@ export async function StartGitHubOAuth(): Promise<OAuthState | null>
  */
 export async function PollGitHubOAuthToken(deviceCode: string): Promise<string | null>
 {
-    if (!GITHUB_OAUTH_CLIENT_ID || 'Iv1.CONFIGURE_YOUR_APP' === GITHUB_OAUTH_CLIENT_ID)
+    if (!GITHUB_OAUTH_CLIENT_ID || (GITHUB_OAUTH_CLIENT_ID as string) === 'Iv1.CONFIGURE_YOUR_APP')
         return null;
 
     try
