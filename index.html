@@ -3,9 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notemac++ - A powerful text editor for macOS & Web</title>
-    <meta name="description" content="A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Now with Tauri — 75% smaller desktop app.">
+    <title>Notemac++ — Text & Source Code Editor for macOS and Web</title>
+    <meta name="description" content="A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Built-in Git, AI assistant, 70+ languages, integrated terminal. Free and open-source (MIT). Now with Tauri — 75% smaller desktop app.">
+    <meta name="keywords" content="notemac++, notemac, text editor, code editor, macos, web editor, notepad++, notepad plus plus alternative, mac code editor, monaco editor, git integration, AI code assistant, open source editor, tauri, typescript, react">
+    <meta name="author" content="Sergio Agustin De Vita">
     <meta name="theme-color" content="#1a1520">
+    <meta name="google-site-verification" content="g5V8SkraKDAV8ujIzV5y1T5e_xH6MP8oPbveKcnQMPc">
+    <link rel="canonical" href="https://sergioadevita.github.io/notemac-plus-plus/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sergioadevita.github.io/notemac-plus-plus/">
+    <meta property="og:title" content="Notemac++ — Text & Source Code Editor for macOS and Web">
+    <meta property="og:description" content="A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Built-in Git, AI assistant, 70+ languages, integrated terminal. Free and open-source.">
+    <meta property="og:image" content="https://sergioadevita.github.io/notemac-plus-plus/docs/screenshots/editor-mac-glass.png">
+    <meta property="og:site_name" content="Notemac++">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Notemac++ — Text & Source Code Editor for macOS and Web">
+    <meta name="twitter:description" content="A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Built-in Git, AI assistant, 70+ languages, integrated terminal. Free and open-source.">
+    <meta name="twitter:image" content="https://sergioadevita.github.io/notemac-plus-plus/docs/screenshots/editor-mac-glass.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Notemac++",
+        "description": "A powerful, feature-rich text and source code editor for macOS and Web, inspired by Notepad++. Built-in Git, AI assistant, 70+ languages, integrated terminal.",
+        "url": "https://sergioadevita.github.io/notemac-plus-plus/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS, Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "softwareVersion": "3.3.0",
+        "author": {
+            "@type": "Person",
+            "name": "Sergio Agustin De Vita",
+            "url": "https://github.com/sergioadevita"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "screenshot": "https://sergioadevita.github.io/notemac-plus-plus/docs/screenshots/editor-mac-glass.png",
+        "downloadUrl": "https://github.com/sergioadevita/notemac-plus-plus/releases",
+        "sourceOrganization": {
+            "@type": "Organization",
+            "name": "GitHub",
+            "url": "https://github.com/sergioadevita/notemac-plus-plus"
+        }
+    }
+    </script>
+
     <link rel="icon" type="image/png" href="./Icons/icon.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -570,9 +621,9 @@
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
             <span class="name">Notemac<span class="plus-sign">++</span></span>
-            <span class="version-badge">v3.1.0</span>
+            <span class="version-badge">v3.3.0</span>
         </h1>
-        <p class="tagline">A powerful text editor for macOS & Web, inspired by Notepad++</p>
+        <p class="tagline">A powerful text and source code editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
             Now 75% smaller with Tauri — just ~10 MB
@@ -599,7 +650,7 @@
             <div class="stat-label">Languages</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">992</div>
+            <div class="stat-num">2,144</div>
             <div class="stat-label">Unit Tests</div>
         </div>
         <div class="stat-item">
@@ -607,7 +658,7 @@
             <div class="stat-label">Desktop App</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">8</div>
+            <div class="stat-num">7</div>
             <div class="stat-label">Themes</div>
         </div>
         <div class="stat-item">
@@ -620,37 +671,37 @@
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
     <h2 class="section-title">What's <span>New</span></h2>
-    <p class="section-subtitle">Tauri desktop shell, custom theme color picker, and mobile-responsive layouts — all in v3.1.0.</p>
+    <p class="section-subtitle">10 new features: editor enhancements, Git tools, and real-time collaborative editing.</p>
     <div class="new-feature-highlight">
         <div class="new-card full-width">
-            <span class="badge">Major</span>
-            <h3>Tauri Desktop Shell</h3>
-            <p>Replaced Chromium with the system's native WebView. The desktop app dropped from ~50 MB to ~10-15 MB — a 75% reduction — with no feature loss. Built on Rust for memory safety and performance.</p>
+            <span class="badge">v3.3.0</span>
+            <h3>Collaborative Editing — Real-Time Multi-User</h3>
+            <p>Edit files together in real-time via WebRTC with CRDT-based conflict resolution (Yjs). Create or join sessions, see peer cursors with colored labels, and collaborate without a server.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Backend</span>
-            <h3>Rust Command Layer</h3>
-            <p>File operations, native dialogs, window management, and OS keychain credential storage — all implemented in Rust with full type safety.</p>
+            <span class="badge">v3.3.0</span>
+            <h3>Breadcrumb Navigation & Sticky Scroll</h3>
+            <p>File path and symbol breadcrumbs above the editor for quick navigation. Sticky scroll pins function and class headers while scrolling through their bodies.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Testing</span>
-            <h3>8 New E2E Test Suites</h3>
-            <p>Complete Playwright test coverage for the Tauri shell — matching every existing Electron test across app launch, IPC, file ops, UI, menus, and more.</p>
+            <span class="badge">v3.3.0</span>
+            <h3>Code Formatting & Linting</h3>
+            <p>Prettier integration for format-on-save and format-on-command. Inline diagnostics with error/warning markers, a Problems panel, and quick-fix suggestions.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Architecture</span>
-            <h3>Platform Abstraction Layer</h3>
-            <p>Clean PlatformBridge abstraction lets the frontend work seamlessly with Tauri, Electron, or plain browser — zero code changes needed.</p>
+            <span class="badge">v3.3.0</span>
+            <h3>Emmet & Print Support</h3>
+            <p>Expand HTML/CSS abbreviations instantly with Emmet. Print documents with syntax highlighting, line numbers, and a live print preview dialog.</p>
         </div>
         <div class="new-card">
-            <span class="badge">Menus</span>
-            <h3>~100 Native Menu Items</h3>
-            <p>Every File, Edit, Search, View, Encoding, Language, Settings, Tools, Macro, and Window menu action — implemented natively in Rust.</p>
+            <span class="badge">v3.3.0</span>
+            <h3>Git Blame, Stash & Merge Conflicts</h3>
+            <p>Line-by-line blame annotations with commit info on hover. Full stash management (stash, pop, apply, drop). Visual inline merge conflict resolution with accept current/incoming/both.</p>
         </div>
-        <div class="new-card full-width">
-            <span class="badge">v3.1.0</span>
-            <h3>Custom Theme Color Picker</h3>
-            <p>30 color pickers organized into 8 groups let you customize every aspect of the UI. Derive from any built-in theme, reset individual colors, and see changes live.</p>
+        <div class="new-card">
+            <span class="badge">v3.2.0</span>
+            <h3>1,728 Unit Tests — Full Coverage</h3>
+            <p>1:1 source-to-test file mapping across 91 test suites. Every production module has a dedicated test file, plus dead code removal and zero test warnings.</p>
         </div>
     </div>
 </section>
@@ -707,13 +758,68 @@
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#127752;</div>
-            <h3>8 Themes + Custom</h3>
+            <h3>7 Themes + Custom</h3>
             <p>7 built-in themes plus a custom theme color picker with 30 color controls. Mix and match to create your own.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#9998;</div>
             <h3>Code Snippets</h3>
             <p>Pre-built snippets for popular languages. Create, edit, and quick-insert your own.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128203;</div>
+            <h3>Compare Files</h3>
+            <p>Side-by-side diff comparison of any two files with Monaco's built-in diff editor.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128194;</div>
+            <h3>Tabs & Workspace</h3>
+            <p>Drag-drop tabs, pin favorites, color-code groups, restore previous sessions, and manage multiple files with ease.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128450;</div>
+            <h3>Sidebar & Panels</h3>
+            <p>File Explorer, Document List, Function List, Clipboard History, Character Panel, and Search Results — all docked.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128268;</div>
+            <h3>Quick Open</h3>
+            <p>Fuzzy file finder (Cmd+P) to jump to any file in your project instantly.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#9638;</div>
+            <h3>Column Editor</h3>
+            <p>Multi-line vertical editing for aligning text, inserting sequences, and bulk column operations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128295;</div>
+            <h3>Line Operations</h3>
+            <p>Sort, deduplicate, trim, reverse, join, split, and transform lines in bulk.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128736;</div>
+            <h3>Tools</h3>
+            <p>Hash generation (MD5, SHA-256, SHA-512), Base64 encode/decode, URL encode/decode, JSON format and minify.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128289;</div>
+            <h3>Case Conversion</h3>
+            <p>UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe transforms.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128065;</div>
+            <h3>Distraction-Free Mode</h3>
+            <p>Hide all UI chrome for focused writing. Plus Always on Top to keep the editor above other windows.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128206;</div>
+            <h3>Monitoring (tail -f)</h3>
+            <p>Live file watching with auto-scroll — perfect for log files and real-time output.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#127760;</div>
+            <h3>Encoding & Line Endings</h3>
+            <p>UTF-8, UTF-16, ISO-8859, Windows-1252, and more. Convert between LF, CRLF, and CR line endings.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">&#128274;</div>
@@ -740,13 +846,23 @@
             </thead>
             <tbody>
                 <tr><td>Platform</td><td class="highlight">macOS / Web</td><td>Windows</td><td>All</td><td>All</td></tr>
-                <tr><td>App Size</td><td class="highlight">~10-15 MB</td><td>~5 MB</td><td>~300 MB</td><td>~30 MB</td></tr>
+                <tr><td>App Size</td><td class="highlight">~10-15 MB (Tauri)</td><td>~5 MB</td><td>~300 MB</td><td>~30 MB</td></tr>
+                <tr><td>Startup Time</td><td class="highlight">Instant</td><td>Fast</td><td>Moderate</td><td>Fast</td></tr>
+                <tr><td>Syntax Languages</td><td class="yes">70+</td><td>80+</td><td>200+</td><td>50+</td></tr>
                 <tr><td>Built-in Git</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
                 <tr><td>Built-in AI</td><td class="yes">Yes (multi-provider)</td><td class="no">No</td><td>Via Copilot</td><td class="no">No</td></tr>
                 <tr><td>Terminal</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
                 <tr><td>Command Palette</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-                <tr><td>Mark System</td><td class="yes">Yes (5 colors)</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
-                <tr><td>Runs in Browser</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+                <tr><td>Quick Open</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+                <tr><td>Macros</td><td class="yes">Yes</td><td class="yes">Yes</td><td>Via Extensions</td><td class="yes">Yes</td></tr>
+                <tr><td>Split View</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+                <tr><td>Code Snippets</td><td class="yes">Yes</td><td>No (plugins)</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+                <tr><td>Mark System</td><td class="yes">Yes (5 colors)</td><td class="yes">Yes (5 styles)</td><td class="no">No</td><td class="no">No</td></tr>
+                <tr><td>Column Editor</td><td class="yes">Yes</td><td class="yes">Yes</td><td>Via Extensions</td><td class="yes">Yes</td></tr>
+                <tr><td>Compare Files</td><td class="yes">Yes</td><td>Via Plugin</td><td class="yes">Yes</td><td>Via Plugin</td></tr>
+                <tr><td>Themes</td><td class="yes">7</td><td>30+</td><td>1000+</td><td>25+</td></tr>
+                <tr><td>Plugins</td><td>Planned</td><td>200+</td><td>30K+</td><td>5K+</td></tr>
+                <tr><td>Runs in Browser</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes (vscode.dev)</td><td class="no">No</td></tr>
                 <tr><td>Price</td><td class="highlight">Free (MIT)</td><td>Free (GPL)</td><td>Free</td><td>$99</td></tr>
             </tbody>
         </table>
@@ -813,7 +929,7 @@
         <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
         <div class="hero-buttons">
             <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.1.0</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.3.0</a>
         </div>
     </div>
 </section>

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicechute/tauri-releases/main/tauri-conf-schema.json",
+  "productName": "Notemac++",
+  "version": "3.3.0",
+  "identifier": "com.notemac.plusplus",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "title": "Notemac++",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 600,
+        "minHeight": 400,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "app"],
+    "icon": [
+      "../public/icon.icns",
+      "../dist/icon.png"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "category": "DeveloperTool"
+  },
+  "plugins": {
+    "fs": {},
+    "shell": {
+      "open": true
+    }
+  }
+}
