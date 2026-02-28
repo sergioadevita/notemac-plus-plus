@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { produce } from 'immer';
-import type { GitBranch, GitCommit, GitStatus, GitRemote, GitCredentials, GitAuthor, BrowserWorkspace } from "../Commons/Types";
+import type { GitBranch, GitCommit, GitStatus, GitRemote, GitCredentials, GitAuthor, BrowserWorkspace, BlameInfo, StashEntry, ConflictRegion } from "../Commons/Types";
 import type { GitSettings } from "../Configs/GitConfig";
 import { GetDefaultGitSettings, GetDefaultGitAuthor } from "../Configs/GitConfig";
 import { GetValue, SetValue } from '../../Shared/Persistence/PersistenceService';
@@ -51,6 +51,20 @@ export interface NotemacGitSlice
     LoadGitState: () => void;
     SaveGitState: () => void;
 
+    // Blame
+    blameData: BlameInfo[];
+    blameVisible: boolean;
+    SetBlameData: (data: BlameInfo[]) => void;
+    SetBlameVisible: (visible: boolean) => void;
+
+    // Stash
+    stashes: StashEntry[];
+    SetStashes: (stashes: StashEntry[]) => void;
+
+    // Merge conflicts
+    conflicts: ConflictRegion[];
+    SetConflicts: (conflicts: ConflictRegion[]) => void;
+
     // Convenience
     GetStagedFileCount: () => number;
     GetChangedFileCount: () => number;
@@ -74,6 +88,11 @@ export const createGitSlice: StateCreator<NotemacGitSlice> = (set, get) => ({
     currentGitOperation: null,
     gitOperationProgress: 0,
     gitOperationError: null,
+
+    blameData: [],
+    blameVisible: false,
+    stashes: [],
+    conflicts: [],
 
     SetRepoInitialized: (initialized) => set({ isRepoInitialized: initialized }),
     SetCurrentBranch: (branch) => set({ currentBranch: branch }),
@@ -163,6 +182,11 @@ export const createGitSlice: StateCreator<NotemacGitSlice> = (set, get) => ({
         SetValue(DB_GIT_SETTINGS, state.gitSettings);
         SetValue(DB_BROWSER_WORKSPACES, state.browserWorkspaces);
     },
+
+    SetBlameData: (data) => set({ blameData: data }),
+    SetBlameVisible: (visible) => set({ blameVisible: visible }),
+    SetStashes: (stashes) => set({ stashes }),
+    SetConflicts: (conflicts) => set({ conflicts }),
 
     GetStagedFileCount: () => get().gitStatus?.stagedFiles.length || 0,
     GetChangedFileCount: () =>

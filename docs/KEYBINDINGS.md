@@ -85,3 +85,22 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 | Shortcut | Action |
 |---|---|
 | `Cmd+,` | Open Preferences |
+
+## Formatting & Linting
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+Shift+I` | Format Document |
+| `Ctrl+K Ctrl+F` | Format Selection |
+| `F8` | Next Error |
+| `Shift+F8` | Previous Error |
+
+## Collaboration & Git
+
+| Shortcut | Action |
+|---|---|
+| *(Git Blame)* | Toggle Blame (View menu) |
+| *(Merge Conflicts)* | Resolve Conflicts (View menu or inline actions) |
+| *(Collaboration)* | Create / Join Session (Edit > Collaboration menu) |
+
+**Note:** Git Blame, Merge Conflict Resolution, and Collaborative Editing features are accessed primarily through menu commands and inline controls. Breadcrumb Navigation, Sticky Scroll, Emmet Support, Print Support, and Git Stash Management are controlled via Settings or menu options.

@@ -4,6 +4,16 @@ Complete reference of every feature in Notemac++.
 
 ## Table of Contents
 
+- [Breadcrumb Navigation](#breadcrumb-navigation)
+- [Sticky Scroll](#sticky-scroll)
+- [Code Formatting](#code-formatting)
+- [Linting & Diagnostics](#linting--diagnostics)
+- [Emmet Support](#emmet-support)
+- [Print Support](#print-support)
+- [Git Blame View](#git-blame-view)
+- [Git Stash Management](#git-stash-management)
+- [Merge Conflict Resolution](#merge-conflict-resolution)
+- [Collaborative Editing](#collaborative-editing)
 - [Command Palette & Quick Open](#command-palette--quick-open)
 - [Git Integration](#git-integration)
 - [AI Assistant](#ai-assistant)
@@ -29,6 +39,69 @@ Complete reference of every feature in Notemac++.
 - [Monitoring](#monitoring)
 - [Feedback & Support](#feedback--support)
 - [Dialogs](#dialogs)
+
+## Breadcrumb Navigation
+
+Shows file path and symbol breadcrumbs above the editor. Click any segment to navigate to that file, folder, or code symbol. Breadcrumbs auto-update as the cursor moves through different functions and classes.
+
+**Toggle:** Settings > Editor > Breadcrumbs Enabled
+
+## Sticky Scroll
+
+Pins function and class headers at the top of the editor while scrolling through their bodies. Helps maintain context when reading long functions or deeply nested code.
+
+**Toggle:** View > Sticky Scroll, or Settings > Editor > Sticky Scroll Enabled
+
+## Code Formatting
+
+Format the current document or selection using Prettier. Supports JavaScript, TypeScript, HTML, CSS, JSON, Markdown, and more. Optional format-on-save triggers formatting whenever a file is saved.
+
+**Shortcuts:** Format Document (`Ctrl+Shift+I`), Format Selection (`Ctrl+K Ctrl+F`)
+**Settings:** Format on Save (toggle), Default Formatter (selector)
+
+## Linting & Diagnostics
+
+Inline error and warning markers powered by Monaco's diagnostics system. Includes a dedicated Problems panel showing all diagnostics grouped by file, with clickable entries to navigate to each issue. Go-to-next-error and go-to-previous-error commands for quick navigation.
+
+**Shortcuts:** Next Error (`F8`), Previous Error (`Shift+F8`)
+**Toggle:** Settings > Editor > Diagnostics Enabled
+
+## Emmet Support
+
+Expand HTML and CSS abbreviations inline. Type abbreviations like `div.container>ul>li*3` and expand them into full HTML. Works in HTML, CSS, JSX, TSX, SCSS, LESS, and XML files. Registers as a Monaco completion provider for seamless integration.
+
+**Toggle:** Settings > Editor > Emmet Enabled
+
+## Print Support
+
+Format and print the current document or selection with syntax highlighting. Includes a full print preview dialog with options for line numbers, font size, word wrap, and custom headers/footers.
+
+**Menu:** File > Print, File > Print Preview
+
+## Git Blame View
+
+Line-by-line blame annotations showing the author, date, commit hash, and commit message for each line. Toggle blame on/off from the View menu. Blame data is cached per file for performance.
+
+**Toggle:** View > Toggle Blame
+
+## Git Stash Management
+
+Full stash lifecycle from the Git panel: stash current changes with an optional message, list all stashes with dates and messages, pop (apply + remove), apply (keep in stash), or drop individual entries. Stash indices are automatically re-indexed after operations.
+
+**Location:** Git Panel > Stash section
+
+## Merge Conflict Resolution
+
+Visual inline merge conflict resolution. Automatically detects conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) and displays floating controls for each conflict region: Accept Current, Accept Incoming, and Accept Both. Bulk actions to resolve all conflicts at once.
+
+**Actions:** Accept Current, Accept Incoming, Accept Both, Resolve All Current, Resolve All Incoming
+
+## Collaborative Editing
+
+Real-time multi-user editing powered by Yjs (CRDT) over WebRTC. Create a session to get a shareable room ID, or join an existing session by entering its ID. Live peer cursors are shown with colored labels, and the status bar shows connected peer count and avatars.
+
+**Menu:** Edit > Collaboration > Create Session / Join Session / Leave Session
+**Dependencies:** yjs, y-webrtc, y-monaco
 
 ---
 

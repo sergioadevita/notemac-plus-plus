@@ -58,3 +58,27 @@ export {
     StartAutoFetch,
     StopAutoFetch,
 } from './GitAutoFetchController';
+
+export {
+    GetBlameForFile,
+    ToggleBlameView,
+    IsBlameVisible,
+    ClearBlameCache,
+} from './GitBlameController';
+
+export {
+    StashChanges,
+    PopStash,
+    ApplyStash,
+    DropStash,
+    ListStashes,
+} from './GitStashController';
+
+export {
+    DetectConflicts,
+    AcceptCurrent,
+    AcceptIncoming,
+    AcceptBoth,
+    ResolveAllCurrent,
+    ResolveAllIncoming,
+} from './GitMergeController';

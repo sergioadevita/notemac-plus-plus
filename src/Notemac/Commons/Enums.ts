@@ -19,3 +19,5 @@ export type LineEnding = 'LF' | 'CRLF' | 'CR';
 export type ThemeName = 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula' | 'custom';
 
 export type BuiltInThemeName = 'mac-glass' | 'dark' | 'light' | 'monokai' | 'solarized-dark' | 'solarized-light' | 'dracula';
+
+export type DiagnosticSeverity = 'error' | 'warning' | 'info' | 'hint';

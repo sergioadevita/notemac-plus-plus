@@ -40,7 +40,7 @@
             "price": "0",
             "priceCurrency": "USD"
         },
-        "softwareVersion": "3.2.0",
+        "softwareVersion": "3.3.0",
         "author": {
             "@type": "Person",
             "name": "Sergio Agustin De Vita",
@@ -621,7 +621,7 @@
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
             <span class="name">Notemac<span class="plus-sign">++</span></span>
-            <span class="version-badge">v3.2.0</span>
+            <span class="version-badge">v3.3.0</span>
         </h1>
         <p class="tagline">A powerful text and source code editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
@@ -650,7 +650,7 @@
             <div class="stat-label">Languages</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">1,728</div>
+            <div class="stat-num">2,144</div>
             <div class="stat-label">Unit Tests</div>
         </div>
         <div class="stat-item">
@@ -671,37 +671,37 @@
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
     <h2 class="section-title">What's <span>New</span></h2>
-    <p class="section-subtitle">Comprehensive test coverage, custom themes, and a Tauri-powered desktop shell.</p>
+    <p class="section-subtitle">10 new features: editor enhancements, Git tools, and real-time collaborative editing.</p>
     <div class="new-feature-highlight">
         <div class="new-card full-width">
+            <span class="badge">v3.3.0</span>
+            <h3>Collaborative Editing — Real-Time Multi-User</h3>
+            <p>Edit files together in real-time via WebRTC with CRDT-based conflict resolution (Yjs). Create or join sessions, see peer cursors with colored labels, and collaborate without a server.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.3.0</span>
+            <h3>Breadcrumb Navigation & Sticky Scroll</h3>
+            <p>File path and symbol breadcrumbs above the editor for quick navigation. Sticky scroll pins function and class headers while scrolling through their bodies.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.3.0</span>
+            <h3>Code Formatting & Linting</h3>
+            <p>Prettier integration for format-on-save and format-on-command. Inline diagnostics with error/warning markers, a Problems panel, and quick-fix suggestions.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.3.0</span>
+            <h3>Emmet & Print Support</h3>
+            <p>Expand HTML/CSS abbreviations instantly with Emmet. Print documents with syntax highlighting, line numbers, and a live print preview dialog.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v3.3.0</span>
+            <h3>Git Blame, Stash & Merge Conflicts</h3>
+            <p>Line-by-line blame annotations with commit info on hover. Full stash management (stash, pop, apply, drop). Visual inline merge conflict resolution with accept current/incoming/both.</p>
+        </div>
+        <div class="new-card">
             <span class="badge">v3.2.0</span>
             <h3>1,728 Unit Tests — Full Coverage</h3>
             <p>1:1 source-to-test file mapping across 91 test suites. Every production module has a dedicated test file, plus dead code removal and zero test warnings.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">v3.1.0</span>
-            <h3>Custom Theme Color Picker</h3>
-            <p>30 color pickers organized into 8 groups let you customize every aspect of the UI. Derive from any built-in theme, reset individual colors, and see changes live.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">v3.0.0</span>
-            <h3>Tauri Desktop Shell</h3>
-            <p>Replaced Chromium with the system's native WebView. The desktop app dropped from ~50 MB to ~10-15 MB — a 75% reduction — built on Rust for memory safety.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">Architecture</span>
-            <h3>Platform Abstraction Layer</h3>
-            <p>Clean PlatformBridge abstraction lets the frontend work seamlessly with Tauri, Electron, or plain browser — zero code changes needed.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">Backend</span>
-            <h3>Rust Command Layer</h3>
-            <p>File operations, native dialogs, window management, and OS keychain credential storage — all implemented in Rust with full type safety.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">Testing</span>
-            <h3>8 Tauri E2E Test Suites</h3>
-            <p>Complete Playwright test coverage for the Tauri shell — matching every existing Electron test across app launch, IPC, file ops, UI, menus, and more.</p>
         </div>
     </div>
 </section>
@@ -929,7 +929,7 @@
         <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
         <div class="hero-buttons">
             <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.2.0</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.3.0</a>
         </div>
     </div>
 </section>

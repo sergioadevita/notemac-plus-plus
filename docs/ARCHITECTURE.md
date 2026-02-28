@@ -149,6 +149,74 @@ A three-tier encryption system provides platform-specific and secure credential 
 - GitHub OAuth Device Flow authentication
 - Status indicators in sidebar and status bar
 
+## Editor Enhancement Features
+
+**BreadcrumbController** manages breadcrumb navigation:
+- Maintains current file path and symbol stack
+- Updates breadcrumb state as cursor moves
+- Provides click-to-navigate handlers for file, folder, and symbol navigation
+- Caches breadcrumb data per file for performance
+
+**StickyScrollController** manages pinned scroll context:
+- Tracks function and class headers
+- Positions and updates sticky header overlays
+- Synchronizes with editor scroll events
+- Configurable sticky region height
+
+**FormattingController** manages document and selection formatting:
+- Integrates with Prettier formatter
+- Provides format-on-save via file save hooks
+- Supports multiple formatters (JavaScript, TypeScript, HTML, CSS, JSON, Markdown)
+- Format document and selection commands
+
+**DiagnosticsController** manages inline errors and warnings:
+- Integrates with Monaco's diagnostics system
+- Provides Problems panel view
+- Implements go-to-next/previous-error navigation
+- Groups diagnostics by file and severity
+
+**EmmetController** manages HTML/CSS abbreviation expansion:
+- Registers as Monaco completion provider
+- Expands abbreviations in supported file types
+- Supports HTML, CSS, JSX, TSX, SCSS, LESS, XML
+- Real-time expansion with preview
+
+**PrintController** manages document printing:
+- Formats document with syntax highlighting for print
+- Provides print preview dialog
+- Configurable print options (line numbers, font size, word wrap, headers/footers)
+- Print document and selection commands
+
+## Git Enhancement Features
+
+**GitBlameController** manages blame annotations:
+- Fetches commit history per file
+- Displays author, date, hash, message per line
+- Caches blame data per file
+- Toggle blame on/off from View menu
+
+**GitStashController** manages stash lifecycle:
+- Stash current changes with optional message
+- List all stashes with metadata
+- Pop (apply + remove), apply (keep), or drop stashes
+- Auto re-index stash entries after operations
+
+**MergeConflictController** manages merge conflict resolution:
+- Detects conflict markers automatically
+- Displays inline resolution controls per conflict
+- Accept Current, Accept Incoming, Accept Both actions
+- Bulk resolve-all actions
+
+## Collaborative Editing Layer
+
+**CollaborationController** manages real-time multi-user editing:
+- Yjs CRDT integration for conflict-free collaboration
+- WebRTC peer-to-peer communication
+- Session creation and joining with room IDs
+- Live peer cursors with colored labels and avatars
+- Connection status and peer count in status bar
+- Dependencies: yjs, y-webrtc, y-monaco
+
 ## Dependencies
 
 | Package | Version | Purpose |

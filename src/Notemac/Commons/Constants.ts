@@ -162,3 +162,43 @@ export const TIME_SECONDS_PER_MINUTE = 60;
 export const TIME_SECONDS_PER_HOUR = 3600;
 export const TIME_SECONDS_PER_DAY = 86400;
 export const TIME_SECONDS_PER_WEEK = 604800;
+
+// UI - Breadcrumb
+export const UI_BREADCRUMB_SEPARATOR = ' › ';
+export const UI_BREADCRUMB_MAX_ITEMS = 10;
+export const UI_BREADCRUMB_HEIGHT = 26;
+
+// UI - Diagnostics
+export const UI_DIAGNOSTICS_PANEL = "Diagnostics";
+export const UI_DIAGNOSTICS_DEBOUNCE_MS = 500;
+
+// UI - Print
+export const UI_PRINT_PREVIEW_DIALOG = "PrintPreview";
+export const UI_PRINT_DEFAULT_FONT_SIZE = 12;
+export const UI_PRINT_DEFAULT_LINE_NUMBERS = true;
+
+// UI - Collaboration
+export const UI_COLLABORATION_DIALOG = "Collaboration";
+export const UI_COLLABORATION_MAX_PEERS = 10;
+export const UI_COLLABORATION_COLORS = [
+    '#ff6b6b', '#51cf66', '#339af0', '#fcc419',
+    '#cc5de8', '#ff922b', '#20c997', '#845ef7',
+    '#f06595', '#22b8cf',
+];
+export const UI_COLLABORATION_SIGNALING_SERVERS = [
+    'wss://signaling.yjs.dev',
+];
+
+// Git - Blame
+export const GIT_BLAME_DATE_FORMAT = 'yyyy-MM-dd';
+export const GIT_BLAME_MAX_MESSAGE_LENGTH = 50;
+
+// Git - Stash
+export const GIT_STASH_REF_PREFIX = 'refs/stash';
+
+// Formatting
+export const FORMATTER_DEBOUNCE_MS = 300;
+export const FORMATTER_DEFAULT_PRINT_WIDTH = 80;
+
+// Emmet
+export const EMMET_SUPPORTED_LANGUAGES = ['html', 'css', 'scss', 'less', 'jsx', 'tsx', 'xml', 'xsl', 'haml', 'pug'];

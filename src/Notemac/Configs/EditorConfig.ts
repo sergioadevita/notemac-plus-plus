@@ -46,6 +46,12 @@ const defaultSettings: AppSettings =
     rememberLastSession: true,
     searchEngine: EDITOR_DEFAULT_SEARCH_ENGINE,
     dateTimeFormat: EDITOR_DEFAULT_DATE_TIME_FORMAT,
+    stickyScrollEnabled: false,
+    formatOnSave: false,
+    defaultFormatter: 'prettier',
+    emmetEnabled: true,
+    diagnosticsEnabled: true,
+    breadcrumbsEnabled: true,
 };
 
 export function GetDefaultSettings(): AppSettings

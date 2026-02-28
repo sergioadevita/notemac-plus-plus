@@ -110,6 +110,12 @@ export interface AppSettings
     rememberLastSession: boolean;
     searchEngine: string;
     dateTimeFormat: string;
+    stickyScrollEnabled: boolean;
+    formatOnSave: boolean;
+    defaultFormatter: string;
+    emmetEnabled: boolean;
+    diagnosticsEnabled: boolean;
+    breadcrumbsEnabled: boolean;
 }
 
 export interface FindResult
@@ -225,6 +231,81 @@ export interface BrowserWorkspace
     repoUrl?: string;
     createdAt: number;
     lastOpenedAt: number;
+}
+
+// Breadcrumb types
+export interface BreadcrumbItem
+{
+    label: string;
+    kind: 'file' | 'folder' | 'symbol';
+    range?: { startLineNumber: number; startColumn: number; endLineNumber: number; endColumn: number };
+    symbolKind?: number;
+}
+
+// Diagnostic types
+export interface DiagnosticItem
+{
+    message: string;
+    severity: 'error' | 'warning' | 'info' | 'hint';
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+    source: string;
+    code?: string;
+}
+
+export interface QuickFix
+{
+    title: string;
+    edit: { range: { startLineNumber: number; startColumn: number; endLineNumber: number; endColumn: number }; text: string };
+}
+
+// Git Blame types
+export interface BlameInfo
+{
+    line: number;
+    author: string;
+    date: string;
+    commitHash: string;
+    commitMessage: string;
+}
+
+// Git Stash types
+export interface StashEntry
+{
+    index: number;
+    message: string;
+    date: string;
+    hash: string;
+}
+
+// Merge Conflict types
+export interface ConflictRegion
+{
+    startLine: number;
+    separatorLine: number;
+    endLine: number;
+    currentContent: string;
+    incomingContent: string;
+    currentLabel: string;
+    incomingLabel: string;
+}
+
+// Collaboration types
+export interface PeerInfo
+{
+    id: string;
+    name: string;
+    color: string;
+    cursor?: { lineNumber: number; column: number };
+}
+
+export interface CollaborationSession
+{
+    roomId: string;
+    peers: PeerInfo[];
+    isHost: boolean;
 }
 
 // AI types

@@ -583,6 +583,83 @@ export function useEditorActions(
           }
           break;
         }
+
+        // === Breadcrumb Navigation ===
+        case 'toggle-breadcrumbs': {
+          // Handled by BreadcrumbController via store settings
+          break;
+        }
+
+        // === Sticky Scroll ===
+        case 'toggle-sticky-scroll': {
+          const currentSticky = editor.getOption(monaco.editor.EditorOption.stickyScroll);
+          editor.updateOptions({ stickyScroll: { enabled: !currentSticky?.enabled } });
+          break;
+        }
+
+        // === Code Formatting ===
+        case 'format-document': {
+          editor.getAction('editor.action.formatDocument')?.run();
+          break;
+        }
+        case 'format-selection': {
+          editor.getAction('editor.action.formatSelection')?.run();
+          break;
+        }
+
+        // === Diagnostics ===
+        case 'toggle-diagnostics': {
+          // Handled by DiagnosticController
+          break;
+        }
+        case 'next-error': {
+          editor.getAction('editor.action.marker.next')?.run();
+          break;
+        }
+        case 'prev-error': {
+          editor.getAction('editor.action.marker.prev')?.run();
+          break;
+        }
+
+        // === Emmet ===
+        case 'expand-emmet': {
+          // Handled by EmmetController
+          break;
+        }
+        case 'toggle-emmet': {
+          // Handled by EmmetController via store settings
+          break;
+        }
+
+        // === Print Support ===
+        case 'print': {
+          // Handled by PrintController
+          break;
+        }
+        case 'print-preview': {
+          // Handled by PrintController
+          break;
+        }
+
+        // === Git Blame ===
+        case 'toggle-blame': {
+          // Handled by GitBlameController
+          break;
+        }
+
+        // === Merge Conflict Resolution ===
+        case 'accept-current': {
+          // Handled by GitMergeController
+          break;
+        }
+        case 'accept-incoming': {
+          // Handled by GitMergeController
+          break;
+        }
+        case 'accept-both': {
+          // Handled by GitMergeController
+          break;
+        }
       }
     },
     [editor, monaco, tab.id, tab.bookmarks, tab.marks, tab.path, tab.name, tab.isReadOnly, settings.tabSize, updateTab, macroPlaybackHandler]

@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { produce, type Draft } from 'immer';
-import type { AppSettings, ClipboardEntry, SessionData, FileTab } from "../Commons/Types";
+import type { AppSettings, ClipboardEntry, SessionData, FileTab, BreadcrumbItem, DiagnosticItem, CollaborationSession } from "../Commons/Types";
 import type { SidebarPanel, SplitViewMode } from "../Commons/Enums";
 import { GetDefaultSettings } from "../Configs/EditorConfig";
 import { generateId } from '../../Shared/Helpers/IdHelpers';
@@ -35,6 +35,27 @@ export interface NotemacUISlice
     terminalHeight: number;
     showCloneDialog: boolean;
     showGitSettings: boolean;
+    showPrintPreview: boolean;
+    showCollaborationDialog: boolean;
+
+    // Breadcrumb state
+    breadcrumbs: BreadcrumbItem[];
+    SetBreadcrumbs: (items: BreadcrumbItem[]) => void;
+
+    // Diagnostic state
+    diagnostics: DiagnosticItem[];
+    diagnosticsPanelVisible: boolean;
+    SetDiagnostics: (items: DiagnosticItem[]) => void;
+    SetDiagnosticsPanelVisible: (visible: boolean) => void;
+
+    // Collaboration state
+    collaborationSession: CollaborationSession | null;
+    isCollaborating: boolean;
+    SetCollaborationSession: (session: CollaborationSession | null) => void;
+    SetIsCollaborating: (collaborating: boolean) => void;
+
+    setShowPrintPreview: (show: boolean) => void;
+    setShowCollaborationDialog: (show: boolean) => void;
 
     setSidebarPanel: (panel: SidebarPanel) => void;
     toggleSidebar: () => void;
@@ -91,6 +112,24 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     terminalHeight: TERMINAL_DEFAULT_HEIGHT,
     showCloneDialog: false,
     showGitSettings: false,
+    showPrintPreview: false,
+    showCollaborationDialog: false,
+
+    breadcrumbs: [],
+    SetBreadcrumbs: (items) => set({ breadcrumbs: items }),
+
+    diagnostics: [],
+    diagnosticsPanelVisible: false,
+    SetDiagnostics: (items) => set({ diagnostics: items }),
+    SetDiagnosticsPanelVisible: (visible) => set({ diagnosticsPanelVisible: visible }),
+
+    collaborationSession: null,
+    isCollaborating: false,
+    SetCollaborationSession: (session) => set({ collaborationSession: session }),
+    SetIsCollaborating: (collaborating) => set({ isCollaborating: collaborating }),
+
+    setShowPrintPreview: (show) => set({ showPrintPreview: show }),
+    setShowCollaborationDialog: (show) => set({ showCollaborationDialog: show }),
 
     setSidebarPanel: (panel) => set({ sidebarPanel: panel }),
 

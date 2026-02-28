@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-02-28
+
+### Added — Editor Enhancements
+- **Breadcrumb Navigation**: File path and symbol breadcrumbs above the editor — click segments to navigate to files, folders, or code symbols; auto-updates on cursor movement
+- **Sticky Scroll**: Pins function/class headers at the top of the editor while scrolling through their bodies — toggle via View menu or settings
+- **Code Formatting (Prettier)**: Format document or selection on command (`Ctrl+Shift+I`), with optional format-on-save; supports JavaScript, TypeScript, HTML, CSS, JSON, Markdown, and more
+- **Linting & Diagnostics**: Inline errors/warnings with severity markers, quick-fix suggestions, a dedicated Problems panel with error/warning counts, and go-to-next/previous-error navigation
+- **Emmet Support**: Expand HTML/CSS abbreviations (e.g., `div.container>ul>li*3` → full HTML) with intelligent completion in HTML, CSS, JSX, TSX, and more
+- **Print Support**: Format and print current document or selection with syntax highlighting, configurable line numbers, font size, headers/footers, and a full print preview dialog
+
+### Added — Git & Collaboration
+- **Git Blame View**: Line-by-line blame annotations showing author, date, commit hash, and message; toggle via View menu; cached per file for performance
+- **Git Stash Management**: Stash, pop, apply, drop, and list stashes from the Git panel; stash messages, date display, and automatic re-indexing
+- **Merge Conflict Resolution**: Visual inline merge with Accept Current / Accept Incoming / Accept Both controls; automatic conflict marker detection (`<<<<<<<`, `=======`, `>>>>>>>`); bulk resolve-all actions
+- **Collaborative Editing**: Real-time multi-user editing via WebRTC with Yjs CRDT-based conflict resolution; create/join sessions with shareable room IDs; live peer cursors with colored labels; peer avatars in status bar
+
+### Added — Testing
+- **23 new test files** following 1:1 naming convention — comprehensive unit tests for all 10 new features covering controllers, services, and view presenters
+- **New dependencies**: `prettier`, `emmet`, `yjs`, `y-webrtc`, `y-monaco`
+
+### Changed
+- Version bumped to 3.3.0 (10 new features, 5 new dependencies)
+- Updated `useEditorActions.ts` with 14 new action cases
+- Updated `Git/index.ts` to export 3 new controllers (Blame, Stash, Merge)
+- Extended `AppSettings` with 6 new configuration options
+- Added 10 new events to EventDispatcher
+
 ## [3.2.0] - 2026-02-27
 
 ### Added
