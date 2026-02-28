@@ -4,6 +4,7 @@ import type { ThemeColors } from "../Configs/ThemeConfig";
 import './hover-utilities.css';
 import { useFocusTrap } from './hooks/useFocusTrap';
 import { APP_VERSION } from '../Commons/Constants';
+import appIcon from '/icon.png';
 
 interface AboutDialogProps {
   theme: ThemeColors;
@@ -158,7 +159,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
         onClick={(e) => e.stopPropagation()}
         style={styles.dialogContent}
       >
-        <img src="/icon.png" alt="Notemac++" style={styles.icon} />
+        <img src={appIcon} alt="Notemac++" style={styles.icon} />
         <h2 id="about-title" style={styles.title}>
           Notemac++
         </h2>
