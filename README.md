@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.3.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.4.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-3445%2B%20passing-brightgreen" alt="Tests">
@@ -452,12 +452,11 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
-Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests. v3.0.0: Tauri migration — ~75% smaller desktop app (~10-15MB vs ~50MB) using system WebView instead of bundled Chromium, with full platform abstraction layer and 8 new Tauri E2E test suites. v3.1.0: Custom theme color picker with 30 color pickers across 8 groups. v3.2.0: Comprehensive test coverage — 1,728 unit tests across 91 suites with 1:1 source-to-test file mapping, plus dead code removal and test warning fixes. **v3.3.0: Shipped Breadcrumb Navigation, Sticky Scroll, Code Formatting, Linting & Diagnostics, Emmet Support, Print Support, Git Blame View, Git Stash Management, Merge Conflict Resolution, and Collaborative Editing (Yjs + WebRTC).**
+Shipped in v2.0.0: Git integration, AI assistant, integrated terminal, snippet manager, and IntelliSense completions. v2.1.0: New app icon, git auto-detection fix, code quality improvements. v2.2.0: Zero `as any` casts — full type safety across all production code. v2.3.0: Zero `any` milestone — complete type safety across the entire production codebase. v2.4.0: Architecture refactors (GitController split, EditorPanel hooks), accessibility improvements (keyboard nav, ARIA), performance optimizations, and 1,884 total tests. v3.0.0: Tauri migration — ~75% smaller desktop app (~10-15MB vs ~50MB) using system WebView instead of bundled Chromium, with full platform abstraction layer and 8 new Tauri E2E test suites. v3.1.0: Custom theme color picker with 30 color pickers across 8 groups. v3.2.0: Comprehensive test coverage — 1,728 unit tests across 91 suites with 1:1 source-to-test file mapping, plus dead code removal and test warning fixes. v3.3.0: Shipped Breadcrumb Navigation, Sticky Scroll, Code Formatting, Linting & Diagnostics, Emmet Support, Print Support, Git Blame View, Git Stash Management, Merge Conflict Resolution, and Collaborative Editing (Yjs + WebRTC). **v3.4.0: Full Plugin System — manifest-based plugin loading, plugin API with editor/events/UI/commands/themes/languages/storage interfaces, Plugin Manager dialog with install/browse/enable/disable, plugin sidebar panels, status bar items, settings sections, and a remote plugin registry.**
 
 Planned for future releases:
 
 **Advanced Features**
-- **Plugin System** — Extensibility through custom plugins
 - **Workspace & Project Settings** — Per-folder editor and formatter settings
 - **Custom Language Definitions** — User-defined syntax highlighting and grammars
 - **Task Runner** — Run build, test, and lint tasks from project config

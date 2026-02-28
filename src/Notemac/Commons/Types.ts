@@ -116,6 +116,8 @@ export interface AppSettings
     emmetEnabled: boolean;
     diagnosticsEnabled: boolean;
     breadcrumbsEnabled: boolean;
+    pluginsEnabled: boolean;
+    pluginRegistryUrl: string;
 }
 
 export interface FindResult

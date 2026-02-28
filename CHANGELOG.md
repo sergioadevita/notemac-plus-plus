@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-02-28
+
+### Added — Plugin System
+- **Plugin Architecture**: Manifest-based plugin loading with JS bundle support via dynamic `import()` and Blob URLs; plugins provide `activate(context)` / `deactivate()` lifecycle hooks
+- **Plugin API**: Sandboxed PluginContext with scoped interfaces — editor (get/set content, selection, language), events (subscribe/dispatch with auto-cleanup), UI (sidebar panels, status bar items, menu items, settings sections, notifications, dialogs), commands (register/execute), themes (register), languages (register), storage (per-plugin localStorage)
+- **Plugin Manager Dialog**: Two-tab dialog (Installed/Browse) with enable/disable toggles, reload and uninstall buttons, status indicators (active/inactive/error), search + 2-column grid for browsing registry entries, install progress tracking
+- **Plugin Sidebar Panel**: Dynamic rendering of plugin-registered sidebar panels with error boundary wrapping and theme passthrough
+- **Plugin Status Bar Items**: Left/right positioning with priority sorting, error boundary isolation per item
+- **Plugin Settings Sections**: Plugin-registered settings rendered in the Settings dialog under a new "Plugins" tab
+- **Plugin Dialog Wrapper**: Generic modal for plugin-provided dialog components with Escape/backdrop close and error boundary
+- **Plugin Error Boundary**: React error boundary catching render errors from plugin components — shows plugin name, error message, and "Disable Plugin" button
+- **Plugin Registry**: Remote registry fetching with demo fallback entries; search, install, uninstall, and update checking
+- **Plugin Shortcuts**: `Cmd+Shift+X` opens Plugin Manager; Plugins category in Shortcut Mapper
+
+### Added — Testing
+- **13 new test files** following 1:1 naming convention — comprehensive unit tests covering PluginTypes, PluginModel, PluginLoaderService, PluginAPIService, PluginRegistryService, PluginController, PluginErrorBoundary, PluginSidebarPanelViewPresenter, PluginStatusBarViewPresenter, PluginSettingsSectionViewPresenter, PluginManagerViewPresenter, PluginDialogViewPresenter, and PluginIntegration
+
+### Changed
+- Version bumped to 3.4.0
+- Extended `AppSettings` with `pluginsEnabled` and `pluginRegistryUrl`
+- Extended `SidebarPanel` enum with `'plugins'` and `\`plugin:\${string}\`` variants
+- Added 5 new events to EventDispatcher: PLUGIN_ACTIVATED, PLUGIN_DEACTIVATED, PLUGIN_ERROR, PLUGIN_INSTALLED, PLUGIN_UNINSTALLED
+- Added 6 new constants: PLUGIN_DIRECTORY_NAME, PLUGIN_MANIFEST_FILENAME, PLUGIN_REGISTRY_URL, PLUGIN_API_VERSION, PLUGIN_STORAGE_PREFIX, UI_PLUGIN_MANAGER_DIALOG
+- Added PluginSlice to Zustand store (9th composable slice)
+- Updated SidebarViewPresenter with plugin icon and panel rendering
+- Updated StatusBarViewPresenter with plugin status bar items
+- Updated AppViewPresenter with Plugin Manager and Plugin Dialog rendering + InitializePluginSystem on mount
+- Updated MenuActionController with 'show-plugin-manager', 'reload-plugins', and dynamic plugin command dispatch
+- Updated ShortcutConfig with Plugins category (Cmd+Shift+X)
+- Updated SettingsDialogViewPresenter with Plugins section
+
+### New Files (12 source + 13 test = 25 total)
+- `src/Notemac/Commons/PluginTypes.ts`
+- `src/Notemac/Model/PluginModel.ts`
+- `src/Notemac/Services/PluginLoaderService.ts`
+- `src/Notemac/Services/PluginAPIService.ts`
+- `src/Notemac/Services/PluginRegistryService.ts`
+- `src/Notemac/Controllers/PluginController.ts`
+- `src/Notemac/UI/PluginErrorBoundary.tsx`
+- `src/Notemac/UI/PluginSidebarPanelViewPresenter.tsx`
+- `src/Notemac/UI/PluginStatusBarViewPresenter.tsx`
+- `src/Notemac/UI/PluginSettingsSectionViewPresenter.tsx`
+- `src/Notemac/UI/PluginDialogViewPresenter.tsx`
+- `src/Notemac/UI/PluginManagerViewPresenter.tsx`
+
 ## [3.3.0] - 2026-02-28
 
 ### Added — Editor Enhancements
@@ -356,6 +401,7 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[3.4.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.4.0
 [3.3.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.3.0
 [3.2.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.2.0
 [3.1.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.1.0

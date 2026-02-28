@@ -14,6 +14,7 @@ import { InitGitForWorkspace } from '../Controllers/GitController';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
+const PluginSidebarPanelViewPresenter = lazy(() => import('./PluginSidebarPanelViewPresenter').then(m => ({ default: m.PluginSidebarPanelViewPresenter })));
 
 interface SidebarProps {
   theme: ThemeColors;
@@ -345,6 +346,7 @@ export function Sidebar({ theme }: SidebarProps) {
           { panel: 'charPanel' as const, icon: '\ud83d\udd24', title: 'Character Panel' },
           { panel: 'git' as const, icon: '\ud83d\udd00', title: 'Source Control' },
           { panel: 'ai' as const, icon: '\u2728', title: 'AI Assistant' },
+          { panel: 'plugins' as const, icon: '\ud83e\udde9', title: 'Plugin Manager' },
         ] as const).map(({ panel, icon, title }) => {
           const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
           return (
@@ -410,7 +412,7 @@ export function Sidebar({ theme }: SidebarProps) {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : ''}
+          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : sidebarPanel === 'plugins' ? 'Plugins' : typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') ? 'Plugin Panel' : ''}
           <button
             aria-label="Collapse panel"
             onClick={() => setSidebarPanel(null)}
@@ -535,6 +537,33 @@ export function Sidebar({ theme }: SidebarProps) {
           {sidebarPanel === 'ai' && (
             <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
               <AIChatPanelViewPresenter theme={theme} />
+            </Suspense>
+          )}
+
+          {sidebarPanel === 'plugins' && (
+            <div style={{ padding: 16, color: theme.textMuted, fontSize: 13, textAlign: 'center' }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>{'\ud83e\udde9'}</div>
+              <div style={{ marginBottom: 12 }}>Manage your plugins</div>
+              <button
+                onClick={() => useNotemacStore.getState().SetShowPluginManager(true)}
+                style={{
+                  backgroundColor: theme.accent,
+                  color: theme.accentText,
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                }}
+              >
+                Open Plugin Manager
+              </button>
+            </div>
+          )}
+
+          {typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') && (
+            <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
+              <PluginSidebarPanelViewPresenter panelId={sidebarPanel.replace('plugin:', '')} theme={theme} />
             </Suspense>
           )}
         </div>

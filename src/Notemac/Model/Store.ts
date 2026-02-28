@@ -7,8 +7,9 @@ import { createFileTreeSlice, NotemacFileTreeSlice } from "./FileTreeModel";
 import { createSnippetSlice, NotemacSnippetSlice } from "./SnippetModel";
 import { createGitSlice, NotemacGitSlice } from "./GitModel";
 import { createAISlice, NotemacAISlice } from "./AIModel";
+import { createPluginSlice, NotemacPluginSlice } from "./PluginModel";
 
-export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice;
+export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice & NotemacPluginSlice;
 
 export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createTabSlice(...a),
@@ -19,6 +20,7 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createSnippetSlice(...a),
     ...createGitSlice(...a),
     ...createAISlice(...a),
+    ...createPluginSlice(...a),
 }));
 
 // Expose store for E2E test inspection

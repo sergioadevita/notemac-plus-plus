@@ -14,6 +14,7 @@ Complete reference of every feature in Notemac++.
 - [Git Stash Management](#git-stash-management)
 - [Merge Conflict Resolution](#merge-conflict-resolution)
 - [Collaborative Editing](#collaborative-editing)
+- [Plugin System](#plugin-system)
 - [Command Palette & Quick Open](#command-palette--quick-open)
 - [Git Integration](#git-integration)
 - [AI Assistant](#ai-assistant)
@@ -456,3 +457,58 @@ After 20 minutes of continuous use (once per version), a non-intrusive feedback 
 ## Dialogs
 
 Notemac++ includes these dialogs: About (version, creator, feature highlights, tech stack), Settings (5-section preferences), Go to Line, Column Editor, Find/Replace, Run Command, Character Panel, Summary (file statistics), Find Characters in Range, Shortcut Mapper, Clipboard History, Command Palette, Quick Open, Clone Repository, Git Settings, AI Settings, Diff Viewer, and Snippet Manager.
+
+---
+
+## Plugin System
+
+Extensibility framework enabling developers to build custom plugins that integrate deeply with Notemac++.
+
+**Plugin Architecture**
+
+Plugins are loaded via manifest-based configuration. Each plugin provides a manifest (JSON) declaring metadata, entry point, and dependencies. The plugin loader dynamically imports the JavaScript bundle using `import()` and Blob URLs for secure sandboxing. Plugins implement `activate(context)` and `deactivate()` lifecycle hooks for setup and cleanup.
+
+**Plugin API**
+
+Each plugin receives a sandboxed `PluginContext` exposing scoped interfaces:
+- **editor**: Get/set content, query/modify selection, detect current language
+- **events**: Subscribe to editor events, dispatch custom plugin events with auto-cleanup on plugin disable
+- **UI**: Register sidebar panels, status bar items, menu items, settings sections, show notifications, display dialogs
+- **commands**: Register custom commands, execute built-in commands, access command dispatch
+- **themes**: Register custom editor themes
+- **languages**: Register new language definitions
+- **storage**: Per-plugin localStorage with automatic namespacing
+
+**Plugin Manager Dialog**
+
+Two-tab interface for managing plugins:
+- **Installed Tab**: List all installed plugins with status indicators (active/inactive/error), enable/disable toggles, reload and uninstall buttons
+- **Browse Tab**: Search and install plugins from the remote registry; 2-column grid layout with install progress tracking
+
+**Plugin UI Integration**
+
+- **Sidebar Panels**: Plugins can register panels that appear in the sidebar with custom React components; error boundaries wrap each panel to isolate render crashes
+- **Status Bar Items**: Plugins can add items to the status bar with left/right positioning, priority-based sorting, and per-item error boundary isolation
+- **Settings Sections**: Plugin-registered settings appear in Settings > Plugins tab with automatic form generation from settings schema
+- **Dialogs**: Generic wrapper for plugin-provided modal components with Escape/backdrop close support and error boundaries
+
+**Plugin Error Boundary**
+
+React error boundary catches render errors from plugin components, displays plugin name and error message, and provides a "Disable Plugin" button to safely disable misbehaving plugins.
+
+**Plugin Registry**
+
+Remote registry service supports searching, installing, and updating plugins. Includes demo fallback entries for offline development. Registry entries include metadata (name, version, author, description) and download URLs.
+
+**Plugin Shortcuts**
+
+- `Cmd+Shift+X`: Open Plugin Manager
+- Plugins category in Shortcut Mapper for customizing plugin-specific shortcuts
+
+**Use Cases**
+
+- Custom language support via plugin language definitions
+- Theme extensions (custom color schemes, icon packs)
+- Domain-specific tools (markdown preview, diagram rendering, data transformation)
+- Editor enhancements (additional syntax analysis, custom code actions)
+- Team productivity tools (custom formatters, linters, build integration)

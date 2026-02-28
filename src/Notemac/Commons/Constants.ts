@@ -202,3 +202,11 @@ export const FORMATTER_DEFAULT_PRINT_WIDTH = 80;
 
 // Emmet
 export const EMMET_SUPPORTED_LANGUAGES = ['html', 'css', 'scss', 'less', 'jsx', 'tsx', 'xml', 'xsl', 'haml', 'pug'];
+
+// Plugins
+export const PLUGIN_DIRECTORY_NAME = 'plugins';
+export const PLUGIN_MANIFEST_FILENAME = 'manifest.json';
+export const PLUGIN_REGISTRY_URL = 'https://registry.notemac.dev/api/v1';
+export const PLUGIN_API_VERSION = '1.0.0';
+export const PLUGIN_STORAGE_PREFIX = 'notemac-plugin-';
+export const UI_PLUGIN_MANAGER_DIALOG = 'PluginManager';

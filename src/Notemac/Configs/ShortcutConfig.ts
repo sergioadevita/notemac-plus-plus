@@ -78,6 +78,10 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'AI', name: 'Simplify Code', shortcut: '', action: 'ai-simplify' },
     { category: 'AI', name: 'AI Settings', shortcut: '', action: 'ai-settings' },
     { category: 'AI', name: 'Toggle Inline Completions', shortcut: '', action: 'ai-toggle-inline' },
+
+    // Plugins
+    { category: 'Plugins', name: 'Plugin Manager', shortcut: 'Cmd+Shift+X', action: 'show-plugin-manager' },
+    { category: 'Plugins', name: 'Reload Plugins', shortcut: '', action: 'reload-plugins' },
 ] as const;
 
 export function GetDefaultShortcuts(): readonly ShortcutItem[]

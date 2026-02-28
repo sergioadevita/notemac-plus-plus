@@ -7,6 +7,7 @@ import {
     EDITOR_DEFAULT_AUTO_SAVE_DELAY,
     EDITOR_DEFAULT_SEARCH_ENGINE,
     EDITOR_DEFAULT_DATE_TIME_FORMAT,
+    PLUGIN_REGISTRY_URL,
 } from '../Commons/Constants';
 
 const defaultSettings: AppSettings =
@@ -52,6 +53,8 @@ const defaultSettings: AppSettings =
     emmetEnabled: true,
     diagnosticsEnabled: true,
     breadcrumbsEnabled: true,
+    pluginsEnabled: true,
+    pluginRegistryUrl: PLUGIN_REGISTRY_URL,
 };
 
 export function GetDefaultSettings(): AppSettings

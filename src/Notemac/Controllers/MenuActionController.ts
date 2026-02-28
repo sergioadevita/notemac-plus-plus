@@ -273,6 +273,19 @@ export function HandleMenuAction(
             store.SetInlineSuggestionEnabled(!store.inlineSuggestionEnabled);
             break;
 
+        // Plugin actions
+        case 'show-plugin-manager':
+            store.SetShowPluginManager(true);
+            break;
+        case 'reload-plugins':
+        {
+            import('./PluginController').then(({ InitializePluginSystem }) =>
+            {
+                InitializePluginSystem();
+            });
+            break;
+        }
+
         // Dialogs
         case 'preferences':
             store.setShowSettings(true);
@@ -356,8 +369,18 @@ export function HandleMenuAction(
 
         // All editor-handled actions (pass through)
         default:
-            if (editorAction)
+            // Check if it's a plugin command
+            if (action.startsWith('plugin:'))
+            {
+                import('./PluginController').then(({ ExecutePluginCommand }) =>
+                {
+                    ExecutePluginCommand(action);
+                });
+            }
+            else if (editorAction)
+            {
                 editorAction(action, value);
+            }
             break;
     }
 }

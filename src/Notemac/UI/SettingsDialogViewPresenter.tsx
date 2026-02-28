@@ -345,6 +345,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     { id: 'appearance', label: 'Appearance' },
     { id: 'advanced', label: 'Advanced' },
     { id: 'keybindings', label: 'Keybindings' },
+    { id: 'plugins', label: 'Plugins' },
   ];
 
   const SelectField = <T extends string>({ label, value, options, onChange }: {
@@ -724,6 +725,49 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                       </kbd>
                     </div>
                   ))}
+                </div>
+              </>
+            )}
+
+            {activeSection === 'plugins' && (
+              <>
+                <SectionHeader title="Plugin Settings" />
+                <CheckboxField
+                  label="Enable Plugins"
+                  checked={settings.pluginsEnabled}
+                  onChange={(v) => updateSettings({ pluginsEnabled: v })}
+                  description="Enable or disable the plugin system entirely"
+                />
+                <div style={styles.fieldContainer}>
+                  <label style={styles.fieldLabel}>Registry URL</label>
+                  <input
+                    type="text"
+                    value={settings.pluginRegistryUrl}
+                    onChange={(e) => updateSettings({ pluginRegistryUrl: e.target.value })}
+                    style={{
+                      ...styles.selectInput,
+                      minWidth: 280,
+                    }}
+                  />
+                </div>
+                <div style={{ padding: '16px 0' }}>
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      useNotemacStore.getState().SetShowPluginManager(true);
+                    }}
+                    style={{
+                      backgroundColor: theme.accent,
+                      color: theme.accentText,
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '8px 16px',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                    }}
+                  >
+                    Open Plugin Manager
+                  </button>
                 </div>
               </>
             )}

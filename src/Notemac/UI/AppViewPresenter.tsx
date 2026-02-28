@@ -33,6 +33,8 @@ const TerminalPanelViewPresenter = lazy(() => import('./TerminalPanelViewPresent
 const CloneRepositoryViewPresenter = lazy(() => import('./CloneRepositoryViewPresenter').then(m => ({ default: m.CloneRepositoryViewPresenter })));
 const GitSettingsViewPresenter = lazy(() => import('./GitSettingsViewPresenter').then(m => ({ default: m.GitSettingsViewPresenter })));
 const AISettingsViewPresenter = lazy(() => import('./AISettingsViewPresenter').then(m => ({ default: m.AISettingsViewPresenter })));
+const PluginManagerViewPresenter = lazy(() => import('./PluginManagerViewPresenter').then(m => ({ default: m.PluginManagerViewPresenter })));
+const PluginDialogViewPresenter = lazy(() => import('./PluginDialogViewPresenter').then(m => ({ default: m.PluginDialogViewPresenter })));
 
 export default function App()
 {
@@ -58,6 +60,8 @@ export default function App()
   const showCloneDialog = useNotemacStore(s => s.showCloneDialog);
   const showGitSettings = useNotemacStore(s => s.showGitSettings);
   const showAiSettings = useNotemacStore(s => s.showAiSettings);
+  const showPluginManager = useNotemacStore(s => s.showPluginManager);
+  const pluginDialogComponent = useNotemacStore(s => s.pluginDialogComponent);
   const splitView = useNotemacStore(s => s.splitView);
   const splitTabId = useNotemacStore(s => s.splitTabId);
   const addTab = useNotemacStore(s => s.addTab);
@@ -116,6 +120,15 @@ export default function App()
   useEffect(() =>
   {
     useNotemacStore.getState().LoadAIState();
+  }, []);
+
+  // Initialize plugin system
+  useEffect(() =>
+  {
+    import('../Controllers/PluginController').then(({ InitializePluginSystem }) =>
+    {
+      InitializePluginSystem();
+    });
   }, []);
 
   // Auto-collapse sidebar on narrow viewports
@@ -352,6 +365,20 @@ export default function App()
         <ErrorBoundary fallbackMessage="AI Settings failed to load">
           <Suspense fallback={null}>
             <AISettingsViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showPluginManager && (
+        <ErrorBoundary fallbackMessage="Plugin Manager failed to load">
+          <Suspense fallback={null}>
+            <PluginManagerViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {null !== pluginDialogComponent && (
+        <ErrorBoundary fallbackMessage="Plugin dialog failed to load">
+          <Suspense fallback={null}>
+            <PluginDialogViewPresenter theme={theme} />
           </Suspense>
         </ErrorBoundary>
       )}

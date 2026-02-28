@@ -104,3 +104,9 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 | *(Collaboration)* | Create / Join Session (Edit > Collaboration menu) |
 
 **Note:** Git Blame, Merge Conflict Resolution, and Collaborative Editing features are accessed primarily through menu commands and inline controls. Breadcrumb Navigation, Sticky Scroll, Emmet Support, Print Support, and Git Stash Management are controlled via Settings or menu options.
+
+## Plugins
+
+| Shortcut | Action |
+|---|---|
+| `Cmd+Shift+X` | Open Plugin Manager |

@@ -67,4 +67,9 @@ export const NOTEMAC_EVENTS =
     BREADCRUMB_UPDATED: 'notemac-breadcrumb-updated',
     DIAGNOSTICS_UPDATED: 'notemac-diagnostics-updated',
     FORMAT_DOCUMENT: 'notemac-format-document',
+    PLUGIN_ACTIVATED: 'notemac-plugin-activated',
+    PLUGIN_DEACTIVATED: 'notemac-plugin-deactivated',
+    PLUGIN_ERROR: 'notemac-plugin-error',
+    PLUGIN_INSTALLED: 'notemac-plugin-installed',
+    PLUGIN_UNINSTALLED: 'notemac-plugin-uninstalled',
 } as const;

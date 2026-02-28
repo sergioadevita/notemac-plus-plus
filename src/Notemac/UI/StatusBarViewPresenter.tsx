@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import './hover-utilities.css';
@@ -9,6 +9,8 @@ import {
 } from "../Commons/Constants";
 import type { LineEnding } from "../Commons/Enums";
 import { getLanguageDisplayName, countWords, countLines } from '../../Shared/Helpers/TextHelpers';
+
+const PluginStatusBarViewPresenter = lazy(() => import('./PluginStatusBarViewPresenter').then(m => ({ default: m.PluginStatusBarViewPresenter })));
 
 interface StatusBarProps {
   theme: ThemeColors;
@@ -173,6 +175,9 @@ export function StatusBar({ theme }: StatusBarProps) {
         <StatusItem title="Line Count">
           {lineCount} lines
         </StatusItem>
+        <Suspense fallback={null}>
+          <PluginStatusBarViewPresenter position="left" />
+        </Suspense>
       </div>
 
       <div style={mainStyles.sectionRight}>
@@ -235,6 +240,9 @@ export function StatusBar({ theme }: StatusBarProps) {
             {0 < zoomLevel ? '+' : ''}{zoomLevel}
           </StatusItem>
         )}
+        <Suspense fallback={null}>
+          <PluginStatusBarViewPresenter position="right" />
+        </Suspense>
       </div>
     </div>
   );

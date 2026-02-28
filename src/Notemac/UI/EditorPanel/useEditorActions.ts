@@ -647,6 +647,14 @@ export function useEditorActions(
           break;
         }
 
+        // === Plugin Manager ===
+        case 'show-plugin-manager': {
+          import('../../Controllers/PluginController').then(({ }) => {
+            // Handled by MenuActionController — this is a no-op passthrough
+          });
+          break;
+        }
+
         // === Merge Conflict Resolution ===
         case 'accept-current': {
           // Handled by GitMergeController

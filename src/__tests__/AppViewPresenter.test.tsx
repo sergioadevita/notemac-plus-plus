@@ -173,6 +173,18 @@ vi.mock('../Notemac/UI/AISettingsViewPresenter', () => ({
   AISettingsViewPresenter: () => <div>AISettings</div>,
 }));
 
+vi.mock('../Notemac/Controllers/PluginController', () => ({
+  InitializePluginSystem: vi.fn(),
+}));
+
+vi.mock('../Notemac/UI/PluginManagerViewPresenter', () => ({
+  PluginManagerViewPresenter: () => <div>PluginManager</div>,
+}));
+
+vi.mock('../Notemac/UI/PluginDialogViewPresenter', () => ({
+  PluginDialogViewPresenter: () => <div>PluginDialog</div>,
+}));
+
 describe('AppViewPresenter', () => {
   const mockStoreState = {
     tabs: [
@@ -215,6 +227,8 @@ describe('AppViewPresenter', () => {
     showCloneDialog: false,
     showGitSettings: false,
     showAiSettings: false,
+    showPluginManager: false,
+    pluginDialogComponent: null,
     splitView: 'none',
     splitTabId: null,
     zoomLevel: 0,

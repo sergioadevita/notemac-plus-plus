@@ -35,6 +35,7 @@ State is managed with **Zustand** and **Immer**, split into composable slices:
 | `macroSlice` | Recording state, action log, saved macros |
 | `uiSlice` | Sidebar, zoom, split view, dialogs, settings, clipboard history |
 | `fileTreeSlice` | File tree nodes, expansion state, workspace root |
+| `pluginSlice` | Installed plugins, enabled state, plugin metadata, registry cache |
 
 Each slice is independently testable and follows the same patterns: initial state, action creators with Immer drafts, and explicit getter methods.
 
@@ -216,6 +217,43 @@ A three-tier encryption system provides platform-specific and secure credential 
 - Live peer cursors with colored labels and avatars
 - Connection status and peer count in status bar
 - Dependencies: yjs, y-webrtc, y-monaco
+
+## Plugin System Architecture
+
+The plugin system provides a secure, extensible framework for third-party functionality.
+
+**Plugin Lifecycle**
+
+1. **Discovery**: Plugins are discovered from the `plugins/` directory and remote registry
+2. **Loading**: Manifest-based loading with JS bundles dynamically imported via Blob URLs
+3. **Activation**: `activate(context)` hook called with sandboxed PluginContext
+4. **Deactivation**: `deactivate()` hook called for cleanup
+5. **Error Handling**: Plugin render errors caught by error boundaries; misbehaving plugins can be disabled
+
+**Plugin Services**
+
+- **PluginLoaderService**: Loads plugins from disk/registry, manages manifest parsing, handles bundle imports
+- **PluginAPIService**: Creates sandboxed PluginContext with scoped interfaces (editor, events, UI, commands, themes, languages, storage)
+- **PluginRegistryService**: Remote registry integration with search, install, uninstall, and update checking
+- **PluginController**: Orchestrates loading, activation, deactivation, and error handling
+- **PluginModel**: Persistent storage of plugin state (installed plugins, enabled/disabled status, metadata)
+- **PluginSlice**: Zustand store slice for plugin state management
+
+**Plugin UI Components**
+
+- **PluginErrorBoundary**: React error boundary for isolating and reporting plugin render errors
+- **PluginManagerViewPresenter**: Two-tab dialog for browsing/installing and managing plugins
+- **PluginSidebarPanelViewPresenter**: Renders registered sidebar panels from plugins with theme passthrough
+- **PluginStatusBarViewPresenter**: Renders status bar items registered by plugins with error isolation
+- **PluginSettingsSectionViewPresenter**: Renders plugin-registered settings in Settings dialog
+- **PluginDialogViewPresenter**: Generic modal wrapper for plugin-provided dialogs
+
+**Sandboxing & Security**
+
+- Plugins run in the main thread but are isolated through PluginContext (no direct DOM access)
+- Blob URLs prevent direct file system access to plugin bundles
+- Each plugin gets namespaced storage (localStorage with `plugin:${pluginName}` prefix)
+- Error boundaries prevent plugin crashes from affecting the main application
 
 ## Dependencies
 
