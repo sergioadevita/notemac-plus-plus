@@ -444,7 +444,7 @@ How Notemac++ stacks up against other editors:
 | **Column Editor** | Yes | Yes | Via Extensions | Yes |
 | **Compare Files** | Yes | Via Plugin | Yes | Via Plugin |
 | **Themes** | 7 | 30+ | 1000+ | 25+ |
-| **Plugins** | Planned | 200+ | 30K+ | 5K+ |
+| **Plugins** | Yes (5 bundled) | 200+ | 30K+ | 5K+ |
 | **Runs in Browser** | Yes | No | Yes (vscode.dev) | No |
 | **Price** | Free (MIT) | Free (GPL) | Free | $99 |
 
