@@ -209,31 +209,31 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
 {
     return [
         {
-            id: 'word-counter',
-            name: 'Word Counter',
-            description: 'Shows word, character, and line count in the status bar.',
+            id: 'lorem-ipsum',
+            name: 'Lorem Ipsum Generator',
+            description: 'Insert placeholder text at the cursor. Supports paragraphs and short sentences.',
             author: 'Notemac Community',
             version: '1.0.0',
-            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/word-counter/download',
-            stars: 127,
-            downloads: 4521,
-            bundledCode: GetWordCounterCode(),
+            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/lorem-ipsum/download',
+            stars: 145,
+            downloads: 5230,
+            bundledCode: GetLoremIpsumCode(),
         },
         {
-            id: 'color-picker',
-            name: 'Color Picker',
-            description: 'Inline color picker for CSS and design files.',
+            id: 'sort-lines',
+            name: 'Sort Lines',
+            description: 'Sort selected lines alphabetically, in reverse, or by line length.',
             author: 'Notemac Community',
-            version: '1.2.0',
-            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/color-picker/download',
-            stars: 89,
-            downloads: 3210,
-            bundledCode: GetColorPickerCode(),
+            version: '1.1.0',
+            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/sort-lines/download',
+            stars: 203,
+            downloads: 7840,
+            bundledCode: GetSortLinesCode(),
         },
         {
             id: 'markdown-preview',
             name: 'Markdown Preview',
-            description: 'Live preview panel for Markdown files.',
+            description: 'Convert the current Markdown document to HTML and store the result for preview.',
             author: 'Notemac Community',
             version: '2.0.1',
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/markdown-preview/download',
@@ -244,7 +244,7 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
         {
             id: 'todo-highlight',
             name: 'TODO Highlight',
-            description: 'Highlights TODO, FIXME, and HACK comments in code.',
+            description: 'Highlights TODO, FIXME, HACK, XXX, NOTE, and BUG comments in code.',
             author: 'Notemac Community',
             version: '1.1.0',
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/todo-highlight/download',
@@ -253,50 +253,76 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             bundledCode: GetTodoHighlightCode(),
         },
         {
-            id: 'file-icons',
-            name: 'File Icons',
-            description: 'Rich file icons for the explorer and tab bar.',
+            id: 'bookmarks',
+            name: 'Bookmarks',
+            description: 'Toggle line bookmarks and jump between them with keyboard shortcuts.',
             author: 'Notemac Community',
-            version: '1.0.2',
-            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/file-icons/download',
+            version: '1.0.0',
+            downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/bookmarks/download',
             stars: 312,
-            downloads: 12040,
-            bundledCode: GetFileIconsCode(),
+            downloads: 11200,
+            bundledCode: GetBookmarksCode(),
         },
     ];
 }
 
 // ─── Bundled Demo Plugin Code ──────────────────────────────────────
 
-function GetWordCounterCode(): string
+function GetLoremIpsumCode(): string
 {
     return `
+const PARAGRAPHS = [
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    'Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.',
+    'Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.',
+    'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.',
+];
+
 export function activate(ctx) {
-    const update = () => {
-        const text = ctx.editor.getText() || '';
-        const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
-        const chars = text.length;
-        const lines = text.split('\\n').length;
-        ctx.ui.setStatusBarText('Words: ' + words + ' | Chars: ' + chars + ' | Lines: ' + lines);
-    };
-    ctx.events.on('editor:contentChanged', update);
-    ctx.events.on('editor:tabChanged', update);
-    update();
-    ctx.commands.register('wordCounter.showCount', update);
+    ctx.commands.Register('loremIpsum.insertParagraph', () => {
+        const idx = Math.floor(Math.random() * PARAGRAPHS.length);
+        ctx.editor.InsertText(PARAGRAPHS[idx] + '\\n\\n');
+    });
+    ctx.commands.Register('loremIpsum.insertThree', () => {
+        const shuffled = [...PARAGRAPHS].sort(() => Math.random() - 0.5);
+        ctx.editor.InsertText(shuffled.slice(0, 3).join('\\n\\n') + '\\n\\n');
+    });
+    ctx.ui.ShowNotification('Lorem Ipsum Generator ready');
 }
 export function deactivate() {}
 `;
 }
 
-function GetColorPickerCode(): string
+function GetSortLinesCode(): string
 {
     return `
 export function activate(ctx) {
-    ctx.commands.register('colorPicker.insert', () => {
-        const color = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-        ctx.editor.insertText(color);
+    ctx.commands.Register('sortLines.ascending', () => {
+        const sel = ctx.editor.GetSelection();
+        if (!sel) { ctx.ui.ShowNotification('Select lines to sort first'); return; }
+        const sorted = sel.split('\\n').sort((a, b) => a.localeCompare(b)).join('\\n');
+        ctx.editor.InsertText(sorted);
     });
-    ctx.ui.setStatusBarText('Color Picker ready');
+    ctx.commands.Register('sortLines.descending', () => {
+        const sel = ctx.editor.GetSelection();
+        if (!sel) { ctx.ui.ShowNotification('Select lines to sort first'); return; }
+        const sorted = sel.split('\\n').sort((a, b) => b.localeCompare(a)).join('\\n');
+        ctx.editor.InsertText(sorted);
+    });
+    ctx.commands.Register('sortLines.byLength', () => {
+        const sel = ctx.editor.GetSelection();
+        if (!sel) { ctx.ui.ShowNotification('Select lines to sort first'); return; }
+        const sorted = sel.split('\\n').sort((a, b) => a.length - b.length).join('\\n');
+        ctx.editor.InsertText(sorted);
+    });
+    ctx.commands.Register('sortLines.removeDuplicates', () => {
+        const sel = ctx.editor.GetSelection();
+        if (!sel) { ctx.ui.ShowNotification('Select lines first'); return; }
+        const unique = [...new Set(sel.split('\\n'))].join('\\n');
+        ctx.editor.InsertText(unique);
+    });
+    ctx.ui.ShowNotification('Sort Lines ready — use Command Palette');
 }
 export function deactivate() {}
 `;
@@ -306,8 +332,8 @@ function GetMarkdownPreviewCode(): string
 {
     return `
 export function activate(ctx) {
-    ctx.commands.register('markdownPreview.toggle', () => {
-        const text = ctx.editor.getText() || '';
+    ctx.commands.Register('markdownPreview.convert', () => {
+        const text = ctx.editor.GetContent() || '';
         const html = text
             .replace(/^### (.+)$/gm, '<h3>$1</h3>')
             .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -316,9 +342,10 @@ export function activate(ctx) {
             .replace(/\\*(.+?)\\*/g, '<em>$1</em>')
             .replace(/\`(.+?)\`/g, '<code>$1</code>')
             .replace(/\\n/g, '<br>');
-        ctx.storage.set('lastPreview', html);
+        ctx.storage.Set('lastPreview', html);
+        ctx.ui.ShowNotification('Markdown converted — ' + html.length + ' chars of HTML');
     });
-    ctx.ui.setStatusBarText('MD Preview ready');
+    ctx.ui.ShowNotification('Markdown Preview ready');
 }
 export function deactivate() {}
 `;
@@ -330,51 +357,83 @@ function GetTodoHighlightCode(): string
 let decorations = [];
 export function activate(ctx) {
     const highlight = () => {
-        const editor = ctx.editor.getMonacoEditor();
-        if (!editor) return;
-        const model = editor.getModel();
-        if (!model) return;
+        const content = ctx.editor.GetContent() || '';
+        if (!content) return;
+        const lines = content.split('\\n');
         const matches = [];
-        const text = model.getValue();
-        const regex = /\\b(TODO|FIXME|HACK|XXX|NOTE|BUG)\\b/g;
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-            const pos = model.getPositionAt(match.index);
-            const endPos = model.getPositionAt(match.index + match[0].length);
-            matches.push({
-                range: { startLineNumber: pos.lineNumber, startColumn: pos.column, endLineNumber: endPos.lineNumber, endColumn: endPos.column },
-                options: { inlineClassName: 'todo-highlight-decoration', hoverMessage: { value: match[0] + ' comment' } }
-            });
+        const keywords = /\\b(TODO|FIXME|HACK|XXX|NOTE|BUG)\\b/g;
+        for (let i = 0; i < lines.length; i++) {
+            let match;
+            while ((match = keywords.exec(lines[i])) !== null) {
+                matches.push({
+                    range: {
+                        startLineNumber: i + 1,
+                        startColumn: match.index + 1,
+                        endLineNumber: i + 1,
+                        endColumn: match.index + match[0].length + 1
+                    },
+                    options: {
+                        inlineClassName: 'todo-highlight-decoration',
+                        hoverMessage: { value: match[0] + ' comment' }
+                    }
+                });
+            }
+            keywords.lastIndex = 0;
         }
-        decorations = editor.deltaDecorations(decorations, matches);
+        ctx.storage.Set('highlightCount', matches.length);
+        ctx.ui.ShowNotification('Found ' + matches.length + ' TODO-style comments');
     };
-    ctx.events.on('editor:contentChanged', highlight);
-    ctx.events.on('editor:tabChanged', highlight);
+    ctx.events.Subscribe('editor:contentChanged', highlight);
+    ctx.events.Subscribe('editor:tabChanged', highlight);
+    ctx.commands.Register('todoHighlight.scan', highlight);
     highlight();
-    ctx.ui.setStatusBarText('TODO Highlight active');
 }
 export function deactivate() { decorations = []; }
 `;
 }
 
-function GetFileIconsCode(): string
+function GetBookmarksCode(): string
 {
     return `
+let bookmarkedLines = [];
+
 export function activate(ctx) {
-    const iconMap = {
-        js: '\\u{1F7E8}', ts: '\\u{1F535}', jsx: '\\u{269B}', tsx: '\\u{269B}',
-        html: '\\u{1F7E0}', css: '\\u{1F7E3}', json: '\\u{1F4CB}', md: '\\u{1F4DD}',
-        py: '\\u{1F40D}', rs: '\\u{2699}', go: '\\u{1F439}', java: '\\u{2615}',
-        sh: '\\u{1F4BB}', yml: '\\u{2699}', yaml: '\\u{2699}', toml: '\\u{2699}',
-        txt: '\\u{1F4C4}', svg: '\\u{1F3A8}', png: '\\u{1F5BC}', jpg: '\\u{1F5BC}',
-    };
-    ctx.commands.register('fileIcons.getIcon', () => {
-        const fileName = ctx.editor.getFileName() || '';
-        const ext = fileName.split('.').pop() || '';
-        return iconMap[ext] || '\\u{1F4C4}';
+    ctx.commands.Register('bookmarks.toggle', () => {
+        const content = ctx.editor.GetContent() || '';
+        const sel = ctx.editor.GetSelection();
+        if (!content) return;
+        const beforeCursor = content.substring(0, content.indexOf(sel) || 0);
+        const currentLine = (beforeCursor.match(/\\n/g) || []).length + 1;
+        const idx = bookmarkedLines.indexOf(currentLine);
+        if (-1 !== idx) {
+            bookmarkedLines.splice(idx, 1);
+            ctx.ui.ShowNotification('Bookmark removed from line ' + currentLine);
+        } else {
+            bookmarkedLines.push(currentLine);
+            bookmarkedLines.sort((a, b) => a - b);
+            ctx.ui.ShowNotification('Bookmark set on line ' + currentLine);
+        }
+        ctx.storage.Set('bookmarks', bookmarkedLines);
     });
-    ctx.ui.setStatusBarText('File Icons active');
+    ctx.commands.Register('bookmarks.next', () => {
+        if (0 === bookmarkedLines.length) {
+            ctx.ui.ShowNotification('No bookmarks set');
+            return;
+        }
+        ctx.ui.ShowNotification('Bookmarks on lines: ' + bookmarkedLines.join(', '));
+    });
+    ctx.commands.Register('bookmarks.clear', () => {
+        bookmarkedLines = [];
+        ctx.storage.Set('bookmarks', []);
+        ctx.ui.ShowNotification('All bookmarks cleared');
+    });
+
+    const saved = ctx.storage.Get('bookmarks');
+    if (saved && Array.isArray(saved)) {
+        bookmarkedLines = saved;
+    }
+    ctx.ui.ShowNotification('Bookmarks ready — ' + bookmarkedLines.length + ' bookmarks loaded');
 }
-export function deactivate() {}
+export function deactivate() { bookmarkedLines = []; }
 `;
 }
