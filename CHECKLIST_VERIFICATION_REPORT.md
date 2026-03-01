@@ -190,15 +190,16 @@
 | Item | Status | Notes |
 |------|--------|-------|
 | TypeScript compilation | PASS | `npx tsc --noEmit` — zero errors |
-| Unit test suite | PASS | `npx vitest run` — 2,278/2,278 passing across 127 files |
+| Unit test suite | PASS | `npx vitest run` — 2,282/2,282 passing across 127 files |
 | Production build | PASS | `npm run build` — clean build in ~5.0s |
 | Web editor text editing | PASS | Verified in deployed web app |
 | Theme switching | PASS | Built-in themes work, custom theme system functional |
 | File operations | PASS | Menu items accessible (New, Open, Save) |
 | About dialog display | PASS | Shows version with full feature grid |
 | Plugin Manager dialog | PASS | Opens via Ctrl+Shift+X, browse/installed tabs functional |
-| Plugin install from registry | PASS | Demo plugins install with bundled code; directory picker prompts on first install |
-| Plugin sidebar integration | PASS | Plugin panels render in sidebar |
+| Plugin install from registry | PASS | Demo plugins install, auto-load, and auto-activate; directory picker prompts on first install |
+| Plugin sidebar integration | PASS | Sidebar shows active plugins with clickable commands |
+| Plugin Command Palette | PASS | Plugin commands appear in Command Palette under "Plugins" category with human-readable labels |
 | Demo plugins are unique | PASS | 5 demo plugins verified non-redundant with built-in features (Lorem Ipsum, Sort Lines, Markdown Preview, TODO Highlight, Bookmarks) |
 | Plugin API PascalCase | PASS | All bundled plugin code uses correct PascalCase method names (GetContent, InsertText, Register, Subscribe, etc.) |
 
@@ -209,7 +210,7 @@
 ### Feature Checklist: PASSING (100%)
 - **Code Quality:** 10/10 items passing
 - **Review & Optimization:** 9/9 items passing
-- **Testing:** 7/7 items passing (2,278 unit + ~1,301 E2E = 3,579+ total)
+- **Testing:** 7/7 items passing (2,282 unit + ~1,301 E2E = 3,583+ total)
 - **UI & UX:** 6/6 items passing
 - **Documentation:** 7/7 items passing
 - **Integration:** 7/7 items passing
@@ -224,7 +225,7 @@
 - **Git & GitHub:** 5/5 items passing (GitHub Release created)
 - **GitHub Pages & Web App:** 5/5 items passing
 - **GitHub Repo Settings:** 4/4 items passing
-- **Final Smoke Test:** 12/12 items passing
+- **Final Smoke Test:** 14/14 items passing
 
 **Status:** RELEASED — v3.4.0
 
