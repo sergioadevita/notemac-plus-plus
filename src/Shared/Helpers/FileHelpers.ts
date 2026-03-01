@@ -1,4 +1,5 @@
 import { LineEnding } from "../../Notemac/Commons/Enums";
+import type { CustomLanguageDefinition } from "../../Notemac/Commons/Types";
 
 const languageMap: Record<string, string> =
 {
@@ -64,12 +65,43 @@ const languageMap: Record<string, string> =
     '.makefile': 'plaintext',
 };
 
-export function detectLanguage(filename: string): string
+export function detectLanguage(
+    filename: string,
+    customLanguages?: CustomLanguageDefinition[],
+    overrides?: Record<string, string>,
+): string
 {
     if (!filename)
         return 'plaintext';
 
     const lower = filename.toLowerCase();
+
+    // Check file association overrides first
+    if (overrides)
+    {
+        const lastDotOvr = lower.lastIndexOf('.');
+        if (-1 !== lastDotOvr)
+        {
+            const extOvr = lower.substring(lastDotOvr);
+            if (overrides[extOvr])
+                return overrides[extOvr];
+        }
+    }
+
+    // Check custom language extensions
+    if (customLanguages && 0 < customLanguages.length)
+    {
+        const lastDotCust = lower.lastIndexOf('.');
+        if (-1 !== lastDotCust)
+        {
+            const extCust = lower.substring(lastDotCust);
+            for (const lang of customLanguages)
+            {
+                if (lang.extensions.some(e => e.toLowerCase() === extCust))
+                    return lang.id;
+            }
+        }
+    }
 
     if ('dockerfile' === lower)
         return 'dockerfile';

@@ -314,6 +314,23 @@ function CreateLanguagesAPI(pluginId: string): PluginLanguagesAPI
                 config,
                 pluginId,
             });
+
+            // If monarchTokens are provided, register with Monaco for syntax highlighting
+            if (config.monarchTokens && 'undefined' !== typeof window)
+            {
+                import('../Services/LanguageDefinitionService').then(({ RegisterLanguageWithMonaco }) =>
+                {
+                    const extensions = Array.isArray(config.extensions) ? config.extensions as string[] : [];
+                    const aliases = Array.isArray(config.aliases) ? config.aliases as string[] : [];
+                    RegisterLanguageWithMonaco({
+                        id,
+                        label: (config.label as string) || id,
+                        extensions,
+                        aliases,
+                        monarchTokens: config.monarchTokens as import('../Commons/Types').MonarchTokensConfig,
+                    });
+                });
+            }
         },
     };
 }

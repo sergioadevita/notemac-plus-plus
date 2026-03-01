@@ -118,6 +118,8 @@ export interface AppSettings
     breadcrumbsEnabled: boolean;
     pluginsEnabled: boolean;
     pluginRegistryUrl: string;
+    taskRunnerEnabled: boolean;
+    customLanguagesEnabled: boolean;
 }
 
 export interface FindResult
@@ -384,3 +386,63 @@ export interface AIContextItem
     label: string;
     language?: string;
 }
+
+// Task Runner types
+
+export interface TaskDefinition
+{
+    id: string;
+    label: string;
+    command: string;
+    group: 'build' | 'test' | 'lint' | 'custom';
+    isDefault: boolean;
+    cwd?: string;
+    env?: Record<string, string>;
+    problemMatcher?: string;
+    presentation?: TaskPresentation;
+}
+
+export interface TaskPresentation
+{
+    echo: boolean;
+    reveal: 'always' | 'silent' | 'never';
+    focus: boolean;
+    clear: boolean;
+}
+
+export interface TaskExecution
+{
+    taskId: string;
+    startTime: number;
+    endTime?: number;
+    output: string[];
+    exitCode?: number;
+    status: 'running' | 'success' | 'failed' | 'cancelled';
+}
+
+// Custom Language Definition types
+
+export interface CustomLanguageDefinition
+{
+    id: string;
+    label: string;
+    extensions: string[];
+    aliases: string[];
+    monarchTokens: MonarchTokensConfig;
+    brackets?: [string, string][];
+    comments?: { lineComment?: string; blockComment?: [string, string] };
+    autoClosingPairs?: [string, string][];
+}
+
+export interface MonarchTokensConfig
+{
+    keywords?: string[];
+    operators?: string[];
+    tokenizer: Record<string, MonarchTokenRule[]>;
+}
+
+export type MonarchTokenRule =
+    | string
+    | [string, string]
+    | [string, string, string]
+    | { regex: string; action: string | { token: string; next?: string } };

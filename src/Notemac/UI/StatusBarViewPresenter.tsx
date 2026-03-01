@@ -23,6 +23,7 @@ export function StatusBar({ theme }: StatusBarProps) {
     isRepoInitialized, currentBranch, gitStatus, setSidebarPanel,
     aiEnabled, isAiStreaming, activeModelId, inlineSuggestionEnabled,
     SetShowAiSettings,
+    currentExecution, tasks: taskList,
   } = useNotemacStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId);
@@ -156,6 +157,14 @@ export function StatusBar({ theme }: StatusBarProps) {
           <StatusItem>
             <span className="recording-indicator" style={mainStyles.recordingIndicator}>
               {'\u23fa'} Recording
+            </span>
+          </StatusItem>
+        )}
+        {null !== currentExecution && (
+          <StatusItem title={`Running: ${taskList.find(t => t.id === currentExecution.taskId)?.label || currentExecution.taskId}`}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#a6e3a1' }}>
+              <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>{'\u27f3'}</span>
+              {taskList.find(t => t.id === currentExecution.taskId)?.label || 'Task'}
             </span>
           </StatusItem>
         )}

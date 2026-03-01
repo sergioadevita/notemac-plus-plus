@@ -331,6 +331,13 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Git Settings...', action: 'git-settings' },
     ],
     Run: [
+      { label: 'Run Task...', action: 'run-task' },
+      { label: 'Run Build Task', action: 'run-build-task' },
+      { label: 'Run Test Task', action: 'run-test-task' },
+      { label: 'Terminate Task', action: 'terminate-task' },
+      { type: 'separator', label: '' },
+      { label: 'Configure Tasks...', action: 'configure-tasks' },
+      { type: 'separator', label: '' },
       { label: 'Run Command...', action: 'run-command' },
       { type: 'separator', label: '' },
       { label: 'Search on Google', action: 'search-google' },

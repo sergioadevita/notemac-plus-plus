@@ -98,6 +98,16 @@ export function GetAllCommands(): CommandDefinition[]
         { id: 'ai-convert-language', label: 'AI: Convert Language', category: 'AI', action: 'ai-convert-language' },
         { id: 'ai-settings', label: 'AI Settings', category: 'AI', action: 'ai-settings' },
         { id: 'ai-toggle-inline', label: 'AI: Toggle Inline Completions', category: 'AI', action: 'ai-toggle-inline' },
+
+        // Task Runner commands
+        { id: 'run-task', label: 'Run Task...', category: 'Tasks', action: 'run-task' },
+        { id: 'run-build-task', label: 'Run Build Task', category: 'Tasks', action: 'run-build-task' },
+        { id: 'run-test-task', label: 'Run Test Task', category: 'Tasks', action: 'run-test-task' },
+        { id: 'configure-tasks', label: 'Configure Tasks', category: 'Tasks', action: 'configure-tasks' },
+        { id: 'terminate-task', label: 'Terminate Task', category: 'Tasks', action: 'terminate-task' },
+
+        // Custom Language commands
+        { id: 'manage-languages', label: 'Manage Custom Languages', category: 'Language', action: 'manage-languages' },
     ];
 
     // Deduplicate: only add extra commands whose action isn't already in the list

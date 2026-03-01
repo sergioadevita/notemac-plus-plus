@@ -1,8 +1,10 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetTheme, themeColorGroups } from "../Configs/ThemeConfig";
 import { useFocusTrap } from './hooks/useFocusTrap';
+
+const LanguageDefinitionSettingsViewPresenter = lazy(() => import('./LanguageDefinitionSettingsViewPresenter').then(m => ({ default: m.LanguageDefinitionSettingsViewPresenter })));
 
 interface SettingsDialogProps {
   theme: ThemeColors;
@@ -346,6 +348,7 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
     { id: 'advanced', label: 'Advanced' },
     { id: 'keybindings', label: 'Keybindings' },
     { id: 'plugins', label: 'Plugins' },
+    { id: 'languages', label: 'Languages' },
   ];
 
   const SelectField = <T extends string>({ label, value, options, onChange }: {
@@ -727,6 +730,12 @@ export function SettingsDialog({ theme }: SettingsDialogProps) {
                   ))}
                 </div>
               </>
+            )}
+
+            {activeSection === 'languages' && (
+              <Suspense fallback={<div style={{ color: theme.textSecondary, fontSize: 13, padding: 16 }}>Loading...</div>}>
+                <LanguageDefinitionSettingsViewPresenter theme={theme} />
+              </Suspense>
             )}
 
             {activeSection === 'plugins' && (

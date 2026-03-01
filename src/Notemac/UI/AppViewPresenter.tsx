@@ -35,6 +35,8 @@ const GitSettingsViewPresenter = lazy(() => import('./GitSettingsViewPresenter')
 const AISettingsViewPresenter = lazy(() => import('./AISettingsViewPresenter').then(m => ({ default: m.AISettingsViewPresenter })));
 const PluginManagerViewPresenter = lazy(() => import('./PluginManagerViewPresenter').then(m => ({ default: m.PluginManagerViewPresenter })));
 const PluginDialogViewPresenter = lazy(() => import('./PluginDialogViewPresenter').then(m => ({ default: m.PluginDialogViewPresenter })));
+const ConfigureTasksDialogViewPresenter = lazy(() => import('./ConfigureTasksDialogViewPresenter').then(m => ({ default: m.ConfigureTasksDialogViewPresenter })));
+const TaskExecutionPanelViewPresenter = lazy(() => import('./TaskExecutionPanelViewPresenter').then(m => ({ default: m.TaskExecutionPanelViewPresenter })));
 
 export default function App()
 {
@@ -62,6 +64,8 @@ export default function App()
   const showAiSettings = useNotemacStore(s => s.showAiSettings);
   const showPluginManager = useNotemacStore(s => s.showPluginManager);
   const pluginDialogComponent = useNotemacStore(s => s.pluginDialogComponent);
+  const showConfigureTasksDialog = useNotemacStore(s => s.showConfigureTasksDialog);
+  const isTaskPanelVisible = useNotemacStore(s => s.isTaskPanelVisible);
   const splitView = useNotemacStore(s => s.splitView);
   const splitTabId = useNotemacStore(s => s.splitTabId);
   const addTab = useNotemacStore(s => s.addTab);
@@ -257,6 +261,15 @@ export default function App()
               </Suspense>
             </ErrorBoundary>
           )}
+
+          {/* Task execution output panel */}
+          {isTaskPanelVisible && (
+            <ErrorBoundary fallbackMessage="Task execution panel failed to load">
+              <Suspense fallback={null}>
+                <TaskExecutionPanelViewPresenter theme={theme} />
+              </Suspense>
+            </ErrorBoundary>
+          )}
         </div>
       </div>
 
@@ -379,6 +392,13 @@ export default function App()
         <ErrorBoundary fallbackMessage="Plugin dialog failed to load">
           <Suspense fallback={null}>
             <PluginDialogViewPresenter theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showConfigureTasksDialog && (
+        <ErrorBoundary fallbackMessage="Configure Tasks dialog failed to load">
+          <Suspense fallback={null}>
+            <ConfigureTasksDialogViewPresenter theme={theme} onClose={() => useNotemacStore.getState().SetShowConfigureTasksDialog(false)} />
           </Suspense>
         </ErrorBoundary>
       )}

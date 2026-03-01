@@ -203,6 +203,19 @@ export const FORMATTER_DEFAULT_PRINT_WIDTH = 80;
 // Emmet
 export const EMMET_SUPPORTED_LANGUAGES = ['html', 'css', 'scss', 'less', 'jsx', 'tsx', 'xml', 'xsl', 'haml', 'pug'];
 
+// Task Runner
+export const UI_TASK_RUNNER_PANEL = "TaskRunner";
+export const DB_TASKS = "Tasks";
+export const DB_TASK_HISTORY = "TaskHistory";
+export const LIMIT_TASK_HISTORY = 50;
+export const LIMIT_TASK_OUTPUT_LINES = 5000;
+export const TASK_CONFIG_FILENAME = '.notemac/tasks.json';
+
+// Custom Languages
+export const DB_CUSTOM_LANGUAGES = "CustomLanguages";
+export const DB_FILE_ASSOCIATION_OVERRIDES = "FileAssociationOverrides";
+export const LIMIT_CUSTOM_LANGUAGES = 50;
+
 // Plugins
 export const PLUGIN_DIRECTORY_NAME = 'plugins';
 export const PLUGIN_MANIFEST_FILENAME = 'manifest.json';

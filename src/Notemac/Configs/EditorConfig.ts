@@ -55,6 +55,8 @@ const defaultSettings: AppSettings =
     breadcrumbsEnabled: true,
     pluginsEnabled: true,
     pluginRegistryUrl: PLUGIN_REGISTRY_URL,
+    taskRunnerEnabled: true,
+    customLanguagesEnabled: true,
 };
 
 export function GetDefaultSettings(): AppSettings

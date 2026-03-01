@@ -367,6 +367,29 @@ export function HandleMenuAction(
             break;
         }
 
+        // Task Runner actions
+        case 'run-task':
+        case 'run-build-task':
+        case 'run-test-task':
+        case 'terminate-task':
+        case 'configure-tasks':
+            import('./TaskRunnerController').then(mod =>
+            {
+                if ('run-build-task' === action) mod.RunBuildTask();
+                else if ('run-test-task' === action) mod.RunTestTask();
+                else if ('terminate-task' === action) mod.CancelCurrentTask();
+                else if ('configure-tasks' === action)
+                    store.SetShowConfigureTasksDialog(true);
+                // 'run-task' — opens task panel for selection
+                else store.setSidebarPanel('tasks');
+            });
+            break;
+
+        // Custom Language actions
+        case 'manage-languages':
+            store.setShowSettings(true);
+            break;
+
         // All editor-handled actions (pass through)
         default:
             // Check if it's a plugin command

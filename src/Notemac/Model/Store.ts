@@ -8,8 +8,10 @@ import { createSnippetSlice, NotemacSnippetSlice } from "./SnippetModel";
 import { createGitSlice, NotemacGitSlice } from "./GitModel";
 import { createAISlice, NotemacAISlice } from "./AIModel";
 import { createPluginSlice, NotemacPluginSlice } from "./PluginModel";
+import { createTaskRunnerSlice, NotemacTaskRunnerSlice } from "./TaskRunnerModel";
+import { createLanguageDefinitionSlice, NotemacLanguageDefinitionSlice } from "./LanguageDefinitionModel";
 
-export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice & NotemacPluginSlice;
+export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice & NotemacPluginSlice & NotemacTaskRunnerSlice & NotemacLanguageDefinitionSlice;
 
 export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createTabSlice(...a),
@@ -21,6 +23,8 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createGitSlice(...a),
     ...createAISlice(...a),
     ...createPluginSlice(...a),
+    ...createTaskRunnerSlice(...a),
+    ...createLanguageDefinitionSlice(...a),
 }));
 
 // Expose store for E2E test inspection

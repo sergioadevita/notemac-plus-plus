@@ -72,4 +72,10 @@ export const NOTEMAC_EVENTS =
     PLUGIN_ERROR: 'notemac-plugin-error',
     PLUGIN_INSTALLED: 'notemac-plugin-installed',
     PLUGIN_UNINSTALLED: 'notemac-plugin-uninstalled',
+    TASK_STARTED: 'notemac-task-started',
+    TASK_COMPLETED: 'notemac-task-completed',
+    TASK_FAILED: 'notemac-task-failed',
+    TASK_TERMINATED: 'notemac-task-terminated',
+    LANGUAGE_REGISTERED: 'notemac-language-registered',
+    LANGUAGE_UNREGISTERED: 'notemac-language-unregistered',
 } as const;

@@ -72,6 +72,8 @@ vi.mock('../Notemac/Model/Store', () => ({
     isAiStreaming: false,
     activeModelId: null,
     inlineSuggestionEnabled: false,
+    currentExecution: null,
+    tasks: [],
     updateTab: vi.fn(),
     updateSettings: vi.fn(),
     setSidebarPanel: vi.fn(),
@@ -148,6 +150,8 @@ describe('StatusBar', () => {
       useNotemacStore: () => ({
         tabs: [],
         activeTabId: null,
+        currentExecution: null,
+        tasks: [],
       }),
     }));
 
@@ -183,6 +187,8 @@ describe('StatusBar', () => {
         isAiStreaming: false,
         activeModelId: null,
         inlineSuggestionEnabled: false,
+        currentExecution: null,
+        tasks: [],
         updateTab: vi.fn(),
         updateSettings: vi.fn(),
         setSidebarPanel: vi.fn(),
@@ -237,6 +243,8 @@ describe('StatusBar', () => {
         isAiStreaming: false,
         activeModelId: null,
         inlineSuggestionEnabled: false,
+        currentExecution: null,
+        tasks: [],
         updateTab: vi.fn(),
         updateSettings: vi.fn(),
         setSidebarPanel: vi.fn(),

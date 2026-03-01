@@ -16,6 +16,7 @@ import { ExecutePluginCommand } from '../Controllers/PluginController';
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
 const PluginSidebarPanelViewPresenter = lazy(() => import('./PluginSidebarPanelViewPresenter').then(m => ({ default: m.PluginSidebarPanelViewPresenter })));
+const TaskRunnerPanelViewPresenter = lazy(() => import('./TaskRunnerPanelViewPresenter').then(m => ({ default: m.TaskRunnerPanelViewPresenter })));
 
 interface SidebarProps {
   theme: ThemeColors;
@@ -348,6 +349,7 @@ export function Sidebar({ theme }: SidebarProps) {
           { panel: 'git' as const, icon: '\ud83d\udd00', title: 'Source Control' },
           { panel: 'ai' as const, icon: '\u2728', title: 'AI Assistant' },
           { panel: 'plugins' as const, icon: '\ud83e\udde9', title: 'Plugin Manager' },
+          { panel: 'tasks' as const, icon: '\u25b6', title: 'Task Runner' },
         ] as const).map(({ panel, icon, title }) => {
           const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
           return (
@@ -413,7 +415,7 @@ export function Sidebar({ theme }: SidebarProps) {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : sidebarPanel === 'plugins' ? 'Plugins' : typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') ? 'Plugin Panel' : ''}
+          {sidebarPanel === 'explorer' ? 'Explorer' : sidebarPanel === 'search' ? 'Search' : sidebarPanel === 'functions' ? 'Functions' : sidebarPanel === 'docList' ? 'Document List' : sidebarPanel === 'project' ? 'Project' : sidebarPanel === 'clipboardHistory' ? 'Clipboard History' : sidebarPanel === 'charPanel' ? 'Character Panel' : sidebarPanel === 'git' ? 'Source Control' : sidebarPanel === 'ai' ? 'AI Assistant' : sidebarPanel === 'plugins' ? 'Plugins' : sidebarPanel === 'tasks' ? 'Tasks' : typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') ? 'Plugin Panel' : ''}
           <button
             aria-label="Collapse panel"
             onClick={() => setSidebarPanel(null)}
@@ -543,6 +545,12 @@ export function Sidebar({ theme }: SidebarProps) {
 
           {sidebarPanel === 'plugins' && (
             <PluginsSidebarContent theme={theme} />
+          )}
+
+          {sidebarPanel === 'tasks' && (
+            <Suspense fallback={<div style={{ padding: 16, color: theme.textMuted, fontSize: 12 }}>Loading...</div>}>
+              <TaskRunnerPanelViewPresenter theme={theme} />
+            </Suspense>
           )}
 
           {typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') && (
