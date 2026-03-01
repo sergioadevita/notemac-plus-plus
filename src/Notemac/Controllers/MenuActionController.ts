@@ -372,9 +372,10 @@ export function HandleMenuAction(
             // Check if it's a plugin command
             if (action.startsWith('plugin:'))
             {
+                const commandId = action.slice(7); // Strip "plugin:" prefix
                 import('./PluginController').then(({ ExecutePluginCommand }) =>
                 {
-                    ExecutePluginCommand(action);
+                    ExecutePluginCommand(commandId);
                 });
             }
             else if (editorAction)

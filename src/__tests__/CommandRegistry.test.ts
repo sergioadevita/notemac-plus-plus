@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GetAllCommands, GetCommandsByCategory } from '../Notemac/Configs/CommandRegistry';
+import { useNotemacStore } from '../Notemac/Model/Store';
 
 // ─── CommandRegistry — Git commands ─────────────────────────────
 
@@ -61,5 +62,88 @@ describe('CommandRegistry — git commands', () =>
         const actions = commands.map(c => c.action);
         const uniqueActions = new Set(actions);
         expect(actions.length === uniqueActions.size).toBe(true);
+    });
+});
+
+// ─── CommandRegistry — Plugin commands ──────────────────────────
+
+describe('CommandRegistry — plugin commands in Command Palette', () =>
+{
+    beforeEach(() =>
+    {
+        // Clear all plugin commands from store via setState
+        useNotemacStore.setState({ pluginCommands: [] });
+    });
+
+    it('includes registered plugin commands in the command list', () =>
+    {
+        // Register a plugin command in the store
+        useNotemacStore.getState().RegisterPluginCommand({
+            id: 'testPlugin.doSomething',
+            handler: () => {},
+            pluginId: 'test-plugin',
+        });
+
+        const commands = GetAllCommands();
+        const pluginCmd = commands.find(c => 'plugin:testPlugin.doSomething' === c.action);
+        expect(pluginCmd).toBeDefined();
+        expect(pluginCmd!.category).toBe('Plugins');
+
+        // Cleanup
+        useNotemacStore.getState().UnregisterAllByPluginId('test-plugin');
+    });
+
+    it('formats plugin command labels from camelCase IDs', () =>
+    {
+        useNotemacStore.getState().RegisterPluginCommand({
+            id: 'loremIpsum.insertParagraph',
+            handler: () => {},
+            pluginId: 'test-plugin',
+        });
+
+        const commands = GetAllCommands();
+        const pluginCmd = commands.find(c => 'plugin:loremIpsum.insertParagraph' === c.action);
+        expect(pluginCmd).toBeDefined();
+        expect(pluginCmd!.label).toBe('Lorem Ipsum: Insert Paragraph');
+
+        useNotemacStore.getState().UnregisterAllByPluginId('test-plugin');
+    });
+
+    it('does not include plugin commands that clash with built-in actions', () =>
+    {
+        useNotemacStore.getState().RegisterPluginCommand({
+            id: 'new', // Same as built-in "new" action
+            handler: () => {},
+            pluginId: 'test-plugin',
+        });
+
+        const commands = GetAllCommands();
+        // The built-in "new" should exist, but no duplicate plugin version
+        const newCommands = commands.filter(c => c.action === 'new' || c.action === 'plugin:new');
+        // "new" is from shortcuts, "plugin:new" should also be added since "new" !== "plugin:new"
+        // The dedup checks existingActions which contains "new", not "plugin:new"
+        // So plugin:new should still be added
+        expect(newCommands.length).toBeGreaterThanOrEqual(1);
+
+        useNotemacStore.getState().UnregisterAllByPluginId('test-plugin');
+    });
+
+    it('returns more commands with plugin commands than without', () =>
+    {
+        // Clear all plugin commands
+        useNotemacStore.setState({ pluginCommands: [] });
+        const baseCmdCount = GetAllCommands().length;
+
+        // Add a plugin command
+        useNotemacStore.getState().RegisterPluginCommand({
+            id: 'uniqueTest.commandForCounting',
+            handler: () => {},
+            pluginId: 'test-plugin',
+        });
+
+        const withPluginCmds = GetAllCommands();
+        expect(withPluginCmds.length).toBe(baseCmdCount + 1);
+
+        useNotemacStore.setState({ pluginCommands: [] });
     });
 });

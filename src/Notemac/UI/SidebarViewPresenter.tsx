@@ -11,6 +11,7 @@ import {
 import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 import { InitGitForWorkspace } from '../Controllers/GitController';
+import { ExecutePluginCommand } from '../Controllers/PluginController';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
@@ -541,24 +542,7 @@ export function Sidebar({ theme }: SidebarProps) {
           )}
 
           {sidebarPanel === 'plugins' && (
-            <div style={{ padding: 16, color: theme.textMuted, fontSize: 13, textAlign: 'center' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>{'\ud83e\udde9'}</div>
-              <div style={{ marginBottom: 12 }}>Manage your plugins</div>
-              <button
-                onClick={() => useNotemacStore.getState().SetShowPluginManager(true)}
-                style={{
-                  backgroundColor: theme.accent,
-                  color: theme.accentText,
-                  border: 'none',
-                  borderRadius: 6,
-                  padding: '8px 16px',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                Open Plugin Manager
-              </button>
-            </div>
+            <PluginsSidebarContent theme={theme} />
           )}
 
           {typeof sidebarPanel === 'string' && sidebarPanel.startsWith('plugin:') && (
@@ -875,3 +859,127 @@ async function buildWebFileTree(dirHandle: FileSystemDirectoryHandle, depth = 0)
     return a.name.localeCompare(b.name);
   });
 }
+
+// ─── Plugins Sidebar Panel ─────────────────────────────────────────
+
+const PluginsSidebarContent = React.memo(function PluginsSidebarContent({ theme }: { theme: ThemeColors })
+{
+    const { pluginInstances, pluginCommands, SetShowPluginManager } = useNotemacStore();
+    const activePlugins = pluginInstances.filter(p => 'active' === p.status);
+
+    // Group commands by plugin
+    const commandsByPlugin = new Map<string, { id: string; label: string }[]>();
+    for (const cmd of pluginCommands)
+    {
+        const existing = commandsByPlugin.get(cmd.pluginId) || [];
+        // Create human-readable label from command ID
+        const parts = cmd.id.split('.');
+        const labelPart = parts.length > 1 ? parts.slice(1).join('.') : parts[0];
+        const label = labelPart
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .replace(/^./, (c: string) => c.toUpperCase());
+        existing.push({ id: cmd.id, label });
+        commandsByPlugin.set(cmd.pluginId, existing);
+    }
+
+    return (
+        <div style={{ padding: 8 }}>
+            {/* Manage button */}
+            <button
+                onClick={() => SetShowPluginManager(true)}
+                style={{
+                    width: '100%',
+                    padding: '6px 10px',
+                    fontSize: 11,
+                    borderRadius: 4,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.accent,
+                    color: theme.accentText,
+                    cursor: 'pointer',
+                    marginBottom: 10,
+                }}
+            >
+                Manage Plugins
+            </button>
+
+            {0 === activePlugins.length && (
+                <div style={{ color: theme.textMuted, fontSize: 12, textAlign: 'center', padding: '16px 8px' }}>
+                    No active plugins. Open the Plugin Manager to browse and install plugins.
+                </div>
+            )}
+
+            {activePlugins.map(plugin =>
+            {
+                const commands = commandsByPlugin.get(plugin.id) || [];
+                return (
+                    <div
+                        key={plugin.id}
+                        style={{
+                            marginBottom: 8,
+                            borderRadius: 6,
+                            border: `1px solid ${theme.border}`,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {/* Plugin header */}
+                        <div style={{
+                            padding: '6px 10px',
+                            backgroundColor: theme.bgSecondary,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                        }}>
+                            <span style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: '50%',
+                                backgroundColor: '#44ff44',
+                                flexShrink: 0,
+                            }} />
+                            <span style={{ fontSize: 12, fontWeight: 600, color: theme.text }}>
+                                {plugin.manifest.name}
+                            </span>
+                            <span style={{ fontSize: 10, color: theme.textMuted, marginLeft: 'auto' }}>
+                                v{plugin.manifest.version}
+                            </span>
+                        </div>
+
+                        {/* Plugin commands */}
+                        {0 < commands.length && (
+                            <div style={{ padding: '2px 0' }}>
+                                {commands.map(cmd => (
+                                    <div
+                                        key={cmd.id}
+                                        onClick={() => ExecutePluginCommand(cmd.id)}
+                                        className="hover-bg-color"
+                                        style={{
+                                            padding: '5px 10px 5px 22px',
+                                            fontSize: 12,
+                                            color: theme.sidebarText,
+                                            cursor: 'pointer',
+                                            '--hover-bg': theme.bgHover,
+                                            '--hover-color': theme.text,
+                                        } as React.CSSProperties}
+                                    >
+                                        {cmd.label}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {0 === commands.length && (
+                            <div style={{
+                                padding: '4px 10px 6px 22px',
+                                fontSize: 11,
+                                color: theme.textMuted,
+                                fontStyle: 'italic',
+                            }}>
+                                Event-based plugin
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+});

@@ -1,9 +1,10 @@
 import type { CommandDefinition } from "../Commons/Types";
 import { GetDefaultShortcuts } from "./ShortcutConfig";
+import { useNotemacStore } from "../Model/Store";
 
 /**
  * Builds and returns the full list of available commands for the Command Palette.
- * Combines shortcut-mapped commands with additional menu actions.
+ * Combines shortcut-mapped commands, additional menu actions, and plugin commands.
  */
 export function GetAllCommands(): CommandDefinition[]
 {
@@ -107,7 +108,45 @@ export function GetAllCommands(): CommandDefinition[]
             commands.push(cmd);
     }
 
+    // Add active plugin commands so they appear in the Command Palette
+    const store = useNotemacStore.getState();
+    const pluginCommands = store.pluginCommands;
+
+    for (const pluginCmd of pluginCommands)
+    {
+        if (!existingActions.has(pluginCmd.id))
+        {
+            // Create a human-readable label from the command ID
+            // e.g. "loremIpsum.insertParagraph" → "Lorem Ipsum: Insert Paragraph"
+            const label = FormatPluginCommandLabel(pluginCmd.id);
+            commands.push({
+                id: `plugin:${pluginCmd.id}`,
+                label,
+                category: 'Plugins',
+                action: `plugin:${pluginCmd.id}`,
+            });
+        }
+    }
+
     return commands;
+}
+
+/**
+ * Convert a plugin command ID to a human-readable label.
+ * e.g. "loremIpsum.insertParagraph" → "Lorem Ipsum: Insert Paragraph"
+ */
+function FormatPluginCommandLabel(commandId: string): string
+{
+    const parts = commandId.split('.');
+    const formatted = parts.map(part =>
+    {
+        // Split camelCase into words
+        const words = part.replace(/([a-z])([A-Z])/g, '$1 $2');
+        // Capitalize first letter of each word
+        return words.charAt(0).toUpperCase() + words.slice(1);
+    });
+
+    return formatted.join(': ');
 }
 
 export function GetCommandsByCategory(category: string): CommandDefinition[]

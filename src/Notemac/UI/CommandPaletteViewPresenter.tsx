@@ -19,13 +19,14 @@ interface CommandPaletteProps
 
 export function CommandPaletteViewPresenter({ theme }: CommandPaletteProps)
 {
-    const { setShowCommandPalette, activeTabId, tabs, zoomLevel } = useNotemacStore();
+    const { setShowCommandPalette, activeTabId, tabs, zoomLevel, pluginCommands } = useNotemacStore();
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
-    const allCommands = useMemo(() => GetAllCommands(), []);
+    // Re-compute when pluginCommands change (plugins register new commands)
+    const allCommands = useMemo(() => GetAllCommands(), [pluginCommands]);
 
     const filteredCommands = useMemo(() =>
     {

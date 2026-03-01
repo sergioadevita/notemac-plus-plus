@@ -23,6 +23,8 @@ import {
     UninstallPlugin,
     SearchRegistry,
 } from '../Services/PluginRegistryService';
+import { LoadPluginBundle } from '../Services/PluginLoaderService';
+import { CreatePluginContext } from '../Services/PluginAPIService';
 import { UI_ZINDEX_MODAL } from '../Commons/Constants';
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
 
@@ -135,16 +137,48 @@ export function PluginManagerViewPresenter({ theme }: PluginManagerProps): React
             const manifest = await InstallPlugin(entry, dirHandle);
             if (manifest)
             {
+                // Load the module immediately so the plugin is usable right away
+                let module = null;
+                let status: 'active' | 'inactive' | 'error' = 'inactive';
+                let context = null;
+                let error: string | undefined;
+
+                try
+                {
+                    const pluginSubDir = await dirHandle.getDirectoryHandle(entry.id);
+                    const mainFile = manifest.main || 'index.js';
+                    const fileHandle = await pluginSubDir.getFileHandle(mainFile);
+                    const file = await fileHandle.getFile();
+                    const code = await file.text();
+                    module = await LoadPluginBundle(code);
+
+                    // Auto-activate after loading
+                    context = CreatePluginContext(manifest.id);
+                    await module.activate(context);
+                    status = 'active';
+                }
+                catch (err)
+                {
+                    status = module ? 'error' : 'inactive';
+                    error = err instanceof Error ? err.message : String(err);
+                }
+
                 const newInstance = {
                     id: manifest.id,
                     manifest,
-                    status: 'inactive' as const,
-                    context: null,
-                    module: null,
+                    status,
+                    context,
+                    module,
+                    error,
                 };
 
                 SetPluginInstances([...pluginInstances, newInstance]);
                 Dispatch(NOTEMAC_EVENTS.PLUGIN_INSTALLED, { pluginId: manifest.id });
+
+                if ('active' === status)
+                {
+                    Dispatch(NOTEMAC_EVENTS.PLUGIN_ACTIVATED, { pluginId: manifest.id });
+                }
             }
         }
         catch
