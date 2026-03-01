@@ -197,6 +197,7 @@
 | File operations | PASS | Menu items accessible (New, Open, Save) |
 | About dialog display | PASS | Shows version with full feature grid |
 | Plugin Manager dialog | PASS | Opens via Ctrl+Shift+X, browse/installed tabs functional |
+| Plugin install from registry | PASS | Demo plugins install with bundled code; directory picker prompts on first install |
 | Plugin sidebar integration | PASS | Plugin panels render in sidebar |
 
 ---
@@ -221,7 +222,7 @@
 - **Git & GitHub:** 5/5 items passing (GitHub Release created)
 - **GitHub Pages & Web App:** 5/5 items passing
 - **GitHub Repo Settings:** 4/4 items passing
-- **Final Smoke Test:** 9/9 items passing
+- **Final Smoke Test:** 10/10 items passing
 
 **Status:** RELEASED — v3.4.0
 
