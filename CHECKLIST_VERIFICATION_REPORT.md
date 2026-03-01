@@ -199,6 +199,8 @@
 | Plugin Manager dialog | PASS | Opens via Ctrl+Shift+X, browse/installed tabs functional |
 | Plugin install from registry | PASS | Demo plugins install with bundled code; directory picker prompts on first install |
 | Plugin sidebar integration | PASS | Plugin panels render in sidebar |
+| Demo plugins are unique | PASS | 5 demo plugins verified non-redundant with built-in features (Lorem Ipsum, Sort Lines, Markdown Preview, TODO Highlight, Bookmarks) |
+| Plugin API PascalCase | PASS | All bundled plugin code uses correct PascalCase method names (GetContent, InsertText, Register, Subscribe, etc.) |
 
 ---
 
@@ -222,7 +224,7 @@
 - **Git & GitHub:** 5/5 items passing (GitHub Release created)
 - **GitHub Pages & Web App:** 5/5 items passing
 - **GitHub Repo Settings:** 4/4 items passing
-- **Final Smoke Test:** 10/10 items passing
+- **Final Smoke Test:** 12/12 items passing
 
 **Status:** RELEASED — v3.4.0
 
@@ -233,7 +235,7 @@
 ### Plugin System
 - **Plugin Manager** — Browse, install, uninstall, enable, and disable plugins from a built-in manager dialog (Ctrl+Shift+X)
 - **Plugin API** — Sandboxed context giving plugins access to editor, events, UI registration, commands, themes, languages, and scoped storage
-- **Plugin Registry** — Remote registry index with search, star counts, and download counts; falls back to demo entries when offline
+- **Plugin Registry** — Remote registry index with search, star counts, and download counts; bundled demo plugins work offline without network requests
 - **Plugin Loader** — Dynamic `import()` via Blob URLs for JS bundles scanned from a user-selected directory
 - **Plugin Isolation** — Per-plugin try/catch + React error boundaries so one bad plugin can't crash the app
 - **Plugin Settings** — Plugins can register custom settings sections that appear inside the Settings dialog
