@@ -1,7 +1,7 @@
 # Notemac++ Checklist Verification Report
 **Generated:** 2026-03-01 UTC
-**Project Version:** 3.4.0
-**Test Count:** 2,278 unit tests across 127 test suites + ~1,301 E2E tests (web, Electron, Tauri) = 3,579+ total
+**Project Version:** 4.1.0
+**Test Count:** 2,728 unit tests across 138 test suites + ~1,301 E2E tests (web, Electron, Tauri) = 4,029+ total
 
 ---
 
