@@ -168,4 +168,90 @@ describe('PluginManagerViewPresenter', () =>
         // After clicking Browse, search input should appear
         expect(null !== screen.queryByPlaceholderText(/search/i)).toBe(true);
     });
+
+    it('should prompt for directory when clicking Install with no handle set', async () =>
+    {
+        setupMockState({ pluginInstances: [] });
+
+        const mockDirHandle = { kind: 'directory', name: 'plugins' } as unknown as FileSystemDirectoryHandle;
+        const mockShowDirectoryPicker = vi.fn().mockResolvedValue(mockDirHandle);
+        (window as any).showDirectoryPicker = mockShowDirectoryPicker;
+
+        vi.mocked(PluginController.GetPluginDirectoryHandle).mockReturnValue(null);
+        vi.mocked(PluginRegistryService.InstallPlugin).mockResolvedValue(null);
+
+        render(<PluginManagerViewPresenter theme={mockTheme} />);
+
+        const browseTab = screen.getByText('Browse');
+        fireEvent.click(browseTab);
+
+        const installButton = screen.getByText('Install');
+        fireEvent.click(installButton);
+
+        await waitFor(() =>
+        {
+            expect(mockShowDirectoryPicker).toHaveBeenCalledWith({ mode: 'readwrite' });
+        });
+
+        expect(PluginController.SetPluginDirectoryHandle).toHaveBeenCalledWith(mockDirHandle);
+
+        delete (window as any).showDirectoryPicker;
+    });
+
+    it('should not prompt for directory when handle already exists', async () =>
+    {
+        setupMockState({ pluginInstances: [] });
+
+        const mockDirHandle = { kind: 'directory', name: 'plugins' } as unknown as FileSystemDirectoryHandle;
+        const mockShowDirectoryPicker = vi.fn();
+        (window as any).showDirectoryPicker = mockShowDirectoryPicker;
+
+        vi.mocked(PluginController.GetPluginDirectoryHandle).mockReturnValue(mockDirHandle);
+        vi.mocked(PluginRegistryService.InstallPlugin).mockResolvedValue(null);
+
+        render(<PluginManagerViewPresenter theme={mockTheme} />);
+
+        const browseTab = screen.getByText('Browse');
+        fireEvent.click(browseTab);
+
+        const installButton = screen.getByText('Install');
+        fireEvent.click(installButton);
+
+        await waitFor(() =>
+        {
+            expect(PluginRegistryService.InstallPlugin).toHaveBeenCalled();
+        });
+
+        expect(mockShowDirectoryPicker).not.toHaveBeenCalled();
+
+        delete (window as any).showDirectoryPicker;
+    });
+
+    it('should handle user cancelling directory picker gracefully', async () =>
+    {
+        setupMockState({ pluginInstances: [] });
+
+        const mockShowDirectoryPicker = vi.fn().mockRejectedValue(new DOMException('User cancelled'));
+        (window as any).showDirectoryPicker = mockShowDirectoryPicker;
+
+        vi.mocked(PluginController.GetPluginDirectoryHandle).mockReturnValue(null);
+
+        render(<PluginManagerViewPresenter theme={mockTheme} />);
+
+        const browseTab = screen.getByText('Browse');
+        fireEvent.click(browseTab);
+
+        const installButton = screen.getByText('Install');
+        fireEvent.click(installButton);
+
+        await waitFor(() =>
+        {
+            expect(mockShowDirectoryPicker).toHaveBeenCalled();
+        });
+
+        // Should not crash, and Install should not proceed
+        expect(PluginRegistryService.InstallPlugin).not.toHaveBeenCalled();
+
+        delete (window as any).showDirectoryPicker;
+    });
 });
