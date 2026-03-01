@@ -16,6 +16,7 @@ import {
     DeactivatePlugin,
     ReloadPlugin,
     GetPluginDirectoryHandle,
+    SetPluginDirectoryHandle,
 } from '../Controllers/PluginController';
 import {
     InstallPlugin,
@@ -79,9 +80,34 @@ export function PluginManagerViewPresenter({ theme }: PluginManagerProps): React
         await ReloadPlugin(pluginId);
     };
 
+    const requestPluginDirectory = async (): Promise<FileSystemDirectoryHandle | null> =>
+    {
+        let dirHandle = GetPluginDirectoryHandle();
+        if (dirHandle)
+            return dirHandle;
+
+        if (!('showDirectoryPicker' in window))
+            return null;
+
+        try
+        {
+            dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+            if (dirHandle)
+            {
+                SetPluginDirectoryHandle(dirHandle);
+            }
+            return dirHandle;
+        }
+        catch
+        {
+            // User cancelled the directory picker
+            return null;
+        }
+    };
+
     const handleUninstall = async (pluginId: string) =>
     {
-        const dirHandle = GetPluginDirectoryHandle();
+        const dirHandle = await requestPluginDirectory();
         if (!dirHandle)
             return;
 
@@ -98,7 +124,7 @@ export function PluginManagerViewPresenter({ theme }: PluginManagerProps): React
 
     const handleInstall = async (entry: PluginRegistryEntry) =>
     {
-        const dirHandle = GetPluginDirectoryHandle();
+        const dirHandle = await requestPluginDirectory();
         if (!dirHandle)
             return;
 
