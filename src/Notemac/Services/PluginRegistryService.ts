@@ -88,71 +88,68 @@ export async function InstallPlugin(
 {
     try
     {
-        // Download the plugin bundle
-        const response = await fetch(entry.downloadUrl);
-        if (!response.ok)
+        const manifest: PluginManifest = {
+            id: entry.id,
+            name: entry.name,
+            version: entry.version,
+            description: entry.description,
+            author: entry.author,
+            main: 'index.js',
+        };
+
+        let code = '';
+
+        // Use bundled code if available (demo/offline plugins), otherwise download
+        if (entry.bundledCode)
         {
-            throw new Error(`Download failed: ${response.status}`);
-        }
-
-        const contentType = response.headers.get('content-type') || '';
-
-        // Create plugin subfolder
-        const pluginFolder = await pluginDir.getDirectoryHandle(entry.id, { create: true });
-
-        if (contentType.includes('application/json'))
-        {
-            // Single-file plugin: manifest + inline code
-            const data = await response.json();
-            const manifest = data.manifest || data;
-            const code = data.code || '';
-
-            // Write manifest
-            const manifestHandle = await pluginFolder.getFileHandle('manifest.json', { create: true });
-            const manifestWritable = await manifestHandle.createWritable();
-            await manifestWritable.write(JSON.stringify(manifest, null, 2));
-            await manifestWritable.close();
-
-            // Write code
-            if (code)
-            {
-                const mainFile = manifest.main || 'index.js';
-                const codeHandle = await pluginFolder.getFileHandle(mainFile, { create: true });
-                const codeWritable = await codeHandle.createWritable();
-                await codeWritable.write(code);
-                await codeWritable.close();
-            }
-
-            return manifest as PluginManifest;
+            code = entry.bundledCode;
         }
         else
         {
-            // Treat as JS bundle — create a default manifest
-            const code = await response.text();
+            const response = await fetch(entry.downloadUrl);
+            if (!response.ok)
+            {
+                throw new Error(`Download failed: ${response.status}`);
+            }
 
-            const manifest: PluginManifest = {
-                id: entry.id,
-                name: entry.name,
-                version: entry.version,
-                description: entry.description,
-                author: entry.author,
-                main: 'index.js',
-            };
+            const contentType = response.headers.get('content-type') || '';
 
-            // Write manifest
-            const manifestHandle = await pluginFolder.getFileHandle('manifest.json', { create: true });
-            const manifestWritable = await manifestHandle.createWritable();
-            await manifestWritable.write(JSON.stringify(manifest, null, 2));
-            await manifestWritable.close();
+            if (contentType.includes('application/json'))
+            {
+                const data = await response.json();
+                const remoteManifest = data.manifest || data;
+                code = data.code || '';
 
-            // Write code
-            const codeHandle = await pluginFolder.getFileHandle('index.js', { create: true });
+                // Merge remote manifest fields if present
+                if (remoteManifest.main)
+                    manifest.main = remoteManifest.main;
+                if (remoteManifest.contributes)
+                    manifest.contributes = remoteManifest.contributes;
+            }
+            else
+            {
+                code = await response.text();
+            }
+        }
+
+        // Create plugin subfolder and write files
+        const pluginFolder = await pluginDir.getDirectoryHandle(entry.id, { create: true });
+
+        const manifestHandle = await pluginFolder.getFileHandle('manifest.json', { create: true });
+        const manifestWritable = await manifestHandle.createWritable();
+        await manifestWritable.write(JSON.stringify(manifest, null, 2));
+        await manifestWritable.close();
+
+        if (code)
+        {
+            const mainFile = manifest.main || 'index.js';
+            const codeHandle = await pluginFolder.getFileHandle(mainFile, { create: true });
             const codeWritable = await codeHandle.createWritable();
             await codeWritable.write(code);
             await codeWritable.close();
-
-            return manifest;
         }
+
+        return manifest;
     }
     catch
     {
@@ -220,6 +217,7 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/word-counter/download',
             stars: 127,
             downloads: 4521,
+            bundledCode: GetWordCounterCode(),
         },
         {
             id: 'color-picker',
@@ -230,6 +228,7 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/color-picker/download',
             stars: 89,
             downloads: 3210,
+            bundledCode: GetColorPickerCode(),
         },
         {
             id: 'markdown-preview',
@@ -240,6 +239,7 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/markdown-preview/download',
             stars: 256,
             downloads: 8901,
+            bundledCode: GetMarkdownPreviewCode(),
         },
         {
             id: 'todo-highlight',
@@ -250,6 +250,7 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/todo-highlight/download',
             stars: 198,
             downloads: 6745,
+            bundledCode: GetTodoHighlightCode(),
         },
         {
             id: 'file-icons',
@@ -260,6 +261,120 @@ export function GetDemoRegistryEntries(): PluginRegistryEntry[]
             downloadUrl: 'https://registry.notemac.dev/api/v1/plugins/file-icons/download',
             stars: 312,
             downloads: 12040,
+            bundledCode: GetFileIconsCode(),
         },
     ];
+}
+
+// ─── Bundled Demo Plugin Code ──────────────────────────────────────
+
+function GetWordCounterCode(): string
+{
+    return `
+export function activate(ctx) {
+    const update = () => {
+        const text = ctx.editor.getText() || '';
+        const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
+        const chars = text.length;
+        const lines = text.split('\\n').length;
+        ctx.ui.setStatusBarText('Words: ' + words + ' | Chars: ' + chars + ' | Lines: ' + lines);
+    };
+    ctx.events.on('editor:contentChanged', update);
+    ctx.events.on('editor:tabChanged', update);
+    update();
+    ctx.commands.register('wordCounter.showCount', update);
+}
+export function deactivate() {}
+`;
+}
+
+function GetColorPickerCode(): string
+{
+    return `
+export function activate(ctx) {
+    ctx.commands.register('colorPicker.insert', () => {
+        const color = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        ctx.editor.insertText(color);
+    });
+    ctx.ui.setStatusBarText('Color Picker ready');
+}
+export function deactivate() {}
+`;
+}
+
+function GetMarkdownPreviewCode(): string
+{
+    return `
+export function activate(ctx) {
+    ctx.commands.register('markdownPreview.toggle', () => {
+        const text = ctx.editor.getText() || '';
+        const html = text
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
+            .replace(/\\*(.+?)\\*/g, '<em>$1</em>')
+            .replace(/\`(.+?)\`/g, '<code>$1</code>')
+            .replace(/\\n/g, '<br>');
+        ctx.storage.set('lastPreview', html);
+    });
+    ctx.ui.setStatusBarText('MD Preview ready');
+}
+export function deactivate() {}
+`;
+}
+
+function GetTodoHighlightCode(): string
+{
+    return `
+let decorations = [];
+export function activate(ctx) {
+    const highlight = () => {
+        const editor = ctx.editor.getMonacoEditor();
+        if (!editor) return;
+        const model = editor.getModel();
+        if (!model) return;
+        const matches = [];
+        const text = model.getValue();
+        const regex = /\\b(TODO|FIXME|HACK|XXX|NOTE|BUG)\\b/g;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            const pos = model.getPositionAt(match.index);
+            const endPos = model.getPositionAt(match.index + match[0].length);
+            matches.push({
+                range: { startLineNumber: pos.lineNumber, startColumn: pos.column, endLineNumber: endPos.lineNumber, endColumn: endPos.column },
+                options: { inlineClassName: 'todo-highlight-decoration', hoverMessage: { value: match[0] + ' comment' } }
+            });
+        }
+        decorations = editor.deltaDecorations(decorations, matches);
+    };
+    ctx.events.on('editor:contentChanged', highlight);
+    ctx.events.on('editor:tabChanged', highlight);
+    highlight();
+    ctx.ui.setStatusBarText('TODO Highlight active');
+}
+export function deactivate() { decorations = []; }
+`;
+}
+
+function GetFileIconsCode(): string
+{
+    return `
+export function activate(ctx) {
+    const iconMap = {
+        js: '\\u{1F7E8}', ts: '\\u{1F535}', jsx: '\\u{269B}', tsx: '\\u{269B}',
+        html: '\\u{1F7E0}', css: '\\u{1F7E3}', json: '\\u{1F4CB}', md: '\\u{1F4DD}',
+        py: '\\u{1F40D}', rs: '\\u{2699}', go: '\\u{1F439}', java: '\\u{2615}',
+        sh: '\\u{1F4BB}', yml: '\\u{2699}', yaml: '\\u{2699}', toml: '\\u{2699}',
+        txt: '\\u{1F4C4}', svg: '\\u{1F3A8}', png: '\\u{1F5BC}', jpg: '\\u{1F5BC}',
+    };
+    ctx.commands.register('fileIcons.getIcon', () => {
+        const fileName = ctx.editor.getFileName() || '';
+        const ext = fileName.split('.').pop() || '';
+        return iconMap[ext] || '\\u{1F4C4}';
+    });
+    ctx.ui.setStatusBarText('File Icons active');
+}
+export function deactivate() {}
+`;
 }

@@ -184,6 +184,8 @@ export interface PluginRegistryEntry
     icon?: string;
     stars: number;
     downloads: number;
+    /** Inline JS code for bundled/demo plugins (skips download). */
+    bundledCode?: string;
 }
 
 // ─── UI Registration Types ─────────────────────────────────────────
