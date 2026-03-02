@@ -1,7 +1,7 @@
 # Notemac++ Checklist Verification Report
-**Generated:** 2026-03-01 UTC
-**Project Version:** 4.1.0
-**Test Count:** 2,728 unit tests across 138 test suites + ~1,301 E2E tests (web, Electron, Tauri) = 4,029+ total
+**Generated:** 2026-03-02 UTC
+**Project Version:** 4.1.1
+**Test Count:** 2,736 unit tests across 139 test suites + ~1,301 E2E tests (web, Electron, Tauri) = 4,037+ total
 
 ---
 
@@ -40,11 +40,11 @@
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Unit tests written (Vitest) | PASS | 127 test files, 2,278 total tests (+134 new) |
+| Unit tests written (Vitest) | PASS | 139 test files, 2,736 total tests (+8 new in ProcessExecutionService) |
 | Edge cases covered | PASS | Null, undefined, boundary values tested in all new modules |
 | Negative tests included | PASS | Error states and invalid inputs verified (bad plugins, failed loads) |
-| All existing tests pass | PASS | 2,278/2,278 passing, 0 failures |
-| Test count updated in docs | PASS | README.md badge updated to 3576+ |
+| All existing tests pass | PASS | 2,736/2,736 passing, 0 failures |
+| Test count updated in docs | PASS | README.md badge updated to 4000+ |
 | Tauri E2E tests written | PASS | Existing E2E tests maintained |
 | New feature tests | PASS | 12 new test files following 1:1 naming convention |
 
