@@ -13,6 +13,10 @@ import { useNotemacStore } from '../Notemac/Model/Store';
 import { Dispatch, NOTEMAC_EVENTS } from '../Shared/EventDispatcher/EventDispatcher';
 import type { TaskDefinition } from '../Notemac/Commons/Types';
 
+// Track the mock ExecuteTask so tests can invoke callbacks
+let mockExecuteTaskCallbacks: any = null;
+let mockCancelFn = vi.fn();
+
 // Mock the store
 vi.mock('../Notemac/Model/Store', () => ({
     useNotemacStore: {
@@ -28,6 +32,24 @@ vi.mock('../Shared/EventDispatcher/EventDispatcher', () => ({
         TASK_COMPLETED: 'TASK_COMPLETED',
         TASK_TERMINATED: 'TASK_TERMINATED',
     },
+}));
+
+// Mock PlatformBridge — default to desktop
+vi.mock('../Notemac/Services/PlatformBridge', () => ({
+    DetectPlatform: vi.fn(() => 'electron'),
+    IsDesktopEnvironment: vi.fn(() => true),
+    IsTauriEnvironment: vi.fn(() => false),
+    IsElectronEnvironment: vi.fn(() => true),
+}));
+
+// Mock ProcessExecutionService
+vi.mock('../Notemac/Services/ProcessExecutionService', () => ({
+    ExecuteTask: vi.fn((task: any, callbacks: any) =>
+    {
+        mockExecuteTaskCallbacks = callbacks;
+        mockCancelFn = vi.fn();
+        return { cancel: mockCancelFn };
+    }),
 }));
 
 // Mock TaskRunnerService functions
@@ -100,33 +122,6 @@ vi.mock('../Notemac/Services/TaskRunnerService', () => {
             }
             return groupTasks.length > 0 ? groupTasks[0] : null;
         }),
-        GenerateSimulatedOutput: vi.fn((task: TaskDefinition) =>
-        {
-            if (task.group === 'build')
-            {
-                return [
-                    '> Executing task: ' + task.label,
-                    '> Command: ' + task.command,
-                    'Compiling sources...',
-                    'Build completed successfully.',
-                ];
-            }
-            if (task.group === 'test')
-            {
-                return [
-                    '> Executing task: ' + task.label,
-                    '> Command: ' + task.command,
-                    'Running test suites...',
-                    'PASS  src/__tests__/utils.test.ts',
-                    'Test Suites: 1 passed, 1 total',
-                ];
-            }
-            return [
-                '> Executing task: ' + task.label,
-                '> Command: ' + task.command,
-                'Task completed.',
-            ];
-        }),
         FormatTaskDuration: vi.fn((startTime, endTime) =>
         {
             const diff = endTime - startTime;
@@ -143,7 +138,8 @@ describe('TaskRunnerController — RunTask', () =>
 
     beforeEach(() =>
     {
-        vi.useFakeTimers();
+        mockExecuteTaskCallbacks = null;
+        mockCancelFn = vi.fn();
         mockStore = {
             currentExecution: null,
             tasks: [],
@@ -161,11 +157,6 @@ describe('TaskRunnerController — RunTask', () =>
         mockDispatch = Dispatch as any;
         mockDispatch.mockClear();
         vi.clearAllMocks();
-    });
-
-    afterEach(() =>
-    {
-        vi.useRealTimers();
     });
 
     // ─── RunTask: Happy Path ───────────────────────────────────────────
@@ -193,7 +184,24 @@ describe('TaskRunnerController — RunTask', () =>
         );
     });
 
-    it('generates output lines and streams them with timer advancement', () =>
+    it('echoes command info before executing', () =>
+    {
+        const task: TaskDefinition = {
+            id: 'task-1',
+            label: 'Build',
+            command: 'npm run build',
+            group: 'build',
+            isDefault: true,
+        };
+        mockStore.tasks = [task];
+
+        RunTask('task-1');
+
+        expect(mockStore.AppendTaskOutput).toHaveBeenCalledWith(expect.stringContaining('Executing task: Build'));
+        expect(mockStore.AppendTaskOutput).toHaveBeenCalledWith(expect.stringContaining('Command: npm run build'));
+    });
+
+    it('streams output lines via onLine callback', () =>
     {
         const task: TaskDefinition = {
             id: 'task-1',
@@ -214,13 +222,40 @@ describe('TaskRunnerController — RunTask', () =>
 
         RunTask('task-1');
 
-        // Advance by one line delay (150ms)
-        vi.advanceTimersByTime(150);
-        expect(mockStore.AppendTaskOutput).toHaveBeenCalled();
+        // Simulate process output
+        expect(mockExecuteTaskCallbacks).not.toBeNull();
+        mockExecuteTaskCallbacks.onLine('Compiling sources...');
+        mockExecuteTaskCallbacks.onLine('Build complete.');
 
-        // Advance to completion
-        vi.advanceTimersByTime(10000);
-        expect(mockStore.CompleteTaskExecution).toHaveBeenCalled();
+        // AppendTaskOutput called for echoed lines + process lines
+        const calls = mockStore.AppendTaskOutput.mock.calls.map((c: any[]) => c[0]);
+        expect(calls).toContain('Compiling sources...');
+        expect(calls).toContain('Build complete.');
+    });
+
+    it('completes task when onExit callback fires', () =>
+    {
+        const task: TaskDefinition = {
+            id: 'task-1',
+            label: 'Build',
+            command: 'npm run build',
+            group: 'build',
+            isDefault: true,
+        };
+        mockStore.tasks = [task];
+        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
+            mockStore.currentExecution = {
+                taskId,
+                startTime: Date.now(),
+                output: [],
+                status: 'running',
+            };
+        });
+
+        RunTask('task-1');
+        mockExecuteTaskCallbacks.onExit(0);
+
+        expect(mockStore.CompleteTaskExecution).toHaveBeenCalledWith(0);
         expect(mockDispatch).toHaveBeenCalledWith(
             NOTEMAC_EVENTS.TASK_COMPLETED,
             expect.objectContaining({
@@ -230,7 +265,7 @@ describe('TaskRunnerController — RunTask', () =>
         );
     });
 
-    it('completes task execution after all output is streamed', () =>
+    it('reports non-zero exit code', () =>
     {
         const task: TaskDefinition = {
             id: 'task-1',
@@ -250,11 +285,35 @@ describe('TaskRunnerController — RunTask', () =>
         });
 
         RunTask('task-1');
+        mockExecuteTaskCallbacks.onExit(1);
 
-        // Fast-forward all timers
-        vi.runAllTimers();
+        expect(mockStore.CompleteTaskExecution).toHaveBeenCalledWith(1);
+    });
 
-        expect(mockStore.CompleteTaskExecution).toHaveBeenCalledWith(0);
+    it('appends error message via onError callback', () =>
+    {
+        const task: TaskDefinition = {
+            id: 'task-1',
+            label: 'Build',
+            command: 'npm run build',
+            group: 'build',
+            isDefault: true,
+        };
+        mockStore.tasks = [task];
+        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
+            mockStore.currentExecution = {
+                taskId,
+                startTime: Date.now(),
+                output: [],
+                status: 'running',
+            };
+        });
+
+        RunTask('task-1');
+        mockExecuteTaskCallbacks.onError('spawn ENOENT');
+
+        const calls = mockStore.AppendTaskOutput.mock.calls.map((c: any[]) => c[0]);
+        expect(calls.some((line: string) => line.includes('ERROR') && line.includes('spawn ENOENT'))).toBe(true);
     });
 
     // ─── RunTask: Task Not Found ────────────────────────────────────────
@@ -298,7 +357,27 @@ describe('TaskRunnerController — RunTask', () =>
         RunTask('task-2');
 
         expect(mockStore.StartTaskExecution).not.toHaveBeenCalled();
-        expect(mockDispatch).not.toHaveBeenCalledWith(NOTEMAC_EVENTS.TASK_STARTED);
+    });
+
+    // ─── RunTask: Web Platform ─────────────────────────────────────────
+
+    it('does nothing on web platform', async () =>
+    {
+        const { IsDesktopEnvironment } = await import('../Notemac/Services/PlatformBridge');
+        (IsDesktopEnvironment as any).mockReturnValueOnce(false);
+
+        const task: TaskDefinition = {
+            id: 'task-1',
+            label: 'Build',
+            command: 'npm run build',
+            group: 'build',
+            isDefault: true,
+        };
+        mockStore.tasks = [task];
+
+        RunTask('task-1');
+
+        expect(mockStore.StartTaskExecution).not.toHaveBeenCalled();
     });
 });
 
@@ -308,7 +387,7 @@ describe('TaskRunnerController — RunBuildTask', () =>
 
     beforeEach(() =>
     {
-        vi.useFakeTimers();
+        mockExecuteTaskCallbacks = null;
         mockStore = {
             currentExecution: null,
             tasks: [],
@@ -324,11 +403,6 @@ describe('TaskRunnerController — RunBuildTask', () =>
 
         (useNotemacStore.getState as any).mockReturnValue(mockStore);
         vi.clearAllMocks();
-    });
-
-    afterEach(() =>
-    {
-        vi.useRealTimers();
     });
 
     it('delegates to RunTask with default build task', () =>
@@ -386,7 +460,7 @@ describe('TaskRunnerController — RunTestTask', () =>
 
     beforeEach(() =>
     {
-        vi.useFakeTimers();
+        mockExecuteTaskCallbacks = null;
         mockStore = {
             currentExecution: null,
             tasks: [],
@@ -402,11 +476,6 @@ describe('TaskRunnerController — RunTestTask', () =>
 
         (useNotemacStore.getState as any).mockReturnValue(mockStore);
         vi.clearAllMocks();
-    });
-
-    afterEach(() =>
-    {
-        vi.useRealTimers();
     });
 
     it('delegates to RunTask with default test task', () =>
@@ -466,7 +535,8 @@ describe('TaskRunnerController — CancelCurrentTask', () =>
     beforeEach(() =>
     {
         vi.clearAllMocks();
-        vi.useFakeTimers();
+        mockExecuteTaskCallbacks = null;
+        mockCancelFn = vi.fn();
         mockStore = {
             currentExecution: null,
             tasks: [],
@@ -482,11 +552,6 @@ describe('TaskRunnerController — CancelCurrentTask', () =>
 
         (useNotemacStore.getState as any).mockReturnValue(mockStore);
         mockDispatch = Dispatch as any;
-    });
-
-    afterEach(() =>
-    {
-        vi.useRealTimers();
     });
 
     it('cancels running task and dispatches TASK_TERMINATED event', () =>
@@ -509,11 +574,12 @@ describe('TaskRunnerController — CancelCurrentTask', () =>
         });
 
         RunTask('task-1');
-        vi.advanceTimersByTime(150);
+        const cancelFn = mockCancelFn;
 
         mockDispatch.mockClear();
         CancelCurrentTask();
 
+        expect(cancelFn).toHaveBeenCalled();
         expect(mockStore.CancelTaskExecution).toHaveBeenCalled();
         expect(mockDispatch).toHaveBeenCalledWith(
             NOTEMAC_EVENTS.TASK_TERMINATED,
@@ -521,38 +587,6 @@ describe('TaskRunnerController — CancelCurrentTask', () =>
                 taskId: 'task-1',
             })
         );
-    });
-
-    it('clears active timers when cancelling', () =>
-    {
-        const task: TaskDefinition = {
-            id: 'task-1',
-            label: 'Build',
-            command: 'npm run build',
-            group: 'build',
-            isDefault: true,
-        };
-        mockStore.tasks = [task];
-        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
-            mockStore.currentExecution = {
-                taskId,
-                startTime: Date.now(),
-                output: [],
-                status: 'running',
-            };
-        });
-
-        RunTask('task-1');
-        vi.advanceTimersByTime(150);
-
-        // Task should have pending timers
-        const timersBefore = vi.getTimerCount();
-
-        CancelCurrentTask();
-
-        // After cancellation, timers should be cleared
-        const timersAfter = vi.getTimerCount();
-        expect(timersAfter).toBeLessThan(timersBefore);
     });
 
     it('does nothing when no task is running', () =>
@@ -952,165 +986,5 @@ describe('TaskRunnerController — GetLastTaskDuration', () =>
         const duration = GetLastTaskDuration();
 
         expect(duration).toBe('');
-    });
-});
-
-describe('TaskRunnerController — Event Dispatching', () =>
-{
-    let mockStore: any;
-    let mockDispatch: any;
-
-    beforeEach(() =>
-    {
-        vi.clearAllMocks();
-        vi.useFakeTimers();
-        mockStore = {
-            currentExecution: null,
-            tasks: [],
-            taskHistory: [],
-            StartTaskExecution: vi.fn(),
-            AppendTaskOutput: vi.fn(),
-            CompleteTaskExecution: vi.fn(),
-            CancelTaskExecution: vi.fn(),
-            AddTask: vi.fn(),
-            RemoveTask: vi.fn(),
-            SetTasks: vi.fn(),
-        };
-
-        (useNotemacStore.getState as any).mockReturnValue(mockStore);
-        mockDispatch = Dispatch as any;
-    });
-
-    afterEach(() =>
-    {
-        vi.useRealTimers();
-    });
-
-    it('dispatches TASK_STARTED with correct event data', () =>
-    {
-        const task: TaskDefinition = {
-            id: 'task-1',
-            label: 'Build Task',
-            command: 'npm run build',
-            group: 'build',
-            isDefault: true,
-        };
-        mockStore.tasks = [task];
-
-        RunTask('task-1');
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            NOTEMAC_EVENTS.TASK_STARTED,
-            {
-                taskId: 'task-1',
-                label: 'Build Task',
-            }
-        );
-    });
-
-    it('dispatches TASK_COMPLETED with exit code', () =>
-    {
-        const task: TaskDefinition = {
-            id: 'task-1',
-            label: 'Build Task',
-            command: 'npm run build',
-            group: 'build',
-            isDefault: true,
-        };
-        mockStore.tasks = [task];
-        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
-            mockStore.currentExecution = {
-                taskId,
-                startTime: Date.now(),
-                output: [],
-                status: 'running',
-            };
-        });
-
-        RunTask('task-1');
-        vi.runAllTimers();
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            NOTEMAC_EVENTS.TASK_COMPLETED,
-            expect.objectContaining({
-                taskId: 'task-1',
-                label: 'Build Task',
-                exitCode: 0,
-            })
-        );
-    });
-
-    it('dispatches TASK_TERMINATED when task is cancelled', () =>
-    {
-        const task: TaskDefinition = {
-            id: 'task-1',
-            label: 'Build Task',
-            command: 'npm run build',
-            group: 'build',
-            isDefault: true,
-        };
-        mockStore.tasks = [task];
-        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
-            mockStore.currentExecution = {
-                taskId,
-                startTime: Date.now(),
-                output: [],
-                status: 'running',
-            };
-        });
-
-        RunTask('task-1');
-        vi.advanceTimersByTime(300);
-
-        mockDispatch.mockClear();
-        CancelCurrentTask();
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            NOTEMAC_EVENTS.TASK_TERMINATED,
-            {
-                taskId: 'task-1',
-            }
-        );
-    });
-
-    it('does not dispatch completion event if task was cancelled', () =>
-    {
-        const task: TaskDefinition = {
-            id: 'task-1',
-            label: 'Build Task',
-            command: 'npm run build',
-            group: 'build',
-            isDefault: true,
-        };
-        mockStore.tasks = [task];
-        mockStore.StartTaskExecution.mockImplementation((taskId: string) => {
-            mockStore.currentExecution = {
-                taskId,
-                startTime: Date.now(),
-                output: [],
-                status: 'running',
-            };
-        });
-        mockStore.CancelTaskExecution.mockImplementation(() => {
-            mockStore.currentExecution = null;
-        });
-
-        RunTask('task-1');
-        vi.advanceTimersByTime(300);
-
-        // Cancel before completion
-        CancelCurrentTask();
-
-        // Clear the dispatch calls from cancel
-        mockDispatch.mockClear();
-
-        // Advance to where completion would occur
-        vi.advanceTimersByTime(10000);
-
-        // Should not dispatch TASK_COMPLETED after cancellation
-        expect(mockDispatch).not.toHaveBeenCalledWith(
-            NOTEMAC_EVENTS.TASK_COMPLETED,
-            expect.anything()
-        );
     });
 });

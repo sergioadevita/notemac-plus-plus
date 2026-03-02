@@ -2,8 +2,8 @@
  * TaskRunnerController — Orchestrates task execution lifecycle.
  *
  * Bridges the TaskRunnerService (pure logic) with the Zustand store
- * and event dispatcher. Manages task execution, cancellation, and
- * configuration loading.
+ * and event dispatcher. On desktop platforms, spawns real OS processes
+ * via ProcessExecutionService. Task runner is unavailable on web.
  */
 
 import { useNotemacStore } from '../Model/Store';
@@ -11,25 +11,30 @@ import {
     ValidateTaskDefinition,
     ParseTasksConfig,
     GetDefaultTask,
-    GenerateSimulatedOutput,
     FormatTaskDuration,
 } from '../Services/TaskRunnerService';
+import { ExecuteTask as ExecuteProcess } from '../Services/ProcessExecutionService';
+import type { ProcessHandle } from '../Services/ProcessExecutionService';
+import { IsDesktopEnvironment } from '../Services/PlatformBridge';
 import { Dispatch } from '../../Shared/EventDispatcher/EventDispatcher';
 import { NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
 import type { TaskDefinition } from '../Commons/Types';
 
-// Track the active simulation timer for cancellation
-let activeSimulationTimer: ReturnType<typeof setTimeout> | null = null;
-let activeOutputTimers: ReturnType<typeof setTimeout>[] = [];
+// Track the active process handle for cancellation
+let activeProcessHandle: ProcessHandle | null = null;
 
 // ─── Task Execution ─────────────────────────────────────────────────
 
 /**
- * Run a task by ID. Looks up the task in the store and simulates execution.
+ * Run a task by ID. Spawns a real OS process on desktop platforms.
  */
 export function RunTask(taskId: string): void
 {
     const store = useNotemacStore.getState();
+
+    // Task runner is only available on desktop
+    if (!IsDesktopEnvironment())
+        return;
 
     // Prevent running if a task is already executing
     if (null !== store.currentExecution)
@@ -43,43 +48,52 @@ export function RunTask(taskId: string): void
     store.StartTaskExecution(taskId);
     Dispatch(NOTEMAC_EVENTS.TASK_STARTED, { taskId, label: task.label });
 
-    // Generate simulated output and stream it line by line
-    const outputLines = GenerateSimulatedOutput(task);
-    activeOutputTimers = [];
-
-    const lineDelay = 150; // ms between lines
-
-    for (let i = 0; i < outputLines.length; i++)
+    // Echo the command being run
+    store.AppendTaskOutput(`> Executing task: ${task.label}`);
+    store.AppendTaskOutput(`> Command: ${task.command}`);
+    if (task.cwd)
     {
-        const timer = setTimeout(() =>
+        store.AppendTaskOutput(`> Working directory: ${task.cwd}`);
+    }
+    store.AppendTaskOutput('');
+
+    // Execute real process
+    activeProcessHandle = ExecuteProcess(task, {
+        onLine(line: string)
         {
             const currentStore = useNotemacStore.getState();
-            // Only append if still running (not cancelled)
             if (null !== currentStore.currentExecution && 'running' === currentStore.currentExecution.status)
             {
-                currentStore.AppendTaskOutput(outputLines[i]);
+                currentStore.AppendTaskOutput(line);
             }
-        }, i * lineDelay);
-        activeOutputTimers.push(timer);
-    }
+        },
 
-    // Complete execution after all output has been streamed
-    const totalTime = outputLines.length * lineDelay + 200;
-    activeSimulationTimer = setTimeout(() =>
-    {
-        const currentStore = useNotemacStore.getState();
-        if (null !== currentStore.currentExecution && 'running' === currentStore.currentExecution.status)
+        onExit(exitCode: number)
         {
-            currentStore.CompleteTaskExecution(0);
-            Dispatch(NOTEMAC_EVENTS.TASK_COMPLETED, {
-                taskId,
-                label: task.label,
-                exitCode: 0,
-            });
-        }
-        activeSimulationTimer = null;
-        activeOutputTimers = [];
-    }, totalTime);
+            const currentStore = useNotemacStore.getState();
+            if (null !== currentStore.currentExecution && 'running' === currentStore.currentExecution.status)
+            {
+                currentStore.AppendTaskOutput('');
+                currentStore.AppendTaskOutput(`> Task "${task.label}" finished with exit code ${exitCode}`);
+                currentStore.CompleteTaskExecution(exitCode);
+                Dispatch(NOTEMAC_EVENTS.TASK_COMPLETED, {
+                    taskId,
+                    label: task.label,
+                    exitCode,
+                });
+            }
+            activeProcessHandle = null;
+        },
+
+        onError(message: string)
+        {
+            const currentStore = useNotemacStore.getState();
+            if (null !== currentStore.currentExecution && 'running' === currentStore.currentExecution.status)
+            {
+                currentStore.AppendTaskOutput(`[ERROR] ${message}`);
+            }
+        },
+    });
 }
 
 /**
@@ -119,17 +133,12 @@ export function CancelCurrentTask(): void
 
     const taskId = store.currentExecution.taskId;
 
-    // Clear all timers
-    if (null !== activeSimulationTimer)
+    // Kill the active process
+    if (null !== activeProcessHandle)
     {
-        clearTimeout(activeSimulationTimer);
-        activeSimulationTimer = null;
+        activeProcessHandle.cancel();
+        activeProcessHandle = null;
     }
-    for (const timer of activeOutputTimers)
-    {
-        clearTimeout(timer);
-    }
-    activeOutputTimers = [];
 
     store.CancelTaskExecution();
     Dispatch(NOTEMAC_EVENTS.TASK_TERMINATED, { taskId });

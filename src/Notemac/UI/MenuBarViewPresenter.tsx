@@ -4,6 +4,7 @@ import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetEncodings } from "../Configs/EncodingConfig";
 import { GetLanguages } from "../Configs/LanguageConfig";
 import { UI_ZINDEX_MODAL } from "../Commons/Constants";
+import { IsDesktopEnvironment } from "../Services/PlatformBridge";
 
 interface MenuBarProps {
   theme: ThemeColors;
@@ -331,13 +332,15 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Git Settings...', action: 'git-settings' },
     ],
     Run: [
-      { label: 'Run Task...', action: 'run-task' },
-      { label: 'Run Build Task', action: 'run-build-task' },
-      { label: 'Run Test Task', action: 'run-test-task' },
-      { label: 'Terminate Task', action: 'terminate-task' },
-      { type: 'separator', label: '' },
-      { label: 'Configure Tasks...', action: 'configure-tasks' },
-      { type: 'separator', label: '' },
+      ...(IsDesktopEnvironment() ? [
+        { label: 'Run Task...', action: 'run-task' },
+        { label: 'Run Build Task', action: 'run-build-task' },
+        { label: 'Run Test Task', action: 'run-test-task' },
+        { label: 'Terminate Task', action: 'terminate-task' },
+        { type: 'separator' as const, label: '' },
+        { label: 'Configure Tasks...', action: 'configure-tasks' },
+        { type: 'separator' as const, label: '' },
+      ] : []),
       { label: 'Run Command...', action: 'run-command' },
       { type: 'separator', label: '' },
       { label: 'Search on Google', action: 'search-google' },

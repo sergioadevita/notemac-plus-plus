@@ -262,8 +262,8 @@ export default function App()
             </ErrorBoundary>
           )}
 
-          {/* Task execution output panel */}
-          {isTaskPanelVisible && (
+          {/* Task execution output panel — desktop only */}
+          {isElectron && isTaskPanelVisible && (
             <ErrorBoundary fallbackMessage="Task execution panel failed to load">
               <Suspense fallback={null}>
                 <TaskExecutionPanelViewPresenter theme={theme} />
@@ -395,7 +395,7 @@ export default function App()
           </Suspense>
         </ErrorBoundary>
       )}
-      {showConfigureTasksDialog && (
+      {isElectron && showConfigureTasksDialog && (
         <ErrorBoundary fallbackMessage="Configure Tasks dialog failed to load">
           <Suspense fallback={null}>
             <ConfigureTasksDialogViewPresenter theme={theme} onClose={() => useNotemacStore.getState().SetShowConfigureTasksDialog(false)} />

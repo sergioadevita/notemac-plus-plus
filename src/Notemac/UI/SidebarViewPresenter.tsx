@@ -12,6 +12,7 @@ import { GetEditorAction } from '../../Shared/Helpers/EditorGlobals';
 import { detectLanguage, detectLineEnding } from '../../Shared/Helpers/FileHelpers';
 import { InitGitForWorkspace } from '../Controllers/GitController';
 import { ExecutePluginCommand } from '../Controllers/PluginController';
+import { IsDesktopEnvironment } from '../Services/PlatformBridge';
 
 const GitPanelViewPresenter = lazy(() => import('./GitPanelViewPresenter').then(m => ({ default: m.GitPanelViewPresenter })));
 const AIChatPanelViewPresenter = lazy(() => import('./AIChatPanelViewPresenter').then(m => ({ default: m.AIChatPanelViewPresenter })));
@@ -349,7 +350,7 @@ export function Sidebar({ theme }: SidebarProps) {
           { panel: 'git' as const, icon: '\ud83d\udd00', title: 'Source Control' },
           { panel: 'ai' as const, icon: '\u2728', title: 'AI Assistant' },
           { panel: 'plugins' as const, icon: '\ud83e\udde9', title: 'Plugin Manager' },
-          { panel: 'tasks' as const, icon: '\u25b6', title: 'Task Runner' },
+          ...(IsDesktopEnvironment() ? [{ panel: 'tasks' as const, icon: '\u25b6', title: 'Task Runner' }] : []),
         ] as const).map(({ panel, icon, title }) => {
           const gitChangeCount = 'git' === panel ? GetChangedFileCount() : 0;
           return (

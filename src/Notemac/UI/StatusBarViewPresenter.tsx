@@ -9,6 +9,7 @@ import {
 } from "../Commons/Constants";
 import type { LineEnding } from "../Commons/Enums";
 import { getLanguageDisplayName, countWords, countLines } from '../../Shared/Helpers/TextHelpers';
+import { IsDesktopEnvironment } from '../Services/PlatformBridge';
 
 const PluginStatusBarViewPresenter = lazy(() => import('./PluginStatusBarViewPresenter').then(m => ({ default: m.PluginStatusBarViewPresenter })));
 
@@ -160,7 +161,7 @@ export function StatusBar({ theme }: StatusBarProps) {
             </span>
           </StatusItem>
         )}
-        {null !== currentExecution && (
+        {IsDesktopEnvironment() && null !== currentExecution && (
           <StatusItem title={`Running: ${taskList.find(t => t.id === currentExecution.taskId)?.label || currentExecution.taskId}`}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#a6e3a1' }}>
               <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>{'\u27f3'}</span>

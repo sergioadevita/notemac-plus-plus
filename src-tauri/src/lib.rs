@@ -5,6 +5,7 @@ use commands::file_operations;
 use commands::dialog_operations;
 use commands::window_operations;
 use commands::crypto_operations;
+use commands::process_operations;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run()
@@ -41,6 +42,9 @@ pub fn run()
             crypto_operations::safe_storage_encrypt,
             crypto_operations::safe_storage_decrypt,
             crypto_operations::is_safe_storage_available,
+            // Process operations
+            process_operations::execute_command,
+            process_operations::kill_process,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

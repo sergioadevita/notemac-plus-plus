@@ -11,4 +11,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   safeStorageEncrypt: (plaintext) => ipcRenderer.invoke('safe-storage-encrypt', plaintext),
   safeStorageDecrypt: (base64) => ipcRenderer.invoke('safe-storage-decrypt', base64),
   isSafeStorageAvailable: () => ipcRenderer.invoke('safe-storage-available'),
+
+  // Task execution — real process spawning
+  executeCommand: (command, cwd, env) => ipcRenderer.invoke('execute-command', command, cwd, env),
+  killProcess: (pid) => ipcRenderer.invoke('kill-process', pid),
+  onTaskOutputLine: (callback) => {
+    const handler = (_, data) => callback(data);
+    ipcRenderer.on('task-output-line', handler);
+    return () => ipcRenderer.removeListener('task-output-line', handler);
+  },
+  onTaskExit: (callback) => {
+    const handler = (_, data) => callback(data);
+    ipcRenderer.on('task-exit', handler);
+    return () => ipcRenderer.removeListener('task-exit', handler);
+  },
 });

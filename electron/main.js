@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, dialog, ipcMain, safeStorage } from 'electron
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -305,6 +306,88 @@ ipcMain.handle('safe-storage-decrypt', (_, base64) => {
 
 ipcMain.handle('safe-storage-available', () => {
   return safeStorage.isEncryptionAvailable();
+});
+
+// ─── Process Execution ──────────────────────────────────────────────
+
+let activeChildProcess = null;
+
+ipcMain.handle('execute-command', async (event, command, cwd, env) => {
+  const isWin = process.platform === 'win32';
+  const shell = isWin ? 'cmd' : 'sh';
+  const shellFlag = isWin ? '/C' : '-c';
+
+  const spawnOptions = {
+    cwd: cwd || undefined,
+    env: env ? { ...process.env, ...env } : process.env,
+  };
+
+  const child = spawn(shell, [shellFlag, command], spawnOptions);
+  activeChildProcess = child;
+
+  const pid = child.pid;
+  const sender = event.sender;
+
+  // Stream stdout line by line
+  let stdoutBuffer = '';
+  child.stdout.on('data', (chunk) => {
+    stdoutBuffer += chunk.toString();
+    const lines = stdoutBuffer.split('\n');
+    stdoutBuffer = lines.pop() || '';
+    for (const line of lines) {
+      sender.send('task-output-line', { line, stream: 'stdout' });
+    }
+  });
+
+  // Stream stderr line by line
+  let stderrBuffer = '';
+  child.stderr.on('data', (chunk) => {
+    stderrBuffer += chunk.toString();
+    const lines = stderrBuffer.split('\n');
+    stderrBuffer = lines.pop() || '';
+    for (const line of lines) {
+      sender.send('task-output-line', { line, stream: 'stderr' });
+    }
+  });
+
+  child.on('close', (code, signal) => {
+    // Flush remaining buffered output
+    if (stdoutBuffer.length > 0) {
+      sender.send('task-output-line', { line: stdoutBuffer, stream: 'stdout' });
+    }
+    if (stderrBuffer.length > 0) {
+      sender.send('task-output-line', { line: stderrBuffer, stream: 'stderr' });
+    }
+    sender.send('task-exit', { exitCode: code ?? -1, signal: signal || null });
+    if (activeChildProcess === child) {
+      activeChildProcess = null;
+    }
+  });
+
+  child.on('error', (err) => {
+    sender.send('task-output-line', { line: `Error: ${err.message}`, stream: 'stderr' });
+    sender.send('task-exit', { exitCode: -1, signal: null });
+    if (activeChildProcess === child) {
+      activeChildProcess = null;
+    }
+  });
+
+  return { pid };
+});
+
+ipcMain.handle('kill-process', async (_, pid) => {
+  if (activeChildProcess && activeChildProcess.pid === pid) {
+    activeChildProcess.kill('SIGTERM');
+    activeChildProcess = null;
+    return true;
+  }
+  // Fallback: try to kill by PID directly
+  try {
+    process.kill(pid, 'SIGTERM');
+    return true;
+  } catch {
+    return false;
+  }
 });
 
 app.whenReady().then(createWindow);

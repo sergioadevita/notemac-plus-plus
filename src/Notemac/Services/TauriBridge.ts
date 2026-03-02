@@ -50,6 +50,10 @@ export interface TauriAPI
     safeStorageEncrypt: (plaintext: string) => Promise<string>;
     safeStorageDecrypt: (encrypted: string) => Promise<string>;
     isSafeStorageAvailable: () => Promise<boolean>;
+    executeCommand: (command: string, cwd: string | null, env: Record<string, string> | null) => Promise<{ pid: number }>;
+    killProcess: () => void;
+    onTaskOutputLine: (callback: (data: { line: string; stream: string }) => void) => Promise<() => void>;
+    onTaskExit: (callback: (data: { exitCode: number; signal: string | null }) => void) => Promise<() => void>;
 }
 
 // ─── Bridge Implementation ──────────────────────────────────────
@@ -150,6 +154,34 @@ export async function CreateTauriBridge(): Promise<TauriAPI | null>
         async isSafeStorageAvailable(): Promise<boolean>
         {
             return (await invoke('is_safe_storage_available')) as boolean;
+        },
+
+        async executeCommand(command: string, cwd: string | null, env: Record<string, string> | null): Promise<{ pid: number }>
+        {
+            return (await invoke('execute_command', { command, cwd, env })) as { pid: number };
+        },
+
+        killProcess()
+        {
+            invoke('kill_process');
+        },
+
+        async onTaskOutputLine(callback: (data: { line: string; stream: string }) => void): Promise<() => void>
+        {
+            const unlisten = await listen('task-output-line', (event: { payload: unknown }) =>
+            {
+                callback(event.payload as { line: string; stream: string });
+            });
+            return unlisten;
+        },
+
+        async onTaskExit(callback: (data: { exitCode: number; signal: string | null }) => void): Promise<() => void>
+        {
+            const unlisten = await listen('task-exit', (event: { payload: unknown }) =>
+            {
+                callback(event.payload as { exitCode: number; signal: string | null });
+            });
+            return unlisten;
         },
     };
 }
