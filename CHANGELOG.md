@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-03-13
+
+### Added — Keyboard Shortcut Editor
+- **Shortcut Customization**: Click any shortcut in the Shortcut Mapper dialog to enter key capture mode — press a new key combination to reassign it
+- **Conflict Detection**: Real-time detection of shortcut conflicts with visual warnings showing which action already uses the key combination
+- **Per-Row Reset**: Reset individual customized shortcuts back to their default values
+- **Reset All**: One-click reset of all shortcut overrides to restore factory defaults
+- **Export/Import JSON**: Export all shortcut overrides as JSON for backup or sharing; import from JSON to restore configurations
+- **localStorage Persistence**: Custom shortcut overrides persist across sessions via localStorage
+- **Dynamic Dispatch**: Replaced hardcoded if-else chains in AppController with a dynamic lookup map from GetEffectiveShortcuts(), making shortcuts instantly responsive to user changes
+- **Dynamic Labels**: Menu bar and Command Palette shortcut labels update automatically when shortcuts are customized
+
+### Added — Hex Editor
+- **Hex Editor Panel**: Virtualized three-column layout displaying offset, hex bytes, and ASCII representation with virtual scrolling for performance
+- **Inline Byte Editing**: Double-click any byte to edit its hex value in-place; changes update the underlying content string
+- **Bytes-Per-Row Toggle**: Switch between 8 and 16 bytes per row via toolbar buttons
+- **Go To Offset Dialog**: Navigate directly to any byte offset using decimal or hex (0x prefix) input with bounds validation
+- **Binary Content Detection**: `IsBinaryContent()` detects null bytes or high non-printable ratio; `IsBinaryExtension()` checks file extensions against known binary types
+- **View Mode Toggle**: Switch between text and hex views via View menu; hex mode shows the hex editor, text mode returns to Monaco
+- **Hex Search**: Search for hex byte patterns (space-separated hex values) within file content
+- **Status Bar Integration**: When in hex mode, status bar shows byte offset and file size instead of line/column
+
+### Added — Testing
+- 5 new test files (205 new unit tests) covering HexHelpers, HexEditorController, HexEditorViewPresenter, GoToHexOffsetDialogViewPresenter, and ShortcutEditorController
+- Total: 2,941 unit tests across 142 suites
+
+### Changed
+- Version bumped to 4.2.0
+- Extended `FileTab` interface with `viewMode: 'text' | 'hex'`, `hexByteOffset: number`, `hexBytesPerRow: 8 | 16`
+- Added `updateTabViewMode` to TabModel (resets hexByteOffset to 0 when switching to hex)
+- Added `showGoToHexOffset` state and setter to UIModel
+- Extended ShortcutConfig with `GetEffectiveShortcuts()`, `FindConflict()`, `NormalizeKeyboardEvent()`, and localStorage persistence
+- Added ShortcutSlice to Zustand store with `UpdateShortcut`, `ResetShortcut`, `ResetAllShortcuts`, `ExportShortcutsAsJSON`, `ImportShortcutsFromJSON`
+- Refactored AppController.HandleKeyDown from if-else chains to dynamic shortcut lookup map
+- Updated CommandRegistry with effective shortcuts and 4 new hex editor commands
+- Updated MenuActionController with hex editor cases (`view-as-hex`, `view-as-text`, `hex-goto-offset`)
+- Updated EditorPanelViewPresenter with conditional hex/text rendering
+- Updated StatusBarViewPresenter with hex offset display
+- Updated MenuBarViewPresenter with View as Hex/Text toggle
+- Updated AppViewPresenter with GoToHexOffset dialog
+
+### New Files (7 source + 5 test = 12 total)
+- `src/Shared/Helpers/HexHelpers.ts`
+- `src/Notemac/Controllers/HexEditorController.ts`
+- `src/Notemac/Controllers/ShortcutEditorController.ts`
+- `src/Notemac/Model/ShortcutModel.ts`
+- `src/Notemac/UI/HexEditorViewPresenter.tsx`
+- `src/Notemac/UI/GoToHexOffsetDialogViewPresenter.tsx`
+- `src/Notemac/UI/ShortcutMapperDialogViewPresenter.tsx` (rewritten)
+
 ## [3.4.0] - 2026-02-28
 
 ### Added — Plugin System
@@ -401,6 +451,7 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[4.2.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v4.2.0
 [3.4.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.4.0
 [3.3.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.3.0
 [3.2.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.2.0

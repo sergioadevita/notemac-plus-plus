@@ -14,9 +14,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 ## Test Summary
 
-**1,884 total tests** across three test layers:
+**2,941 total tests** across 142 suites and three test layers:
 
-### Unit Tests — 1,728 tests across 91 suites (Vitest)
+### Unit Tests — 1,967 tests across 96 suites (Vitest)
 
 #### Configs & Settings
 
@@ -77,6 +77,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Editor Globals | `EditorGlobals.test.ts` | 13 | Monaco editor instance management, global state |
 | File Helpers | `FileHelpers.test.ts` | 44 | Language detection (30+ extensions), line endings, encoding conversion |
 | Fuzzy Search Helpers | `FuzzySearchHelpers.test.ts` | 20 | String matching, fuzzy matching, ranking, case sensitivity |
+| Hex Helpers | `HexHelpers.test.ts` | 23 | Byte conversion, offset validation, ASCII representation, binary detection |
 | Id Helpers | `IdHelpers.test.ts` | 2 | ID generation, uniqueness |
 | Persistence Service | `PersistenceService.test.ts` | 23 | Local storage, session storage, state persistence, cleanup |
 | Platform Bridge | `PlatformBridge.test.ts` | 13 | Platform detection (web/Tauri/Electron), desktop checks |
@@ -128,6 +129,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Character Range Dialog | `CharInRangeDialogViewPresenter.test.tsx` | 12 | Character code input, validation, display |
 | Clone Repository Dialog | `CloneRepositoryViewPresenter.test.tsx` | 12 | Repository URL input, authentication, progress |
 | Column Editor Dialog | `ColumnEditorDialogViewPresenter.test.tsx` | 12 | Column operation configuration, text input |
+| Go To Hex Offset Dialog | `GoToHexOffsetDialogViewPresenter.test.tsx` | 14 | Offset input validation, decimal/hex conversion, navigation |
 | Go To Line Dialog | `GoToLineDialogViewPresenter.test.tsx` | 10 | Line number input, validation, navigation |
 | Run Command Dialog | `RunCommandDialogViewPresenter.test.tsx` | 9 | Command execution, input handling, output |
 | Settings Dialog | `SettingsDialogViewPresenter.test.tsx` | 30 | All settings tabs (General, Editor, Appearance, Advanced, Keybindings) |
@@ -147,9 +149,12 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Editor Panel | `EditorPanelViewPresenter.integration.test.ts` | 43 | Monaco integration, tab sync, action dispatch |
 | File Tree Model | `FileTreeModel.integration.test.ts` | 32 | Nested trees, expand/collapse, drag-drop |
 | Git Integration | `Git.integration.test.ts` | 40 | Commit, push, pull, branch, merge, stash workflows |
+| Hex Editor Controller | `HexEditorController.test.ts` | 26 | Binary detection, view mode toggle, bytes-per-row toggle, offset validation |
+| Hex Editor View Presenter | `HexEditorViewPresenter.test.tsx` | 21 | Three-column layout, inline byte editing, virtualized scrolling |
 | Macro Model | `MacroModel.integration.test.ts` | 18 | Multi-step macros, action replay, edge cases |
 | OAuth Integration | `OAuthIntegration.test.ts` | 6 | GitHub OAuth device flow, token polling |
 | Search Model | `SearchModel.integration.test.ts` | 10 | Advanced search patterns, regex, whole word matching |
+| Shortcut Editor Controller | `ShortcutEditorController.test.ts` | 39 | Conflict detection, localStorage persistence, export/import, keyboard normalization |
 | Tab Model | `TabModel.integration.test.ts` | 15 | Tab lifecycle, pinning, color coding, restoration |
 | Command Registry | `CommandRegistry.test.ts` | 7 | Command registration, category management |
 | Editor Panel Params | `EditorPanelViewPresenterParams.test.ts` | 5 | Parameter defaults, state management |

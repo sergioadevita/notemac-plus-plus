@@ -40,7 +40,7 @@
             "price": "0",
             "priceCurrency": "USD"
         },
-        "softwareVersion": "3.3.0",
+        "softwareVersion": "4.2.0",
         "author": {
             "@type": "Person",
             "name": "Sergio Agustin De Vita",
@@ -621,7 +621,7 @@
         <img src="./Icons/icon.png" alt="Notemac++" class="hero-icon">
         <h1>
             <span class="name">Notemac<span class="plus-sign">++</span></span>
-            <span class="version-badge">v3.3.0</span>
+            <span class="version-badge">v4.2.0</span>
         </h1>
         <p class="tagline">A powerful text and source code editor for macOS & Web, inspired by Notepad++</p>
         <p class="size-callout">
@@ -650,7 +650,7 @@
             <div class="stat-label">Languages</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">2,144</div>
+            <div class="stat-num">2,941</div>
             <div class="stat-label">Unit Tests</div>
         </div>
         <div class="stat-item">
@@ -671,17 +671,27 @@
 <!-- What's New -->
 <section id="whats-new" class="whats-new">
     <h2 class="section-title">What's <span>New</span></h2>
-    <p class="section-subtitle">10 new features: editor enhancements, Git tools, and real-time collaborative editing.</p>
+    <p class="section-subtitle">v4.2.0: Keyboard Shortcut Editor, Hex Editor, and more advanced file handling.</p>
     <div class="new-feature-highlight">
+        <div class="new-card full-width">
+            <span class="badge">v4.2.0</span>
+            <h3>Keyboard Shortcut Editor</h3>
+            <p>Full shortcut customization with conflict detection, per-row reset, Reset All, and Export/Import JSON. Dynamic shortcut lookup replaces hardcoded dispatch for maximum flexibility.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v4.2.0</span>
+            <h3>Hex Editor</h3>
+            <p>View and edit binary files with a virtualized three-column layout (offset/hex/ASCII), inline byte editing, 8/16 bytes-per-row toggle, and Go To Offset dialog.</p>
+        </div>
+        <div class="new-card">
+            <span class="badge">v4.2.0</span>
+            <h3>Binary File Detection</h3>
+            <p>Auto-detects binary content and prompts hex view. IsBinaryContent/IsBinaryExtension helpers for smart file handling and intelligent viewer selection.</p>
+        </div>
         <div class="new-card full-width">
             <span class="badge">v3.3.0</span>
             <h3>Collaborative Editing — Real-Time Multi-User</h3>
             <p>Edit files together in real-time via WebRTC with CRDT-based conflict resolution (Yjs). Create or join sessions, see peer cursors with colored labels, and collaborate without a server.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">v3.3.0</span>
-            <h3>Breadcrumb Navigation & Sticky Scroll</h3>
-            <p>File path and symbol breadcrumbs above the editor for quick navigation. Sticky scroll pins function and class headers while scrolling through their bodies.</p>
         </div>
         <div class="new-card">
             <span class="badge">v3.3.0</span>
@@ -690,18 +700,8 @@
         </div>
         <div class="new-card">
             <span class="badge">v3.3.0</span>
-            <h3>Emmet & Print Support</h3>
-            <p>Expand HTML/CSS abbreviations instantly with Emmet. Print documents with syntax highlighting, line numbers, and a live print preview dialog.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">v3.3.0</span>
             <h3>Git Blame, Stash & Merge Conflicts</h3>
             <p>Line-by-line blame annotations with commit info on hover. Full stash management (stash, pop, apply, drop). Visual inline merge conflict resolution with accept current/incoming/both.</p>
-        </div>
-        <div class="new-card">
-            <span class="badge">v3.2.0</span>
-            <h3>1,728 Unit Tests — Full Coverage</h3>
-            <p>1:1 source-to-test file mapping across 91 test suites. Every production module has a dedicated test file, plus dead code removal and zero test warnings.</p>
         </div>
     </div>
 </section>
@@ -822,6 +822,16 @@
             <p>UTF-8, UTF-16, ISO-8859, Windows-1252, and more. Convert between LF, CRLF, and CR line endings.</p>
         </div>
         <div class="feature-card">
+            <div class="feature-icon">&#128290;</div>
+            <h3>Hex Editor</h3>
+            <p>View and edit binary files byte-by-byte with virtualized offset, hex, and ASCII columns.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#9875;</div>
+            <h3>Shortcut Editor</h3>
+            <p>Customize every keyboard shortcut with conflict detection, per-row reset, and JSON export/import.</p>
+        </div>
+        <div class="feature-card">
             <div class="feature-icon">&#128274;</div>
             <h3>Security</h3>
             <p>AES-GCM encrypted credentials, OS keychain via Tauri, secure OAuth flows, XSS protection.</p>
@@ -861,7 +871,9 @@
                 <tr><td>Column Editor</td><td class="yes">Yes</td><td class="yes">Yes</td><td>Via Extensions</td><td class="yes">Yes</td></tr>
                 <tr><td>Compare Files</td><td class="yes">Yes</td><td>Via Plugin</td><td class="yes">Yes</td><td>Via Plugin</td></tr>
                 <tr><td>Themes</td><td class="yes">7</td><td>30+</td><td>1000+</td><td>25+</td></tr>
-                <tr><td>Plugins</td><td>Planned</td><td>200+</td><td>30K+</td><td>5K+</td></tr>
+                <tr><td>Plugins</td><td class="yes">Yes</td><td>200+</td><td>30K+</td><td>5K+</td></tr>
+                <tr><td>Hex Editor</td><td class="yes highlight">Yes</td><td>Via Plugin</td><td>Via Extension</td><td>Via Plugin</td></tr>
+                <tr><td>Shortcut Editor</td><td class="yes highlight">Yes</td><td>Via Shortcut Mapper</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
                 <tr><td>Runs in Browser</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes (vscode.dev)</td><td class="no">No</td></tr>
                 <tr><td>Price</td><td class="highlight">Free (MIT)</td><td>Free (GPL)</td><td>Free</td><td>$99</td></tr>
             </tbody>
@@ -929,7 +941,7 @@
         <p>No installation required. Launch the web editor right in your browser, or download the lightweight desktop app.</p>
         <div class="hero-buttons">
             <a href="./app/" class="btn btn-primary">Launch Web Editor</a>
-            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v3.3.0</a>
+            <a href="https://github.com/sergioadevita/notemac-plus-plus/releases" target="_blank" class="btn btn-glass">Download v4.2.0</a>
         </div>
     </div>
 </section>

@@ -95,6 +95,17 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 | `F8` | Next Error |
 | `Shift+F8` | Previous Error |
 
+## Hex Editor & Binary Files
+
+| Shortcut | Action |
+|---|---|
+| *(View as Hex)* | Switch to hex viewer (Command Palette) |
+| *(View as Text)* | Switch to text view (Command Palette) |
+| *(Hex: Go to Offset)* | Jump to offset in hex file (Command Palette) |
+| *(Hex: Toggle Bytes Per Row)* | Switch between 8 and 16 bytes-per-row (Command Palette) |
+
+**Note:** Hex editor commands are accessed via Command Palette. Default keyboard shortcuts can be customized via Settings > Keybindings.
+
 ## Collaboration & Git
 
 | Shortcut | Action |

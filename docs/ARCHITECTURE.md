@@ -81,7 +81,7 @@ src/Notemac/
 src/Shared/
 ├── DependencyInjection/  # Service locator
 ├── EventDispatcher/      # Typed pub/sub event system
-├── Helpers/              # FileHelpers, IdHelpers
+├── Helpers/              # FileHelpers, IdHelpers, HexHelpers
 ├── Persistence/          # Save/load services
 ├── Pooling/              # Object pool management
 └── Git/                  # Git integration adapter
@@ -217,6 +217,60 @@ A three-tier encryption system provides platform-specific and secure credential 
 - Live peer cursors with colored labels and avatars
 - Connection status and peer count in status bar
 - Dependencies: yjs, y-webrtc, y-monaco
+
+## Hex Editor Architecture
+
+**HexEditorController** manages binary file viewing and editing:
+- Detects binary content and switches view mode
+- Handles byte-level editing with validation
+- Manages Go To Offset navigation
+- Supports 8/16 bytes-per-row toggle
+- Integrates with FileController for file operations
+
+**HexHelpers.ts** (Shared/Helpers) provides binary utilities:
+- Byte-to-hex and hex-to-byte conversion
+- Offset calculation and validation
+- ASCII representation generation
+- Binary content detection algorithm
+
+**UI Components:**
+- **HexEditorViewPresenter.tsx**: Main virtualized hex editor display with three-column layout
+- **GoToHexOffsetDialogViewPresenter.tsx**: Offset navigation dialog with input validation
+
+**Shortcut Support:**
+Keyboard commands registered for hex operations:
+- `view-as-hex` and `view-as-text`: Toggle hex/text view
+- `hex-goto-offset`: Open Go To Offset dialog
+- `hex-toggle-bytes-per-row`: Switch 8 ↔ 16 bytes per row
+
+## Keyboard Shortcut Editor Architecture
+
+**ShortcutEditorController** manages custom keyboard binding:
+- Loads default shortcuts from ShortcutConfig
+- Applies user overrides from localStorage
+- Detects keyboard conflicts
+- Validates shortcut syntax
+- Exports/imports shortcuts as JSON
+- Dynamic command dispatch with NormalizeKeyboardEvent
+
+**ShortcutModel.ts** holds keyboard mapping state:
+- Default shortcut definitions by category
+- Custom override dictionary
+- Conflict detection and tracking
+
+**ShortcutConfig Extensions:**
+- `GetEffectiveShortcuts()`: Merges defaults with custom overrides
+- `FindConflict()`: Detects shortcut collisions
+- `NormalizeKeyboardEvent()`: Cross-platform key event normalization
+- localStorage persistence with key `notemac-custom-shortcuts`
+
+**UI Component:**
+- **ShortcutEditorController.test.ts**: Tests conflict detection and persistence
+
+**AppController Refactor:**
+- Migrated from if-else chains to dynamic lookup map for command dispatch
+- Commands resolved by action ID from shortcut registry
+- Enables extensibility for plugin-registered commands
 
 ## Plugin System Architecture
 

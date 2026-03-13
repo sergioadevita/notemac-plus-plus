@@ -34,6 +34,8 @@ Complete reference of every feature in Notemac++.
 - [Line Operations](#line-operations)
 - [Case Conversion](#case-conversion)
 - [Tools](#tools)
+- [Keyboard Shortcut Editor](#keyboard-shortcut-editor)
+- [Hex Editor](#hex-editor)
 - [Status Bar](#status-bar)
 - [Settings & Preferences](#settings--preferences)
 - [Session Management](#session-management)
@@ -404,6 +406,53 @@ Six transforms: UPPERCASE, lowercase, Proper Case (capitalize first letter of ea
 **Encoding**: Base64 encode/decode and URL encode/decode for selected text.
 
 **JSON**: Pretty-print (format) or minify JSON content.
+
+---
+
+## Keyboard Shortcut Editor
+
+Customize keyboard shortcuts for all actions in Notemac++ with full conflict detection and management.
+
+**Features:**
+- View all default shortcuts organized by category (File, Edit, Search, View, etc.)
+- Edit individual shortcuts with real-time conflict detection
+- Per-row reset button to restore a single shortcut to its default binding
+- Reset All button to restore all shortcuts to defaults
+- Export custom shortcuts to JSON for sharing or backup
+- Import shortcuts from JSON files
+- Persistent storage via localStorage for automatic restoration on restart
+- Dynamic command dispatch with support for modifier keys (Cmd, Shift, Alt)
+- Keyboard event normalization for cross-platform consistency
+
+**Access:** Settings > Keybindings tab or Command Palette > "Shortcut Mapper"
+
+---
+
+## Hex Editor
+
+View and edit binary files with an intuitive three-column interface and powerful navigation tools.
+
+**Display:**
+- Virtualized three-column layout: offset (left), hexadecimal values (center), ASCII representation (right)
+- Inline byte editing with value validation
+- Toggle between 8 bytes-per-row and 16 bytes-per-row display
+- Binary content detection with fallback to text view warning
+- View mode toggle to switch between hex and text view
+
+**Navigation & Tools:**
+- Go To Offset dialog (`Cmd+Shift+G` or Command Palette > "Hex: Go to Offset")
+  - Jump to any offset in the file
+  - Support for decimal and hexadecimal offset input
+  - Automatic boundary validation
+- Toggle bytes per row for different display densities
+- Virtualized scrolling for efficient performance on large files
+- Status bar integration showing current offset and file size
+
+**Shortcuts:**
+- View as Hex (Command Palette)
+- View as Text (Command Palette)
+- Hex: Go to Offset (Command Palette)
+- Hex: Toggle Bytes Per Row (Command Palette)
 
 ---
 
