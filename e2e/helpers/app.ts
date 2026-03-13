@@ -250,7 +250,7 @@ export async function switchToTab(page: Page, index: number): Promise<void> {
  * Navigate to the app and wait for it to be ready.
  */
 export async function gotoApp(page: Page): Promise<void> {
-  await page.goto('/');
+  await page.goto('./');
   await waitForAppReady(page);
 }
 
