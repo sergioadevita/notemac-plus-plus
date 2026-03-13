@@ -117,9 +117,10 @@ test.describe('Tauri Native Features', () => {
     // App runs in web mode, so the web MenuBar should render
     // Check for menu item text like "File", "Edit", etc.
     const hasMenuText = await page.evaluate(() => {
-      const divs = document.querySelectorAll('div');
-      for (const div of divs) {
-        if (div.textContent === 'File' || div.textContent === 'Edit') return true;
+      const divs = document.querySelectorAll('div, span, button');
+      for (const el of divs) {
+        const text = (el.textContent || '').trim();
+        if (text === 'File' || text === 'Edit') return true;
       }
       return false;
     });
