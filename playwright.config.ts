@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './e2e/specs',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   workers: process.env.CI ? 2 : 4,
   reporter: process.env.CI ? 'list' : [['html', { open: 'never' }]],
   timeout: 30_000,
@@ -12,7 +12,7 @@ export default defineConfig({
 
   use: {
     baseURL: 'http://localhost:4173/app',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 10_000,
   },
