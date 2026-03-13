@@ -169,9 +169,15 @@ export function StatusBar({ theme }: StatusBarProps) {
             </span>
           </StatusItem>
         )}
-        <StatusItem title="Cursor Position">
-          Ln {activeTab.cursorLine}, Col {activeTab.cursorColumn}
-        </StatusItem>
+        {('hex' === activeTab.viewMode) ? (
+          <StatusItem title="Hex Offset">
+            Offset: {activeTab.hexByteOffset} (0x{activeTab.hexByteOffset.toString(16).toUpperCase()}) | {activeTab.hexBytesPerRow} bytes/row
+          </StatusItem>
+        ) : (
+          <StatusItem title="Cursor Position">
+            Ln {activeTab.cursorLine}, Col {activeTab.cursorColumn}
+          </StatusItem>
+        )}
         {!isNarrow && (
           <StatusItem title="Character Count">
             {charCount} chars

@@ -9,6 +9,61 @@ vi.mock('../Notemac/Model/Store', () => ({
     },
 }));
 
+// Mock ShortcutConfig
+vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
+    GetEffectiveShortcuts: vi.fn(() => [
+        { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+        { name: 'Close Tab', shortcut: 'Cmd+W', category: 'File', action: 'close-tab' },
+        { name: 'Restore Last Closed', shortcut: 'Cmd+Shift+T', category: 'File', action: 'restore-last-closed' },
+        { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+        { name: 'Replace', shortcut: 'Cmd+H', category: 'Search', action: 'replace' },
+        { name: 'Find in Files', shortcut: 'Cmd+Shift+F', category: 'Search', action: 'find-in-files' },
+        { name: 'Go to Line', shortcut: 'Cmd+G', category: 'Search', action: 'goto-line' },
+        { name: 'Toggle Sidebar', shortcut: 'Cmd+B', category: 'View', action: 'toggle-sidebar' },
+        { name: 'Preferences', shortcut: 'Cmd+,', category: 'Settings', action: 'preferences' },
+        { name: 'Zoom In', shortcut: 'Cmd+=', category: 'View', action: 'zoom-in' },
+        { name: 'Zoom Out', shortcut: 'Cmd+-', category: 'View', action: 'zoom-out' },
+        { name: 'Reset Zoom', shortcut: 'Cmd+0', category: 'View', action: 'zoom-reset' },
+        { name: 'Command Palette', shortcut: 'Cmd+Shift+P', category: 'View', action: 'command-palette' },
+        { name: 'Quick Open', shortcut: 'Cmd+P', category: 'File', action: 'quick-open' },
+        { name: 'Toggle Terminal', shortcut: 'Cmd+`', category: 'View', action: 'toggle-terminal' },
+        { name: 'Source Control Panel', shortcut: 'Cmd+Shift+G', category: 'Git', action: 'show-git-panel' },
+    ]),
+    NormalizeKeyboardEvent: vi.fn((e: KeyboardEvent) => {
+        const parts: string[] = [];
+        if (e.metaKey || e.ctrlKey) {
+            parts.push('Cmd');
+        }
+        if (e.shiftKey) {
+            parts.push('Shift');
+        }
+        if (e.altKey) {
+            parts.push('Alt');
+        }
+        let key = e.key;
+        if ('ArrowUp' === key) {
+            key = 'Up';
+        } else if ('ArrowDown' === key) {
+            key = 'Down';
+        } else if ('ArrowLeft' === key) {
+            key = 'Left';
+        } else if ('ArrowRight' === key) {
+            key = 'Right';
+        } else if ('Backquote' === key || '`' === key) {
+            key = '`';
+        } else if ('Escape' === key) {
+            key = 'Escape';
+        } else if (1 === key.length && 'a' <= key && key <= 'z') {
+            key = key.toUpperCase();
+        }
+        if ('Meta' === key || 'Control' === key || 'Shift' === key || 'Alt' === key) {
+            return '';
+        }
+        parts.push(key);
+        return parts.join('+');
+    }),
+}));
+
 function createKeyboardEvent(key: string, options: Partial<KeyboardEventInit> = {}): KeyboardEvent
 {
     return new KeyboardEvent('keydown', {
@@ -51,6 +106,8 @@ describe('AppController — HandleKeyDown', () =>
             setShowSnippetManager: vi.fn(),
             setShowCloneDialog: vi.fn(),
             setShowGitSettings: vi.fn(),
+            customShortcutOverrides: {},
+            tabs: [],
         };
 
         (useNotemacStore.getState as any).mockReturnValue(mockStore);

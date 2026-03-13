@@ -1,8 +1,10 @@
 import { useNotemacStore } from "../Model/Store";
+import { GetEffectiveShortcuts, NormalizeKeyboardEvent } from "../Configs/ShortcutConfig";
+import { HandleMenuAction } from "./MenuActionController";
 
 /**
  * Handles keyboard shortcut routing for the application.
- * Translates keyboard events into menu actions.
+ * Translates keyboard events into menu actions using a dynamic lookup map.
  */
 export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoomLevel: number): void
 {
@@ -14,91 +16,10 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
     const isAppFocused = appContainer?.contains(activeEl) || activeEl === document.body;
     if (!isAppFocused) return;
 
-    const isMod = e.metaKey || e.ctrlKey;
     const store = useNotemacStore.getState();
 
-    if (isMod && 'n' === e.key)
-    {
-        e.preventDefault();
-        store.addTab();
-    }
-    else if (isMod && 'w' === e.key)
-    {
-        e.preventDefault();
-        if (null !== activeTabId)
-            store.closeTab(activeTabId);
-    }
-    else if (isMod && e.shiftKey && 'T' === e.key)
-    {
-        e.preventDefault();
-        store.restoreLastClosedTab();
-    }
-    else if (isMod && 'f' === e.key)
-    {
-        e.preventDefault();
-        store.setShowFindReplace(true, 'find');
-    }
-    else if (isMod && 'h' === e.key)
-    {
-        e.preventDefault();
-        store.setShowFindReplace(true, 'replace');
-    }
-    else if (isMod && 'g' === e.key)
-    {
-        e.preventDefault();
-        store.setShowGoToLine(true);
-    }
-    else if (isMod && 'b' === e.key)
-    {
-        e.preventDefault();
-        store.toggleSidebar();
-    }
-    else if (isMod && ',' === e.key)
-    {
-        e.preventDefault();
-        store.setShowSettings(true);
-    }
-    else if (isMod && '=' === e.key)
-    {
-        e.preventDefault();
-        store.setZoomLevel(zoomLevel + 1);
-    }
-    else if (isMod && '-' === e.key)
-    {
-        e.preventDefault();
-        store.setZoomLevel(zoomLevel - 1);
-    }
-    else if (isMod && '0' === e.key)
-    {
-        e.preventDefault();
-        store.setZoomLevel(0);
-    }
-    else if (isMod && e.shiftKey && 'P' === e.key)
-    {
-        e.preventDefault();
-        store.setShowCommandPalette(true);
-    }
-    else if (isMod && e.shiftKey && 'F' === e.key)
-    {
-        e.preventDefault();
-        store.setShowFindReplace(true, 'findInFiles');
-    }
-    else if (isMod && 'p' === e.key)
-    {
-        e.preventDefault();
-        store.setShowQuickOpen(true);
-    }
-    else if (e.ctrlKey && '`' === e.key)
-    {
-        e.preventDefault();
-        store.setShowTerminalPanel(!store.showTerminalPanel);
-    }
-    else if (e.ctrlKey && e.shiftKey && 'G' === e.key)
-    {
-        e.preventDefault();
-        store.setSidebarPanel(store.sidebarPanel === 'git' ? null : 'git');
-    }
-    else if ('Escape' === e.key)
+    // Special case: Escape key closes all dialogs
+    if ('Escape' === e.key)
     {
         store.setShowFindReplace(false);
         store.setShowSettings(false);
@@ -115,5 +36,29 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
         store.setShowSnippetManager(false);
         store.setShowCloneDialog(false);
         store.setShowGitSettings(false);
+        return;
+    }
+
+    // Build dynamic lookup map from effective shortcuts
+    const effectiveShortcuts = GetEffectiveShortcuts(store.customShortcutOverrides);
+    const shortcutMap: Record<string, string> = {};
+
+    for (const item of effectiveShortcuts)
+    {
+        if ('' !== item.shortcut)
+        {
+            shortcutMap[item.shortcut] = item.action;
+        }
+    }
+
+    // Normalize keyboard event to shortcut string
+    const normalizedShortcut = NormalizeKeyboardEvent(e);
+
+    // Look up the normalized shortcut in the map
+    if ('' !== normalizedShortcut && undefined !== shortcutMap[normalizedShortcut])
+    {
+        e.preventDefault();
+        const action = shortcutMap[normalizedShortcut];
+        HandleMenuAction(action, activeTabId, store.tabs, zoomLevel);
     }
 }

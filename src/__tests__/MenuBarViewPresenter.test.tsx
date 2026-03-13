@@ -32,6 +32,14 @@ const mockTheme = {
 
 vi.mock('../Notemac/Model/Store');
 
+vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
+  GetEffectiveShortcuts: vi.fn(() => [
+    { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+    { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },
+    { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+  ]),
+}));
+
 vi.mock('../Notemac/Configs/EncodingConfig', () => ({
   GetEncodings: vi.fn(() => [
     {
@@ -71,6 +79,9 @@ describe('MenuBar', () => {
         syncScrollHorizontal: false,
       },
       isRecordingMacro: false,
+      customShortcutOverrides: {},
+      tabs: [{ id: 'tab-1', name: 'test.txt', viewMode: 'text' }],
+      activeTabId: 'tab-1',
     } as any);
   });
 
@@ -165,9 +176,10 @@ describe('MenuBar', () => {
     const menuItems = screen.getAllByRole('menuitem');
     const hasShortcuts = menuItems.some(
       (item) =>
-        item.textContent?.includes('Ctrl') ||
-        item.textContent?.includes('Cmd') ||
-        item.textContent?.includes('Alt')
+        item.textContent?.includes('⌘') || // Cmd symbol
+        item.textContent?.includes('⌃') || // Ctrl symbol
+        item.textContent?.includes('⌥') || // Alt symbol
+        item.textContent?.includes('⇧') // Shift symbol
     );
     expect(hasShortcuts).toBe(true);
   });
@@ -221,6 +233,9 @@ describe('MenuBar', () => {
         syncScrollHorizontal: false,
       },
       isRecordingMacro: true,
+      customShortcutOverrides: {},
+      tabs: [{ id: 'tab-1', name: 'test.txt', viewMode: 'text' }],
+      activeTabId: 'tab-1',
     } as any);
 
     rerender(<MenuBar theme={mockTheme} onAction={mockOnAction} />);

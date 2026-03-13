@@ -37,6 +37,7 @@ export interface NotemacUISlice
     showGitSettings: boolean;
     showPrintPreview: boolean;
     showCollaborationDialog: boolean;
+    showGoToHexOffset: boolean;
 
     // Breadcrumb state
     breadcrumbs: BreadcrumbItem[];
@@ -79,6 +80,7 @@ export interface NotemacUISlice
     setTerminalHeight: (height: number) => void;
     setShowCloneDialog: (show: boolean) => void;
     setShowGitSettings: (show: boolean) => void;
+    setShowGoToHexOffset: (show: boolean) => void;
 
     saveSession: () => SessionData;
     loadSession: (session: SessionData) => void;
@@ -114,6 +116,7 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     showGitSettings: false,
     showPrintPreview: false,
     showCollaborationDialog: false,
+    showGoToHexOffset: false,
 
     breadcrumbs: [],
     SetBreadcrumbs: (items) => set({ breadcrumbs: items }),
@@ -176,6 +179,7 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
     setShowTerminalPanel: (show) => set({ showTerminalPanel: show }),
     setShowCloneDialog: (show) => set({ showCloneDialog: show }),
     setShowGitSettings: (show) => set({ showGitSettings: show }),
+    setShowGoToHexOffset: (show) => set({ showGoToHexOffset: show }),
     setTerminalHeight: (height) => set({ terminalHeight: Math.max(TERMINAL_MIN_HEIGHT, Math.min(TERMINAL_MAX_HEIGHT, height)) }),
 
     saveSession: () =>
@@ -218,6 +222,9 @@ export const createUISlice: StateCreator<NotemacUISlice & { tabs: FileTab[]; act
             marks: [],
             hiddenLines: [],
             isMonitoring: false,
+            viewMode: 'text',
+            hexByteOffset: 0,
+            hexBytesPerRow: 16,
         }));
 
         // Cross-slice set: tabs/activeTabId live on TabSlice, sidebarPanel on UISlice

@@ -1,4 +1,4 @@
-interface ShortcutItem
+export interface ShortcutItem
 {
     category: string;
     name: string;
@@ -83,6 +83,192 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     { category: 'Plugins', name: 'Plugin Manager', shortcut: 'Cmd+Shift+X', action: 'show-plugin-manager' },
     { category: 'Plugins', name: 'Reload Plugins', shortcut: '', action: 'reload-plugins' },
 ] as const;
+
+const STORAGE_KEY: string = 'notemac-custom-shortcuts';
+
+export function LoadCustomShortcuts(): Record<string, string>
+{
+    try
+    {
+        if (typeof window === 'undefined' || null === window.localStorage)
+        {
+            return {};
+        }
+
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (null === stored || '' === stored)
+        {
+            return {};
+        }
+
+        const parsed = JSON.parse(stored);
+        if ('object' !== typeof parsed || null === parsed)
+        {
+            return {};
+        }
+
+        return parsed as Record<string, string>;
+    }
+    catch
+    {
+        return {};
+    }
+}
+
+export function SaveCustomShortcuts(overrides: Record<string, string>): void
+{
+    try
+    {
+        if (typeof window === 'undefined' || null === window.localStorage)
+        {
+            return;
+        }
+
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+    }
+    catch
+    {
+        // Silently fail if storage is unavailable
+    }
+}
+
+export function GetEffectiveShortcuts(overrides?: Record<string, string>): ShortcutItem[]
+{
+    const customOverrides = overrides ?? LoadCustomShortcuts();
+
+    return DEFAULT_SHORTCUTS.map((defaultItem) =>
+    {
+        const overriddenShortcut = customOverrides[defaultItem.action];
+
+        if (undefined !== overriddenShortcut && '' !== overriddenShortcut)
+        {
+            return {
+                ...defaultItem,
+                shortcut: overriddenShortcut
+            };
+        }
+
+        return defaultItem;
+    });
+}
+
+export function FindConflict(
+    shortcut: string,
+    excludeAction: string,
+    overrides?: Record<string, string>
+): ShortcutItem | null
+{
+    if ('' === shortcut)
+    {
+        return null;
+    }
+
+    const customOverrides = overrides ?? LoadCustomShortcuts();
+    const effective = GetEffectiveShortcuts(customOverrides);
+
+    for (const item of effective)
+    {
+        if (excludeAction === item.action)
+        {
+            continue;
+        }
+
+        if (shortcut === item.shortcut)
+        {
+            return item;
+        }
+    }
+
+    return null;
+}
+
+export function NormalizeKeyboardEvent(e: KeyboardEvent): string
+{
+    const parts: string[] = [];
+
+    // Add Cmd for metaKey or ctrlKey
+    if (e.metaKey || e.ctrlKey)
+    {
+        parts.push('Cmd');
+    }
+
+    // Add Shift
+    if (e.shiftKey)
+    {
+        parts.push('Shift');
+    }
+
+    // Add Alt
+    if (e.altKey)
+    {
+        parts.push('Alt');
+    }
+
+    // Normalize the key
+    let key = e.key;
+
+    // Handle special arrow keys
+    if ('ArrowUp' === key)
+    {
+        key = 'Up';
+    }
+    else if ('ArrowDown' === key)
+    {
+        key = 'Down';
+    }
+    else if ('ArrowLeft' === key)
+    {
+        key = 'Left';
+    }
+    else if ('ArrowRight' === key)
+    {
+        key = 'Right';
+    }
+    else if ('Backquote' === key || '`' === key)
+    {
+        key = '`';
+    }
+    else if ('Escape' === key)
+    {
+        key = 'Escape';
+    }
+    else if (1 === key.length && 'a' <= key && key <= 'z')
+    {
+        // Uppercase single letters
+        key = key.toUpperCase();
+    }
+
+    // Check if key is ONLY a modifier
+    if ('Meta' === key || 'Control' === key || 'Shift' === key || 'Alt' === key)
+    {
+        return '';
+    }
+
+    parts.push(key);
+
+    return parts.join('+');
+}
+
+export function IsValidShortcut(shortcut: string): boolean
+{
+    if ('' === shortcut)
+    {
+        return false;
+    }
+
+    // Must contain at least one non-modifier key
+    const parts = shortcut.split('+');
+
+    for (const part of parts)
+    {
+        if ('Cmd' !== part && 'Shift' !== part && 'Alt' !== part)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 export function GetDefaultShortcuts(): readonly ShortcutItem[]
 {

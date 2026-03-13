@@ -7,16 +7,24 @@ const mockSetShowShortcutMapper = vi.fn();
 vi.mock('../Notemac/Model/Store', () => ({
   useNotemacStore: vi.fn(() => ({
     setShowShortcutMapper: mockSetShowShortcutMapper,
+    customShortcutOverrides: {},
   })),
 }));
 
 vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
   GetDefaultShortcuts: vi.fn(() => [
-    { name: 'New File', shortcut: 'Cmd+N', category: 'File' },
-    { name: 'Save', shortcut: 'Cmd+S', category: 'File' },
-    { name: 'Find', shortcut: 'Cmd+F', category: 'Search' },
-    { name: 'Undo', shortcut: 'Cmd+Z', category: 'Edit' },
-    { name: 'Redo', shortcut: 'Cmd+Shift+Z', category: 'Edit' },
+    { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+    { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },
+    { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+    { name: 'Undo', shortcut: 'Cmd+Z', category: 'Edit', action: 'undo' },
+    { name: 'Redo', shortcut: 'Cmd+Shift+Z', category: 'Edit', action: 'redo' },
+  ]),
+  GetEffectiveShortcuts: vi.fn(() => [
+    { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+    { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },
+    { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+    { name: 'Undo', shortcut: 'Cmd+Z', category: 'Edit', action: 'undo' },
+    { name: 'Redo', shortcut: 'Cmd+Shift+Z', category: 'Edit', action: 'redo' },
   ]),
   GetShortcutCategories: vi.fn(() => ['File', 'Search', 'Edit']),
 }));

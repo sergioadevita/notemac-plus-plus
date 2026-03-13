@@ -34,6 +34,7 @@ export interface NotemacTabSlice
     moveTabForward: () => void;
     moveTabBackward: () => void;
     addRecentFile: (path: string, name: string) => void;
+    updateTabViewMode: (id: string, viewMode: 'text' | 'hex') => void;
 }
 
 export const createTabSlice: StateCreator<NotemacTabSlice, [], [], NotemacTabSlice> = (set, get) => ({
@@ -66,6 +67,9 @@ export const createTabSlice: StateCreator<NotemacTabSlice, [], [], NotemacTabSli
             marks: [],
             hiddenLines: [],
             isMonitoring: false,
+            viewMode: tab?.viewMode || 'text',
+            hexByteOffset: tab?.hexByteOffset || 0,
+            hexBytesPerRow: tab?.hexBytesPerRow || 16,
         };
 
         set(produce((state: NotemacTabSlice) =>
@@ -310,6 +314,22 @@ export const createTabSlice: StateCreator<NotemacTabSlice, [], [], NotemacTabSli
             state.recentFiles.unshift({ path, name });
             if (state.recentFiles.length > LIMIT_RECENT_FILES)
                 state.recentFiles.pop();
+        }));
+    },
+
+    updateTabViewMode: (id, viewMode) =>
+    {
+        set(produce((state: NotemacTabSlice) =>
+        {
+            const tab = state.tabs.find(t => t.id === id);
+            if (tab)
+            {
+                tab.viewMode = viewMode;
+                if ('hex' === viewMode)
+                {
+                    tab.hexByteOffset = 0;
+                }
+            }
         }));
     },
 });

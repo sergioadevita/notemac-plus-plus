@@ -11,6 +11,7 @@ import { useEditorEvents } from './EditorPanel/useEditorEvents';
 import { useEditorActions, registerActionHandler, unregisterActionHandler } from './EditorPanel/useEditorActions';
 import { useMacroPlayback } from './EditorPanel/useMacroPlayback';
 import { RegisterAIContextMenuActions } from './EditorPanel/useAIContextMenu';
+import { HexEditorPanel } from './HexEditorViewPresenter';
 
 interface EditorPanelProps {
   tab: FileTab;
@@ -130,6 +131,11 @@ export function EditorPanel({ tab, theme, settings, zoomLevel }: EditorPanelProp
     monacoRef.current = monaco;
     handleEditorMount(editor, monaco);
   }, [handleEditorMount]);
+
+  if ('hex' === tab.viewMode)
+  {
+    return <HexEditorPanel tabId={tab.id} theme={theme} />;
+  }
 
   return (
     <div style={{ flex: 1, overflow: 'hidden' }}>

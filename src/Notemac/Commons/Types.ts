@@ -21,6 +21,9 @@ export interface FileTab
     marks: MarkStyle[];
     hiddenLines: number[];
     isMonitoring: boolean;
+    viewMode: 'text' | 'hex';
+    hexByteOffset: number;
+    hexBytesPerRow: 8 | 16;
 }
 
 export interface MarkStyle

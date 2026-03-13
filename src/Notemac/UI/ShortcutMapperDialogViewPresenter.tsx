@@ -1,7 +1,16 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
-import { GetDefaultShortcuts, GetShortcutCategories } from "../Configs/ShortcutConfig";
+import { GetEffectiveShortcuts, GetShortcutCategories } from "../Configs/ShortcutConfig";
+import type { ShortcutItem } from "../Configs/ShortcutConfig";
+import {
+  EditShortcut,
+  CaptureShortcut,
+  ResetShortcutToDefault,
+  ResetAllToDefaults,
+  ExportShortcuts,
+  ImportShortcuts
+} from "../Controllers/ShortcutEditorController";
 import { useFocusTrap } from './hooks/useFocusTrap';
 
 interface ShortcutMapperDialogProps
@@ -121,18 +130,114 @@ function useStyles(theme: ThemeColors) {
       fontSize: 13,
       fontWeight: 600,
     } as React.CSSProperties,
+    editInput: {
+      backgroundColor: theme.bg,
+      color: theme.text,
+      border: `2px solid ${theme.accent}`,
+      borderRadius: 3,
+      padding: '2px 8px',
+      fontSize: 11,
+      fontFamily: 'monospace',
+      fontWeight: 600,
+    } as React.CSSProperties,
+    editActions: {
+      display: 'flex',
+      gap: 8,
+      marginLeft: 8,
+    } as React.CSSProperties,
+    resetButton: {
+      backgroundColor: 'transparent',
+      color: theme.textSecondary,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 3,
+      padding: '2px 6px',
+      cursor: 'pointer',
+      fontSize: 11,
+      lineHeight: '1',
+      transition: 'color 0.2s, border-color 0.2s',
+    } as React.CSSProperties,
+    toolbarButton: {
+      backgroundColor: theme.bgTertiary,
+      color: theme.text,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 6,
+      padding: '6px 16px',
+      cursor: 'pointer',
+      fontSize: 13,
+      marginRight: 8,
+      transition: 'background-color 0.2s',
+    } as React.CSSProperties,
+    errorText: {
+      color: '#ef4444',
+      fontSize: 11,
+      marginTop: 4,
+      marginLeft: 12,
+    } as React.CSSProperties,
+    confirmOverlay: {
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    } as React.CSSProperties,
+    confirmDialog: {
+      backgroundColor: theme.bgSecondary,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 8,
+      padding: 24,
+      maxWidth: 400,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+    } as React.CSSProperties,
+    confirmTitle: {
+      color: theme.text,
+      fontSize: 16,
+      fontWeight: 600,
+      marginBottom: 8,
+    } as React.CSSProperties,
+    confirmMessage: {
+      color: theme.textSecondary,
+      fontSize: 13,
+      marginBottom: 16,
+    } as React.CSSProperties,
+    confirmActions: {
+      display: 'flex',
+      gap: 8,
+      justifyContent: 'flex-end',
+    } as React.CSSProperties,
+    customizedRow: {
+      backgroundColor: theme.bg + '80',
+    } as React.CSSProperties,
+    iconButton: {
+      backgroundColor: 'transparent',
+      color: theme.text,
+      border: 'none',
+      cursor: 'pointer',
+      padding: '2px 6px',
+      fontSize: 12,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'color 0.2s',
+    } as React.CSSProperties,
   }), [theme]);
 }
 
 export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
 {
-  const { setShowShortcutMapper } = useNotemacStore();
+  const { setShowShortcutMapper, customShortcutOverrides } = useNotemacStore();
   const [filter, setFilter] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
+  const [editingAction, setEditingAction] = useState<string | null>(null);
+  const [capturedShortcut, setCapturedShortcut] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const styles = useStyles(theme);
 
-  const shortcuts = GetDefaultShortcuts();
+  const shortcuts = GetEffectiveShortcuts(customShortcutOverrides);
   const categories = ['all', ...GetShortcutCategories()];
   const filtered = shortcuts.filter(s =>
   {
@@ -145,80 +250,314 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
 
   useFocusTrap(dialogRef, true, () => setShowShortcutMapper(false));
 
+  const HandleShortcutCellClick = useCallback((item: ShortcutItem) =>
+  {
+    if (null === editingAction)
+    {
+      setEditingAction(item.action);
+      setCapturedShortcut('');
+      setEditError(null);
+    }
+  }, [editingAction]);
+
+  const HandleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) =>
+  {
+    if (null === editingAction)
+    {
+      return;
+    }
+
+    if ('Escape' === e.key)
+    {
+      setEditingAction(null);
+      setCapturedShortcut('');
+      setEditError(null);
+      return;
+    }
+
+    const CapturedCombo = CaptureShortcut(e as unknown as KeyboardEvent);
+    if ('' !== CapturedCombo)
+    {
+      setCapturedShortcut(CapturedCombo);
+    }
+  }, [editingAction]);
+
+  const HandleConfirmEdit = useCallback(() =>
+  {
+    if (null === editingAction || '' === capturedShortcut)
+    {
+      setEditError('No shortcut captured');
+      return;
+    }
+
+    const result = EditShortcut(editingAction, capturedShortcut);
+    if (!result.success)
+    {
+      setEditError(result.error ?? 'Unknown error');
+    }
+    else
+    {
+      setEditingAction(null);
+      setCapturedShortcut('');
+      setEditError(null);
+    }
+  }, [editingAction, capturedShortcut]);
+
+  const HandleCancelEdit = useCallback(() =>
+  {
+    setEditingAction(null);
+    setCapturedShortcut('');
+    setEditError(null);
+  }, []);
+
+  const HandleResetSingle = useCallback((action: string) =>
+  {
+    ResetShortcutToDefault(action);
+  }, []);
+
+  const HandleResetAll = useCallback(() =>
+  {
+    ResetAllToDefaults();
+    setShowResetConfirm(false);
+  }, []);
+
+  const HandleExport = useCallback(() =>
+  {
+    const ExportedContent = ExportShortcuts();
+    const blob = new window.Blob([ExportedContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'shortcuts.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const HandleImportClick = useCallback(() =>
+  {
+    if (null !== fileInputRef.current)
+    {
+      fileInputRef.current.click();
+    }
+  }, []);
+
+  const HandleImportFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) =>
+  {
+    const File = e.target.files?.[0];
+    if (!File)
+    {
+      return;
+    }
+
+    const Reader = new FileReader();
+    Reader.onload = (event) =>
+    {
+      const Content = event.target?.result;
+      if ('string' === typeof Content)
+      {
+        try
+        {
+          ImportShortcuts(Content);
+        }
+        catch (Err)
+        {
+          setEditError(`Import failed: ${null !== Err && 'object' === typeof Err && 'message' in Err ? (Err as Error).message : 'Unknown error'}`);
+        }
+      }
+    };
+    Reader.readAsText(File);
+    e.target.value = '';
+  }, []);
+
   return (
-    <div className="dialog-overlay" onClick={() => setShowShortcutMapper(false)}>
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="shortcut-mapper-title"
-        onClick={(e) => e.stopPropagation()}
-        style={styles.dialogContainer}
-      >
-        <h3 id="shortcut-mapper-title" style={styles.dialogTitle}>
-          Shortcut Mapper
-        </h3>
+    <>
+      <div className="dialog-overlay" onClick={() => setShowShortcutMapper(false)}>
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="shortcut-mapper-title"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={HandleKeyDown}
+          style={styles.dialogContainer}
+        >
+          <h3 id="shortcut-mapper-title" style={styles.dialogTitle}>
+            Shortcut Mapper
+          </h3>
 
-        {/* Category tabs */}
-        <div style={styles.categoryTabsContainer}>
-          {categories.map(cat => (
-            <span
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={styles.categoryTab(activeCategory === cat)}
-            >
-              {cat}
-            </span>
-          ))}
-        </div>
+          {/* Category tabs */}
+          <div style={styles.categoryTabsContainer}>
+            {categories.map(cat => (
+              <span
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                style={styles.categoryTab(activeCategory === cat)}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
 
-        {/* Filter */}
-        <input
-          type="text"
-          placeholder="Filter shortcuts..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={styles.filterInput}
-        />
+          {/* Filter */}
+          <input
+            type="text"
+            placeholder="Filter shortcuts..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={styles.filterInput}
+          />
 
-        {/* Shortcuts table */}
-        <div style={styles.tableContainer}>
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.tableHeaderRow}>
-                <th style={styles.tableHeaderCell}>Command</th>
-                <th style={styles.tableHeaderCell}>Shortcut</th>
-                <th style={styles.tableHeaderCell}>Category</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s) => (
-                <tr key={`${s.name}-${s.shortcut}`} style={styles.tableBodyRow}>
-                  <td style={styles.tableCommandCell}>{s.name}</td>
-                  <td style={styles.tableShortcutCell}>
-                    <kbd style={styles.shortcutKbd}>
-                      {s.shortcut}
-                    </kbd>
-                  </td>
-                  <td style={styles.tableCategoryCell}>{s.category}</td>
+          {/* Shortcuts table */}
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeaderRow}>
+                  <th style={styles.tableHeaderCell}>Command</th>
+                  <th style={styles.tableHeaderCell}>Shortcut</th>
+                  <th style={styles.tableHeaderCell}>Category</th>
+                  <th style={styles.tableHeaderCell}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map((s) => (
+                  <tr
+                    key={`${s.action}-${s.shortcut}`}
+                    style={{
+                      ...styles.tableBodyRow,
+                      ...(null !== customShortcutOverrides[s.action] ? styles.customizedRow : {})
+                    }}
+                  >
+                    <td style={styles.tableCommandCell}>{s.name}</td>
+                    <td style={styles.tableShortcutCell}>
+                      {editingAction === s.action ? (
+                        <div style={styles.editActions}>
+                          <div style={styles.editInput}>
+                            {'' !== capturedShortcut ? capturedShortcut : 'Press keys...'}
+                          </div>
+                          <button
+                            onClick={HandleConfirmEdit}
+                            style={styles.iconButton}
+                            title="Confirm"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={HandleCancelEdit}
+                            style={styles.iconButton}
+                            title="Cancel"
+                          >
+                            ✗
+                          </button>
+                        </div>
+                      ) : (
+                        <kbd
+                          style={{ ...styles.shortcutKbd, cursor: 'pointer' }}
+                          onClick={() => HandleShortcutCellClick(s)}
+                        >
+                          {s.shortcut}
+                        </kbd>
+                      )}
+                    </td>
+                    <td style={styles.tableCategoryCell}>{s.category}</td>
+                    <td style={styles.tableShortcutCell}>
+                      {null !== customShortcutOverrides[s.action] && editingAction !== s.action && (
+                        <button
+                          onClick={() => HandleResetSingle(s.action)}
+                          style={styles.resetButton}
+                          title="Reset to default"
+                        >
+                          ↺
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        <div style={styles.footerContainer}>
-          <span style={styles.shortcutCount}>
-            {filtered.length} shortcuts
-          </span>
-          <button
-            onClick={() => setShowShortcutMapper(false)}
-            style={styles.closeButton}
-          >
-            Close
-          </button>
+          {null !== editError && (
+            <div style={styles.errorText}>
+              {editError}
+            </div>
+          )}
+
+          <div style={styles.footerContainer}>
+            <span style={styles.shortcutCount}>
+              {filtered.length} shortcuts
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                style={styles.toolbarButton}
+              >
+                Reset All
+              </button>
+              <button
+                onClick={HandleExport}
+                style={styles.toolbarButton}
+              >
+                Export
+              </button>
+              <button
+                onClick={HandleImportClick}
+                style={styles.toolbarButton}
+              >
+                Import
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={HandleImportFile}
+                style={{ display: 'none' }}
+              />
+              <button
+                onClick={() => setShowShortcutMapper(false)}
+                style={styles.closeButton}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showResetConfirm && (
+        <div
+          style={styles.confirmOverlay}
+          onClick={() => setShowResetConfirm(false)}
+        >
+          <div
+            style={styles.confirmDialog}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.confirmTitle}>Reset All Shortcuts?</div>
+            <div style={styles.confirmMessage}>
+              This will reset all custom shortcuts to their defaults. This action cannot be undone.
+            </div>
+            <div style={styles.confirmActions}>
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                style={styles.toolbarButton}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={HandleResetAll}
+                style={{
+                  ...styles.closeButton,
+                  backgroundColor: '#ef4444',
+                }}
+              >
+                Reset All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

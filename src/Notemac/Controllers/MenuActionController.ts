@@ -113,6 +113,22 @@ export function HandleMenuAction(
             store.setShowCharInRange(true);
             break;
 
+        // Hex editor actions
+        case 'view-as-hex':
+        case 'view-as-text':
+        {
+            import('./HexEditorController').then(({ ToggleViewMode }) =>
+            {
+                ToggleViewMode();
+            });
+            break;
+        }
+        case 'hex-goto-offset':
+        {
+            store.setShowGoToHexOffset(true);
+            break;
+        }
+
         // View actions
         case 'word-wrap':
             store.updateSettings({ wordWrap: value as boolean | undefined });
@@ -247,7 +263,7 @@ export function HandleMenuAction(
             store.setShowGitSettings(true);
             break;
         case 'show-git-panel':
-            store.setSidebarPanel('git');
+            store.setSidebarPanel('git' === store.sidebarPanel ? null : 'git');
             break;
 
         // AI actions

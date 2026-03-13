@@ -19,6 +19,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 // Lazy-loaded dialogs (rarely shown — improves initial load time)
 const SettingsDialog = lazy(() => import('./SettingsDialogViewPresenter').then(m => ({ default: m.SettingsDialog })));
 const GoToLineDialog = lazy(() => import('./GoToLineDialogViewPresenter').then(m => ({ default: m.GoToLineDialog })));
+const GoToHexOffsetDialog = lazy(() => import('./GoToHexOffsetDialogViewPresenter').then(m => ({ default: m.GoToHexOffsetDialog })));
 const AboutDialog = lazy(() => import('./AboutDialogViewPresenter').then(m => ({ default: m.AboutDialog })));
 const RunCommandDialog = lazy(() => import('./RunCommandDialogViewPresenter').then(m => ({ default: m.RunCommandDialog })));
 const ColumnEditorDialog = lazy(() => import('./ColumnEditorDialogViewPresenter').then(m => ({ default: m.ColumnEditorDialog })));
@@ -48,6 +49,7 @@ export default function App()
   const showFindReplace = useNotemacStore(s => s.showFindReplace);
   const showSettings = useNotemacStore(s => s.showSettings);
   const showGoToLine = useNotemacStore(s => s.showGoToLine);
+  const showGoToHexOffset = useNotemacStore(s => s.showGoToHexOffset);
   const showAbout = useNotemacStore(s => s.showAbout);
   const showRunCommand = useNotemacStore(s => s.showRunCommand);
   const showColumnEditor = useNotemacStore(s => s.showColumnEditor);
@@ -287,6 +289,13 @@ export default function App()
         <ErrorBoundary fallbackMessage="Go to Line dialog failed to load">
           <Suspense fallback={null}>
             <GoToLineDialog theme={theme} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      {showGoToHexOffset && (
+        <ErrorBoundary fallbackMessage="Go to Hex Offset dialog failed to load">
+          <Suspense fallback={null}>
+            <GoToHexOffsetDialog theme={theme} />
           </Suspense>
         </ErrorBoundary>
       )}

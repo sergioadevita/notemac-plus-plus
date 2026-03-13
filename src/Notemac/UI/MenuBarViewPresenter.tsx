@@ -3,6 +3,7 @@ import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetEncodings } from "../Configs/EncodingConfig";
 import { GetLanguages } from "../Configs/LanguageConfig";
+import { GetEffectiveShortcuts } from "../Configs/ShortcutConfig";
 import { UI_ZINDEX_MODAL } from "../Commons/Constants";
 import { IsDesktopEnvironment } from "../Services/PlatformBridge";
 
@@ -28,12 +29,36 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
   const [focusedMenuItem, setFocusedMenuItem] = useState<string | null>(null);
   const [focusedSubmenuIndex, setFocusedSubmenuIndex] = useState(-1);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { settings, isRecordingMacro } = useNotemacStore();
+  const { settings, isRecordingMacro, customShortcutOverrides, tabs, activeTabId } = useNotemacStore();
+  const activeTab = tabs.find(t => t.id === activeTabId);
 
-  const isMac = navigator.platform.includes('Mac');
-  const mod = isMac ? '\u2318' : 'Ctrl+';
-  const shift = isMac ? '\u21e7' : 'Shift+';
-  const alt = isMac ? '\u2325' : 'Alt+';
+  // Build shortcut lookup map from effective shortcuts
+  const effectiveShortcuts = GetEffectiveShortcuts(customShortcutOverrides);
+  const actionToShortcut: Record<string, string> = {};
+  for (const item of effectiveShortcuts)
+  {
+    if ('' !== item.shortcut)
+    {
+      actionToShortcut[item.action] = item.shortcut;
+    }
+  }
+
+  // Convert shortcut string to display format (e.g., "Cmd+N" → "⌘N")
+  const GetShortcutLabel = (action: string): string => {
+    const shortcut = actionToShortcut[action];
+    if (!shortcut) {
+      return '';
+    }
+
+    let result = shortcut;
+    result = result.replace(/Cmd\+?/g, '\u2318');
+    result = result.replace(/Shift\+?/g, '\u21e7');
+    result = result.replace(/Alt\+?/g, '\u2325');
+    result = result.replace(/Ctrl\+?/g, '\u2303');
+    result = result.replace(/\+/g, '');
+
+    return result;
+  };
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -125,23 +150,23 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
 
   const menus: Record<string, MenuItem[]> = {
     File: [
-      { label: 'New', shortcut: `${mod}N`, action: 'new' },
+      { label: 'New', shortcut: GetShortcutLabel('new'), action: 'new' },
       { type: 'separator', label: '' },
-      { label: 'Open...', shortcut: `${mod}O`, action: 'open' },
+      { label: 'Open...', shortcut: GetShortcutLabel('open'), action: 'open' },
       { label: 'Open Folder as Workspace', action: 'open-folder' },
       { label: 'Reload from Disk', action: 'reload-from-disk' },
       { type: 'separator', label: '' },
-      { label: 'Save', shortcut: `${mod}S`, action: 'save' },
-      { label: 'Save As...', shortcut: `${shift}${mod}S`, action: 'save-as' },
+      { label: 'Save', shortcut: GetShortcutLabel('save'), action: 'save' },
+      { label: 'Save As...', shortcut: GetShortcutLabel('save-as'), action: 'save-as' },
       { label: 'Save Copy As...', action: 'save-copy-as' },
       { label: 'Save All', action: 'save-all' },
       { type: 'separator', label: '' },
       { label: 'Rename...', action: 'rename-file' },
       { label: 'Delete from Disk', action: 'delete-file' },
       { type: 'separator', label: '' },
-      { label: 'Restore Last Closed Tab', shortcut: `${shift}${mod}T`, action: 'restore-last-closed' },
+      { label: 'Restore Last Closed Tab', shortcut: GetShortcutLabel('restore-last-closed'), action: 'restore-last-closed' },
       { type: 'separator', label: '' },
-      { label: 'Close Tab', shortcut: `${mod}W`, action: 'close-tab' },
+      { label: 'Close Tab', shortcut: GetShortcutLabel('close-tab'), action: 'close-tab' },
       { label: 'Close All', action: 'close-all' },
       { label: 'Close Others', action: 'close-others' },
       { label: 'Close Tabs to Left', action: 'close-tabs-to-left' },
@@ -154,30 +179,30 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Load Session...', action: 'load-session' },
       { label: 'Save Session...', action: 'save-session' },
       { type: 'separator', label: '' },
-      { label: 'Print...', shortcut: `${mod}P`, action: 'print' },
+      { label: 'Print...', shortcut: GetShortcutLabel('print'), action: 'print' },
     ],
     Edit: [
-      { label: 'Undo', shortcut: `${mod}Z`, action: 'undo' },
-      { label: 'Redo', shortcut: `${shift}${mod}Z`, action: 'redo' },
+      { label: 'Undo', shortcut: GetShortcutLabel('undo'), action: 'undo' },
+      { label: 'Redo', shortcut: GetShortcutLabel('redo'), action: 'redo' },
       { type: 'separator', label: '' },
-      { label: 'Cut', shortcut: `${mod}X`, action: 'cut' },
-      { label: 'Copy', shortcut: `${mod}C`, action: 'copy' },
-      { label: 'Paste', shortcut: `${mod}V`, action: 'paste' },
-      { label: 'Select All', shortcut: `${mod}A`, action: 'select-all' },
+      { label: 'Cut', shortcut: GetShortcutLabel('cut'), action: 'cut' },
+      { label: 'Copy', shortcut: GetShortcutLabel('copy'), action: 'copy' },
+      { label: 'Paste', shortcut: GetShortcutLabel('paste'), action: 'paste' },
+      { label: 'Select All', shortcut: GetShortcutLabel('select-all'), action: 'select-all' },
       { type: 'separator', label: '' },
-      { label: 'Duplicate Line', shortcut: `${mod}D`, action: 'duplicate-line' },
-      { label: 'Delete Line', shortcut: `${shift}${mod}K`, action: 'delete-line' },
-      { label: 'Transpose Line', shortcut: `${alt}T`, action: 'transpose-line' },
-      { label: 'Move Line Up', shortcut: `${alt}\u2191`, action: 'move-line-up' },
-      { label: 'Move Line Down', shortcut: `${alt}\u2193`, action: 'move-line-down' },
+      { label: 'Duplicate Line', shortcut: GetShortcutLabel('duplicate-line'), action: 'duplicate-line' },
+      { label: 'Delete Line', shortcut: GetShortcutLabel('delete-line'), action: 'delete-line' },
+      { label: 'Transpose Line', shortcut: GetShortcutLabel('transpose-line'), action: 'transpose-line' },
+      { label: 'Move Line Up', shortcut: GetShortcutLabel('move-line-up'), action: 'move-line-up' },
+      { label: 'Move Line Down', shortcut: GetShortcutLabel('move-line-down'), action: 'move-line-down' },
       { label: 'Split Lines', action: 'split-lines' },
       { label: 'Join Lines', action: 'join-lines' },
       { type: 'separator', label: '' },
-      { label: 'Toggle Comment', shortcut: `${mod}/`, action: 'toggle-comment' },
-      { label: 'Block Comment', shortcut: `${shift}${alt}A`, action: 'block-comment' },
+      { label: 'Toggle Comment', shortcut: GetShortcutLabel('toggle-comment'), action: 'toggle-comment' },
+      { label: 'Block Comment', shortcut: GetShortcutLabel('block-comment'), action: 'block-comment' },
       { type: 'separator', label: '' },
-      { label: 'UPPERCASE', shortcut: `${shift}${mod}U`, action: 'uppercase' },
-      { label: 'lowercase', shortcut: `${mod}U`, action: 'lowercase' },
+      { label: 'UPPERCASE', shortcut: GetShortcutLabel('uppercase'), action: 'uppercase' },
+      { label: 'lowercase', shortcut: GetShortcutLabel('lowercase'), action: 'lowercase' },
       { label: 'Proper Case', action: 'proper-case' },
       { label: 'Sentence Case', action: 'sentence-case' },
       { label: 'Invert Case', action: 'invert-case' },
@@ -185,8 +210,8 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { type: 'separator', label: '' },
       { label: 'Insert Date/Time', action: 'insert-datetime' },
       { type: 'separator', label: '' },
-      { label: 'Column Editor...', shortcut: `${alt}C`, action: 'column-editor' },
-      { label: 'Clipboard History', shortcut: `${mod}${shift}V`, action: 'clipboard-history' },
+      { label: 'Column Editor...', shortcut: GetShortcutLabel('column-editor'), action: 'column-editor' },
+      { label: 'Clipboard History', shortcut: GetShortcutLabel('clipboard-history'), action: 'clipboard-history' },
       { label: 'Character Panel', action: 'char-panel' },
       { type: 'separator', label: '' },
       { label: 'Copy File Path', action: 'copy-file-path' },
@@ -199,10 +224,10 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Set Read-Only', action: 'toggle-readonly' },
     ],
     Search: [
-      { label: 'Find...', shortcut: `${mod}F`, action: 'find' },
-      { label: 'Replace...', shortcut: `${mod}H`, action: 'replace' },
-      { label: 'Find in Files...', shortcut: `${shift}${mod}F`, action: 'find-in-files' },
-      { label: 'Incremental Search', shortcut: `${mod}${alt}I`, action: 'incremental-search' },
+      { label: 'Find...', shortcut: GetShortcutLabel('find'), action: 'find' },
+      { label: 'Replace...', shortcut: GetShortcutLabel('replace'), action: 'replace' },
+      { label: 'Find in Files...', shortcut: GetShortcutLabel('find-in-files'), action: 'find-in-files' },
+      { label: 'Incremental Search', shortcut: GetShortcutLabel('incremental-search'), action: 'incremental-search' },
       { type: 'separator', label: '' },
       { label: 'Mark...', action: 'mark' },
       { label: 'Mark Style 1', action: 'mark-style', value: 1 },
@@ -219,13 +244,13 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Delete Unmarked Lines', action: 'delete-unmarked-lines' },
       { label: 'Inverse Marks', action: 'inverse-marks' },
       { type: 'separator', label: '' },
-      { label: 'Go to Line...', shortcut: `${mod}G`, action: 'goto-line' },
-      { label: 'Go to Matching Bracket', shortcut: `${shift}${mod}\\`, action: 'goto-bracket' },
+      { label: 'Go to Line...', shortcut: GetShortcutLabel('goto-line'), action: 'goto-line' },
+      { label: 'Go to Matching Bracket', shortcut: GetShortcutLabel('goto-bracket'), action: 'goto-bracket' },
       { label: 'Select to Matching Bracket', action: 'select-to-bracket' },
       { type: 'separator', label: '' },
-      { label: 'Toggle Bookmark', shortcut: `${mod}F2`, action: 'toggle-bookmark' },
-      { label: 'Next Bookmark', shortcut: 'F2', action: 'next-bookmark' },
-      { label: 'Previous Bookmark', shortcut: `${shift}F2`, action: 'prev-bookmark' },
+      { label: 'Toggle Bookmark', shortcut: GetShortcutLabel('toggle-bookmark'), action: 'toggle-bookmark' },
+      { label: 'Next Bookmark', shortcut: GetShortcutLabel('next-bookmark'), action: 'next-bookmark' },
+      { label: 'Previous Bookmark', shortcut: GetShortcutLabel('prev-bookmark'), action: 'prev-bookmark' },
       { label: 'Clear All Bookmarks', action: 'clear-bookmarks' },
       { type: 'separator', label: '' },
       { label: 'Find Characters in Range...', action: 'find-char-in-range' },
@@ -252,11 +277,11 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Fold Level 7', action: 'fold-level', value: 7 },
       { label: 'Fold Level 8', action: 'fold-level', value: 8 },
       { type: 'separator', label: '' },
-      { label: 'Zoom In', shortcut: `${mod}+`, action: 'zoom-in' },
-      { label: 'Zoom Out', shortcut: `${mod}-`, action: 'zoom-out' },
-      { label: 'Reset Zoom', shortcut: `${mod}0`, action: 'zoom-reset' },
+      { label: 'Zoom In', shortcut: GetShortcutLabel('zoom-in'), action: 'zoom-in' },
+      { label: 'Zoom Out', shortcut: GetShortcutLabel('zoom-out'), action: 'zoom-out' },
+      { label: 'Reset Zoom', shortcut: GetShortcutLabel('zoom-reset'), action: 'zoom-reset' },
       { type: 'separator', label: '' },
-      { label: 'Toggle Sidebar', shortcut: `${mod}B`, action: 'toggle-sidebar' },
+      { label: 'Toggle Sidebar', shortcut: GetShortcutLabel('toggle-sidebar'), action: 'toggle-sidebar' },
       { label: 'Document List', action: 'show-doc-list' },
       { label: 'Function List', action: 'show-function-list' },
       { label: 'Project Panel', action: 'show-project-panel' },
@@ -274,9 +299,11 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Summary...', action: 'show-summary' },
       { label: 'Monitoring (tail -f)', action: 'toggle-monitoring' },
       { type: 'separator', label: '' },
-      { label: 'Command Palette...', shortcut: `${shift}${mod}P`, action: 'command-palette' },
-      { label: 'Quick Open...', shortcut: `${mod}P`, action: 'quick-open' },
-      { label: 'Toggle Terminal', shortcut: 'Ctrl+`', action: 'toggle-terminal' },
+      { label: activeTab && 'hex' === activeTab.viewMode ? 'View as Text' : 'View as Hex', action: activeTab && 'hex' === activeTab.viewMode ? 'view-as-text' : 'view-as-hex' },
+      { type: 'separator', label: '' },
+      { label: 'Command Palette...', shortcut: GetShortcutLabel('command-palette'), action: 'command-palette' },
+      { label: 'Quick Open...', shortcut: GetShortcutLabel('quick-open'), action: 'quick-open' },
+      { label: 'Toggle Terminal', shortcut: GetShortcutLabel('toggle-terminal'), action: 'toggle-terminal' },
     ],
     Encoding: [
       ...GetEncodings().flatMap(group => [
@@ -316,8 +343,8 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Reverse Line Order', action: 'reverse-lines' },
     ],
     Macro: [
-      { label: isRecordingMacro ? 'Stop Recording' : 'Start Recording', shortcut: `${shift}${mod}R`, action: isRecordingMacro ? 'macro-stop' : 'macro-start' },
-      { label: 'Playback', shortcut: `${shift}${mod}P`, action: 'macro-playback' },
+      { label: isRecordingMacro ? 'Stop Recording' : 'Start Recording', shortcut: GetShortcutLabel('macro-start'), action: isRecordingMacro ? 'macro-stop' : 'macro-start' },
+      { label: 'Playback', shortcut: GetShortcutLabel('macro-playback'), action: 'macro-playback' },
       { type: 'separator', label: '' },
       { label: 'Run Macro Multiple Times...', action: 'macro-run-multiple' },
       { label: 'Save Recorded Macro...', action: 'macro-save' },
@@ -370,10 +397,10 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'JSON Minify', action: 'json-minify' },
     ],
     AI: [
-      { label: 'AI Chat Panel', shortcut: 'Ctrl+Shift+A', action: 'ai-chat' },
+      { label: 'AI Chat Panel', shortcut: GetShortcutLabel('ai-chat'), action: 'ai-chat' },
       { type: 'separator', label: '' },
-      { label: 'Explain Code', shortcut: 'Ctrl+Shift+E', action: 'ai-explain' },
-      { label: 'Refactor Code', shortcut: 'Ctrl+Shift+R', action: 'ai-refactor' },
+      { label: 'Explain Code', shortcut: GetShortcutLabel('ai-explain'), action: 'ai-explain' },
+      { label: 'Refactor Code', shortcut: GetShortcutLabel('ai-refactor'), action: 'ai-refactor' },
       { label: 'Generate Tests', action: 'ai-generate-tests' },
       { label: 'Generate Documentation', action: 'ai-generate-docs' },
       { label: 'Fix Error', action: 'ai-fix-error' },
@@ -384,7 +411,7 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'AI Settings...', action: 'ai-settings' },
     ],
     Settings: [
-      { label: 'Preferences...', shortcut: `${mod},`, action: 'preferences' },
+      { label: 'Preferences...', shortcut: GetShortcutLabel('preferences'), action: 'preferences' },
       { label: 'Shortcut Mapper...', action: 'shortcut-mapper' },
       { type: 'separator', label: '' },
       { label: 'About Notemac++', action: 'about' },

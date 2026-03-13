@@ -1,5 +1,5 @@
 import type { CommandDefinition } from "../Commons/Types";
-import { GetDefaultShortcuts } from "./ShortcutConfig";
+import { GetEffectiveShortcuts } from "./ShortcutConfig";
 import { useNotemacStore } from "../Model/Store";
 import { IsDesktopEnvironment } from "../Services/PlatformBridge";
 
@@ -10,7 +10,7 @@ import { IsDesktopEnvironment } from "../Services/PlatformBridge";
 export function GetAllCommands(): CommandDefinition[]
 {
     const commands: CommandDefinition[] = [];
-    const shortcuts = GetDefaultShortcuts();
+    const shortcuts = GetEffectiveShortcuts();
     const maxCount = shortcuts.length;
 
     // Build from shortcut config
@@ -87,6 +87,12 @@ export function GetAllCommands(): CommandDefinition[]
         { id: 'show-git-panel', label: 'Source Control Panel', category: 'Git', action: 'show-git-panel' },
         { id: 'clone-repository', label: 'Clone Repository', category: 'Git', action: 'clone-repository' },
         { id: 'git-settings', label: 'Git Settings', category: 'Git', action: 'git-settings' },
+
+        // Hex Editor commands
+        { id: 'view-as-hex', label: 'View as Hex', category: 'View', action: 'view-as-hex' },
+        { id: 'view-as-text', label: 'View as Text', category: 'View', action: 'view-as-text' },
+        { id: 'hex-goto-offset', label: 'Hex: Go to Offset', category: 'View', action: 'hex-goto-offset' },
+        { id: 'hex-toggle-bytes-per-row', label: 'Hex: Toggle Bytes Per Row', category: 'View', action: 'hex-toggle-bytes-per-row' },
 
         // AI commands
         { id: 'ai-chat', label: 'AI Chat Panel', category: 'AI', action: 'ai-chat' },
