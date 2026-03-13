@@ -27,12 +27,12 @@ describe('ShortcutConfig — git shortcuts', () =>
         expect(0 < gitShortcuts.length).toBe(true);
     });
 
-    it('has Source Control Panel shortcut with Ctrl+Shift+G', () =>
+    it('has Source Control Panel shortcut with Cmd+Shift+G', () =>
     {
         const gitShortcuts = GetShortcutsByCategory('Git');
         const sourceControl = gitShortcuts.find(s => 'show-git-panel' === s.action);
         expect(sourceControl).toBeDefined();
-        expect(sourceControl!.shortcut).toBe('Ctrl+Shift+G');
+        expect(sourceControl!.shortcut).toBe('Cmd+Shift+G');
     });
 
     it('has Clone Repository shortcut', () =>

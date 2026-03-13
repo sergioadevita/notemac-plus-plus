@@ -59,19 +59,19 @@ export const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
 
     // New features
     { category: 'View', name: 'Command Palette', shortcut: 'Cmd+Shift+P', action: 'command-palette' },
-    { category: 'View', name: 'Toggle Terminal', shortcut: 'Ctrl+`', action: 'toggle-terminal' },
+    { category: 'View', name: 'Toggle Terminal', shortcut: 'Cmd+`', action: 'toggle-terminal' },
     { category: 'Edit', name: 'Compare Files', shortcut: '', action: 'compare-files' },
     { category: 'Edit', name: 'Snippet Manager', shortcut: '', action: 'snippet-manager' },
 
     // Git
-    { category: 'Git', name: 'Source Control Panel', shortcut: 'Ctrl+Shift+G', action: 'show-git-panel' },
+    { category: 'Git', name: 'Source Control Panel', shortcut: 'Cmd+Shift+G', action: 'show-git-panel' },
     { category: 'Git', name: 'Clone Repository', shortcut: '', action: 'clone-repository' },
     { category: 'Git', name: 'Git Settings', shortcut: '', action: 'git-settings' },
 
     // AI
-    { category: 'AI', name: 'AI Chat Panel', shortcut: 'Ctrl+Shift+A', action: 'ai-chat' },
-    { category: 'AI', name: 'Explain Code', shortcut: 'Ctrl+Shift+E', action: 'ai-explain' },
-    { category: 'AI', name: 'Refactor Code', shortcut: 'Ctrl+Shift+R', action: 'ai-refactor' },
+    { category: 'AI', name: 'AI Chat Panel', shortcut: 'Cmd+Shift+A', action: 'ai-chat' },
+    { category: 'AI', name: 'Explain Code', shortcut: 'Cmd+Shift+E', action: 'ai-explain' },
+    { category: 'AI', name: 'Refactor Code', shortcut: 'Cmd+Shift+R', action: 'ai-refactor' },
     { category: 'AI', name: 'Generate Tests', shortcut: '', action: 'ai-generate-tests' },
     { category: 'AI', name: 'Generate Docs', shortcut: '', action: 'ai-generate-docs' },
     { category: 'AI', name: 'Fix Error', shortcut: '', action: 'ai-fix-error' },

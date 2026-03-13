@@ -77,21 +77,14 @@ test.describe('Tauri UI — Editor Integration', () => {
     expect(typeof activeTab.name).toBe('string');
   });
 
-  test('App renders menu items (web mode with MenuBar)', async () => {
-    // App runs in web mode, so the web MenuBar should render
-    // Check for menu items via role="menubar" or role="menuitem"
-    const hasMenuBar = await page.evaluate(() => {
+  test('App hides web MenuBar in Tauri mode (native menu used)', async () => {
+    // After Tauri mock injection, IsDesktopEnvironment() returns true,
+    // so the web MenuBar is hidden — Tauri uses native OS menus instead.
+    const hasWebMenuBar = await page.evaluate(() => {
       const menubar = document.querySelector('[role="menubar"]');
-      if (menubar) return true;
-      // Fallback: check for menu item elements with File/Edit text
-      const items = document.querySelectorAll('[role="menuitem"]');
-      for (const item of items) {
-        const text = (item.textContent || '').trim();
-        if (text === 'File' || text === 'Edit') return true;
-      }
-      return false;
+      return menubar !== null;
     });
-    expect(hasMenuBar).toBe(true);
+    expect(hasWebMenuBar).toBe(false);
   });
 });
 

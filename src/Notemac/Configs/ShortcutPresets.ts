@@ -123,9 +123,9 @@ export const RESHARPER_PRESET: ShortcutMappingPreset =
         { category: 'Settings', name: 'Shortcut Mapper', shortcut: 'Cmd+Alt+S', action: 'shortcut-mapper' },
 
         // Macro
-        { category: 'Macro', name: 'Start Recording', shortcut: 'Ctrl+Shift+R', action: 'macro-start' },
-        { category: 'Macro', name: 'Stop Recording', shortcut: 'Ctrl+Shift+R', action: 'macro-stop' },
-        { category: 'Macro', name: 'Playback', shortcut: 'Ctrl+Shift+P', action: 'macro-playback' },
+        { category: 'Macro', name: 'Start Recording', shortcut: 'Cmd+Shift+R', action: 'macro-start' },
+        { category: 'Macro', name: 'Stop Recording', shortcut: 'Cmd+Shift+R', action: 'macro-stop' },
+        { category: 'Macro', name: 'Playback', shortcut: 'Cmd+Shift+P', action: 'macro-playback' },
 
         // View — New features
         { category: 'View', name: 'Command Palette', shortcut: 'Cmd+Shift+A', action: 'command-palette' },
@@ -139,9 +139,9 @@ export const RESHARPER_PRESET: ShortcutMappingPreset =
         { category: 'Git', name: 'Git Settings', shortcut: '', action: 'git-settings' },
 
         // AI
-        { category: 'AI', name: 'AI Chat Panel', shortcut: 'Ctrl+Shift+A', action: 'ai-chat' },
-        { category: 'AI', name: 'Explain Code', shortcut: 'Ctrl+Shift+E', action: 'ai-explain' },
-        { category: 'AI', name: 'Refactor Code', shortcut: 'Ctrl+Alt+R', action: 'ai-refactor' },
+        { category: 'AI', name: 'AI Chat Panel', shortcut: 'Cmd+Shift+A', action: 'ai-chat' },
+        { category: 'AI', name: 'Explain Code', shortcut: 'Cmd+Shift+E', action: 'ai-explain' },
+        { category: 'AI', name: 'Refactor Code', shortcut: 'Cmd+Alt+R', action: 'ai-refactor' },
         { category: 'AI', name: 'Generate Tests', shortcut: '', action: 'ai-generate-tests' },
         { category: 'AI', name: 'Generate Docs', shortcut: '', action: 'ai-generate-docs' },
         { category: 'AI', name: 'Fix Error', shortcut: '', action: 'ai-fix-error' },

@@ -38,28 +38,28 @@ describe('ShortcutConfig — AI Shortcuts', () =>
         expect(0 < aiShortcuts.length).toBe(true);
     });
 
-    it('has ai-chat shortcut with Ctrl+Shift+A', () =>
+    it('has ai-chat shortcut with Cmd+Shift+A', () =>
     {
         const aiShortcuts = GetShortcutsByCategory('AI');
         const chatShortcut = aiShortcuts.find(s => 'ai-chat' === s.action);
         expect(chatShortcut).toBeDefined();
-        expect(chatShortcut!.shortcut).toBe('Ctrl+Shift+A');
+        expect(chatShortcut!.shortcut).toBe('Cmd+Shift+A');
     });
 
-    it('has ai-explain shortcut with Ctrl+Shift+E', () =>
+    it('has ai-explain shortcut with Cmd+Shift+E', () =>
     {
         const aiShortcuts = GetShortcutsByCategory('AI');
         const explainShortcut = aiShortcuts.find(s => 'ai-explain' === s.action);
         expect(explainShortcut).toBeDefined();
-        expect(explainShortcut!.shortcut).toBe('Ctrl+Shift+E');
+        expect(explainShortcut!.shortcut).toBe('Cmd+Shift+E');
     });
 
-    it('has ai-refactor shortcut with Ctrl+Shift+R', () =>
+    it('has ai-refactor shortcut with Cmd+Shift+R', () =>
     {
         const aiShortcuts = GetShortcutsByCategory('AI');
         const refactorShortcut = aiShortcuts.find(s => 'ai-refactor' === s.action);
         expect(refactorShortcut).toBeDefined();
-        expect(refactorShortcut!.shortcut).toBe('Ctrl+Shift+R');
+        expect(refactorShortcut!.shortcut).toBe('Cmd+Shift+R');
     });
 
     it('has all expected AI action shortcuts', () =>
