@@ -1,6 +1,6 @@
 # Keybindings Reference
 
-All default keyboard shortcuts in Notemac++. Shortcuts can be customized via Settings > Shortcut Mapper.
+All default keyboard shortcuts in Notemac++. Shortcuts can be customized via Settings > Shortcut Mapper. Multiple preset mappings are available (Notemac++ Default, ReSharper) and can be selected from the dropdown in the Shortcut Mapper dialog. Plugins can also install custom preset mappings.
 
 ## Quick Access
 
@@ -121,3 +121,30 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 | Shortcut | Action |
 |---|---|
 | `Cmd+Shift+X` | Open Plugin Manager |
+
+## Shortcut Mapping Presets
+
+Notemac++ ships with two built-in shortcut mapping presets. Select a preset from the dropdown at the top of the Shortcut Mapper dialog. User overrides persist across preset switches.
+
+### Notemac++ Default
+The standard shortcut layout shown in the tables above.
+
+### ReSharper
+JetBrains ReSharper / IntelliJ IDEA style shortcuts. Key differences from the default preset:
+
+| Action | Default | ReSharper |
+|---|---|---|
+| New File | `Cmd+N` | `Cmd+Alt+N` |
+| Quick Open | `Cmd+P` | `Cmd+Shift+N` |
+| Delete Line | `Cmd+Shift+K` | `Cmd+Y` |
+| Move Line Up | `Alt+Up` | `Shift+Alt+Up` |
+| Move Line Down | `Alt+Down` | `Shift+Alt+Down` |
+| Replace | `Cmd+H` | `Cmd+R` |
+| Go to Line | `Cmd+G` | `Cmd+L` |
+| Command Palette | `Cmd+Shift+P` | `Cmd+Shift+A` |
+| Toggle Sidebar | `Cmd+B` | `Alt+1` |
+| Toggle Terminal | `` Ctrl+` `` | `Alt+F12` |
+| Source Control | `Cmd+Shift+G` | `Alt+9` |
+| AI Refactor | — | `Ctrl+Alt+R` |
+| Fold All | `Cmd+K Cmd+0` | `Cmd+Shift+-` |
+| Unfold All | `Cmd+K Cmd+J` | `Cmd+Shift+=` |

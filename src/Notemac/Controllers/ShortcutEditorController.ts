@@ -1,5 +1,8 @@
 import { useNotemacStore } from "../Model/Store";
-import { FindConflict, IsValidShortcut, NormalizeKeyboardEvent } from "../Configs/ShortcutConfig";
+import { FindConflict, IsValidShortcut, NormalizeKeyboardEvent, GetDefaultShortcuts } from "../Configs/ShortcutConfig";
+import type { ShortcutItem } from "../Configs/ShortcutConfig";
+import type { ShortcutMappingPreset } from "../Configs/ShortcutPresets";
+import { BUILT_IN_PRESETS, GetPresetById } from "../Configs/ShortcutPresets";
 
 /**
  * Edits a keyboard shortcut with validation and conflict detection
@@ -16,8 +19,9 @@ export function EditShortcut(action: string, newShortcut: string): { success: bo
 
     const store = useNotemacStore.getState();
     const overrides = store.customShortcutOverrides;
+    const baseShortcuts = GetActivePresetShortcuts();
 
-    const conflict = FindConflict(newShortcut, action, overrides);
+    const conflict = FindConflict(newShortcut, action, overrides, baseShortcuts);
     if (null !== conflict)
     {
         return {
@@ -118,4 +122,96 @@ export function GetOverrideCount(): number
 {
     const store = useNotemacStore.getState();
     return Object.keys(store.customShortcutOverrides).length;
+}
+
+// ─── Preset Management ────────────────────────────────────────────
+
+/**
+ * Gets the active preset ID from the store
+ */
+export function GetActivePresetId(): string
+{
+    const store = useNotemacStore.getState();
+    return store.activePresetId;
+}
+
+/**
+ * Gets the base shortcuts for the currently active preset
+ */
+export function GetActivePresetShortcuts(): readonly ShortcutItem[]
+{
+    const store = useNotemacStore.getState();
+    const preset = GetPresetById(store.activePresetId);
+
+    if (null !== preset)
+    {
+        return preset.shortcuts;
+    }
+
+    // Check plugin presets
+    const pluginPresets = store.pluginPresets;
+    for (const pp of pluginPresets)
+    {
+        if (store.activePresetId === pp.id)
+        {
+            // Build full ShortcutItem[] from plugin preset by merging with defaults
+            const defaults = GetDefaultShortcuts();
+            return defaults.map((defaultItem) =>
+            {
+                const pluginOverride = pp.shortcuts.find(s => s.action === defaultItem.action);
+                if (undefined !== pluginOverride)
+                {
+                    return { ...defaultItem, shortcut: pluginOverride.shortcut };
+                }
+                return defaultItem;
+            }) as ShortcutItem[];
+        }
+    }
+
+    // Fallback to defaults
+    return GetDefaultShortcuts();
+}
+
+/**
+ * Switches the active shortcut mapping preset
+ * @param presetId The ID of the preset to switch to
+ */
+export function SetActivePreset(presetId: string): void
+{
+    const store = useNotemacStore.getState();
+    store.SetActivePreset(presetId);
+}
+
+/**
+ * Gets all available presets (built-in + plugin-contributed)
+ * @returns Array of available mapping presets
+ */
+export function GetAvailablePresets(): ShortcutMappingPreset[]
+{
+    const store = useNotemacStore.getState();
+    const allPresets: ShortcutMappingPreset[] = [...BUILT_IN_PRESETS];
+
+    // Add plugin-contributed presets
+    for (const pp of store.pluginPresets)
+    {
+        const defaults = GetDefaultShortcuts();
+        const fullShortcuts: ShortcutItem[] = defaults.map((defaultItem) =>
+        {
+            const pluginOverride = pp.shortcuts.find(s => s.action === defaultItem.action);
+            if (undefined !== pluginOverride)
+            {
+                return { ...defaultItem, shortcut: pluginOverride.shortcut };
+            }
+            return defaultItem;
+        });
+
+        allPresets.push({
+            id: pp.id,
+            name: pp.name,
+            description: pp.description,
+            shortcuts: fullShortcuts
+        });
+    }
+
+    return allPresets;
 }

@@ -235,6 +235,8 @@ describe('AppViewPresenter', () => {
     sidebarPanel: 'files',
     addTab: vi.fn(),
     LoadAIState: vi.fn(),
+    LoadActivePresetFromStorage: vi.fn(),
+    LoadShortcutsFromStorage: vi.fn(),
     setSidebarPanel: vi.fn(),
   };
 

@@ -128,6 +128,13 @@ export default function App()
     useNotemacStore.getState().LoadAIState();
   }, []);
 
+  // Load shortcut preset and custom shortcuts from storage
+  useEffect(() =>
+  {
+    useNotemacStore.getState().LoadActivePresetFromStorage();
+    useNotemacStore.getState().LoadShortcutsFromStorage();
+  }, []);
+
   // Initialize plugin system
   useEffect(() =>
   {

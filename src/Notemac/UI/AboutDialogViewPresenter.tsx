@@ -196,7 +196,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             <span>Encoding Support</span>
             <span>Line Operations</span>
             <span>Drag & Drop Tabs</span>
-            <span>Customizable Settings</span>
+            <span>Shortcut Presets</span>
           </div>
         </div>
 

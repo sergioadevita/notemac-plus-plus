@@ -14,9 +14,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 ## Test Summary
 
-**2,941 total tests** across 142 suites and three test layers:
+**2,992 total tests** across 144 suites and three test layers:
 
-### Unit Tests — 1,967 tests across 96 suites (Vitest)
+### Unit Tests — 2,018 tests across 98 suites (Vitest)
 
 #### Configs & Settings
 
@@ -26,7 +26,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Encoding Config | `EncodingConfig.test.ts` | 11 | Default encodings, UTF-8 configuration |
 | Git Config | `GitConfig.test.ts` | 9 | Default Git settings, author, credentials, persistence keys |
 | Language Config | `LanguageConfig.test.ts` | 17 | Language detection, language-specific defaults |
-| Shortcut Config | `ShortcutConfig.test.ts` | 7 | Keyboard shortcut definitions, categories |
+| Shortcut Config | `ShortcutConfig.test.ts` | 35 | Keyboard shortcut definitions, categories, effective shortcuts merging |
+| Shortcut Presets | `ShortcutPresets.test.ts` | 35 | Preset structure, ReSharper differences, storage, GetPresetById |
+| Shortcut Presets Integration | `ShortcutPresetsIntegration.test.ts` | 16 | Preset+override merging, conflict detection with presets, category coverage |
 | Theme Config | `ThemeConfig.test.ts` | 14 | Theme validation, color definitions, custom themes |
 
 #### Controllers

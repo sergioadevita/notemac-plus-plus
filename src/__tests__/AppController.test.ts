@@ -9,8 +9,14 @@ vi.mock('../Notemac/Model/Store', () => ({
     },
 }));
 
+// Mock ShortcutPresets
+vi.mock('../Notemac/Configs/ShortcutPresets', () => ({
+    GetPresetById: vi.fn(() => null),
+}));
+
 // Mock ShortcutConfig
 vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
+    GetDefaultShortcuts: vi.fn(() => []),
     GetEffectiveShortcuts: vi.fn(() => [
         { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
         { name: 'Close Tab', shortcut: 'Cmd+W', category: 'File', action: 'close-tab' },
@@ -107,6 +113,7 @@ describe('AppController — HandleKeyDown', () =>
             setShowCloneDialog: vi.fn(),
             setShowGitSettings: vi.fn(),
             customShortcutOverrides: {},
+            activePresetId: 'notemac-default',
             tabs: [],
         };
 

@@ -423,6 +423,9 @@ Customize keyboard shortcuts for all actions in Notemac++ with full conflict det
 - Persistent storage via localStorage for automatic restoration on restart
 - Dynamic command dispatch with support for modifier keys (Cmd, Shift, Alt)
 - Keyboard event normalization for cross-platform consistency
+- **Shortcut Mapping Presets**: Select from built-in preset mappings (Notemac++ Default, ReSharper) via dropdown in the Shortcut Mapper dialog
+- **Plugin Presets**: Plugins can register custom shortcut mapping presets via the `PluginContributions.presets` API
+- **Preset + Override Merging**: Active preset provides base shortcuts; user overrides persist across preset switches
 
 **Access:** Settings > Keybindings tab or Command Palette > "Shortcut Mapper"
 

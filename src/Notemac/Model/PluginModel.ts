@@ -8,6 +8,7 @@ import type {
     RegisteredSettingsSection,
     RegisteredCommand,
     RegisteredShortcut,
+    RegisteredPreset,
     PluginRegistryEntry,
 } from '../Commons/PluginTypes';
 
@@ -46,6 +47,11 @@ export interface NotemacPluginSlice
     pluginShortcuts: RegisteredShortcut[];
     RegisterPluginShortcut: (shortcut: RegisteredShortcut) => void;
     UnregisterPluginShortcut: (action: string) => void;
+
+    // Plugin presets (shortcut mapping presets)
+    pluginPresets: RegisteredPreset[];
+    RegisterPluginPreset: (preset: RegisteredPreset) => void;
+    UnregisterPluginPreset: (id: string) => void;
 
     // Plugin themes
     pluginThemes: { id: string; name: string; colors: Record<string, string>; pluginId: string }[];
@@ -142,6 +148,17 @@ export const createPluginSlice: StateCreator<NotemacPluginSlice, [], [], Notemac
         pluginShortcuts: state.pluginShortcuts.filter(s => s.action !== action),
     })),
 
+    // Presets
+    pluginPresets: [],
+    RegisterPluginPreset: (preset) => set((state) =>
+    {
+        const filtered = state.pluginPresets.filter(p => p.id !== preset.id);
+        return { pluginPresets: [...filtered, preset] };
+    }),
+    UnregisterPluginPreset: (id) => set((state) => ({
+        pluginPresets: state.pluginPresets.filter(p => p.id !== id),
+    })),
+
     // Themes
     pluginThemes: [],
     RegisterPluginTheme: (theme) => set((state) =>
@@ -186,6 +203,7 @@ export const createPluginSlice: StateCreator<NotemacPluginSlice, [], [], Notemac
         pluginSettingsSections: state.pluginSettingsSections.filter(s => s.pluginId !== pluginId),
         pluginCommands: state.pluginCommands.filter(c => c.pluginId !== pluginId),
         pluginShortcuts: state.pluginShortcuts.filter(s => s.pluginId !== pluginId),
+        pluginPresets: state.pluginPresets.filter(p => p.pluginId !== pluginId),
         pluginThemes: state.pluginThemes.filter(t => t.pluginId !== pluginId),
         pluginLanguages: state.pluginLanguages.filter(l => l.pluginId !== pluginId),
     })),

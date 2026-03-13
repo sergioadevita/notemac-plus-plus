@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-4.2.1-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-4000%2B%20passing-brightgreen" alt="Tests">
@@ -291,6 +291,7 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 
 &nbsp;
 
+- **Shortcut Mapping Presets**: Choose between built-in preset mappings (Notemac++ Default, ReSharper) via dropdown in the Shortcut Mapper — plugins can register custom presets
 - **Compare Files**: Side-by-side diff comparison of any two files with Monaco diff editor
 - **Distraction-Free Mode**: Hides all UI chrome for focused writing
 - **Always on Top**: Keep the editor above other windows
@@ -405,7 +406,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 1,728 unit tests (91 suites, Vitest)
+└── __tests__/                  # 2,018 unit tests (98 suites, Vitest)
 ```
 
 ## Testing
@@ -414,7 +415,7 @@ src/
 npx vitest run
 ```
 
-1,728 unit tests across 91 test suites, ~709 web E2E tests across 36 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
+2,018 unit tests across 98 test suites, ~760 web E2E tests across 42 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
 
 ```bash
 npx playwright test          # E2E tests

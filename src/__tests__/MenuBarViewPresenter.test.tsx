@@ -33,6 +33,11 @@ const mockTheme = {
 vi.mock('../Notemac/Model/Store');
 
 vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
+  GetDefaultShortcuts: vi.fn(() => [
+    { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+    { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },
+    { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+  ]),
   GetEffectiveShortcuts: vi.fn(() => [
     { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
     { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },

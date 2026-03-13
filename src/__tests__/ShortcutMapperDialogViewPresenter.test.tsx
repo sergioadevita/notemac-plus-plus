@@ -8,6 +8,7 @@ vi.mock('../Notemac/Model/Store', () => ({
   useNotemacStore: vi.fn(() => ({
     setShowShortcutMapper: mockSetShowShortcutMapper,
     customShortcutOverrides: {},
+    activePresetId: 'notemac-default',
   })),
 }));
 
@@ -27,6 +28,30 @@ vi.mock('../Notemac/Configs/ShortcutConfig', () => ({
     { name: 'Redo', shortcut: 'Cmd+Shift+Z', category: 'Edit', action: 'redo' },
   ]),
   GetShortcutCategories: vi.fn(() => ['File', 'Search', 'Edit']),
+}));
+
+const mockShortcutData = [
+  { name: 'New File', shortcut: 'Cmd+N', category: 'File', action: 'new' },
+  { name: 'Save', shortcut: 'Cmd+S', category: 'File', action: 'save' },
+  { name: 'Find', shortcut: 'Cmd+F', category: 'Search', action: 'find' },
+  { name: 'Undo', shortcut: 'Cmd+Z', category: 'Edit', action: 'undo' },
+  { name: 'Redo', shortcut: 'Cmd+Shift+Z', category: 'Edit', action: 'redo' },
+];
+
+vi.mock('../Notemac/Controllers/ShortcutEditorController', () => ({
+  EditShortcut: vi.fn(() => ({ success: true })),
+  CaptureShortcut: vi.fn(() => 'Cmd+K'),
+  ResetShortcutToDefault: vi.fn(),
+  ResetAllToDefaults: vi.fn(),
+  ExportShortcuts: vi.fn(() => '{}'),
+  ImportShortcuts: vi.fn(() => ({ success: true, count: 0 })),
+  GetActivePresetId: vi.fn(() => 'notemac-default'),
+  SetActivePreset: vi.fn(),
+  GetAvailablePresets: vi.fn(() => [
+    { id: 'notemac-default', name: 'Notemac++ Default', description: 'Standard shortcuts', shortcuts: mockShortcutData },
+    { id: 'resharper', name: 'ReSharper', description: 'ReSharper shortcuts', shortcuts: mockShortcutData },
+  ]),
+  GetActivePresetShortcuts: vi.fn(() => mockShortcutData),
 }));
 
 vi.mock('../Notemac/UI/hooks/useFocusTrap', () => ({

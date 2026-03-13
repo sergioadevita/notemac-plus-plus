@@ -64,6 +64,14 @@ export interface PluginLanguageDef
     config: Record<string, unknown>;
 }
 
+export interface PluginPresetDef
+{
+    id: string;
+    name: string;
+    description?: string;
+    shortcuts: Array<{ action: string; shortcut: string }>;
+}
+
 export interface PluginContributions
 {
     commands?: PluginCommandDef[];
@@ -74,6 +82,7 @@ export interface PluginContributions
     settingsSections?: PluginSettingsSectionDef[];
     themes?: PluginThemeDef[];
     languages?: PluginLanguageDef[];
+    presets?: PluginPresetDef[];
 }
 
 export interface PluginManifest
@@ -236,5 +245,14 @@ export interface RegisteredShortcut
     shortcut: string;
     action: string;
     category: string;
+    pluginId: string;
+}
+
+export interface RegisteredPreset
+{
+    id: string;
+    name: string;
+    description: string;
+    shortcuts: Array<{ action: string; shortcut: string }>;
     pluginId: string;
 }

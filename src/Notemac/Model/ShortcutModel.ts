@@ -1,11 +1,13 @@
 import { StateCreator } from 'zustand';
 import { produce } from 'immer';
 import { LoadCustomShortcuts, SaveCustomShortcuts } from '../Configs/ShortcutConfig';
+import { LoadActivePresetId, SaveActivePresetId } from '../Configs/ShortcutPresets';
 
 export interface NotemacShortcutSlice
 {
     customShortcutOverrides: Record<string, string>;
     shortcutConflictWarning: string | null;
+    activePresetId: string;
     UpdateShortcut: (action: string, newShortcut: string) => void;
     ResetShortcut: (action: string) => void;
     ResetAllShortcuts: () => void;
@@ -13,6 +15,8 @@ export interface NotemacShortcutSlice
     SetShortcutConflictWarning: (msg: string | null) => void;
     ExportShortcutsAsJSON: () => string;
     ImportShortcutsFromJSON: (json: string) => boolean;
+    SetActivePreset: (presetId: string) => void;
+    LoadActivePresetFromStorage: () => void;
 }
 
 export const createShortcutSlice: StateCreator<NotemacShortcutSlice, [], [], NotemacShortcutSlice> = (set, get) =>
@@ -20,6 +24,7 @@ export const createShortcutSlice: StateCreator<NotemacShortcutSlice, [], [], Not
     {
         customShortcutOverrides: {},
         shortcutConflictWarning: null,
+        activePresetId: 'notemac-default',
 
         UpdateShortcut: (action: string, newShortcut: string) =>
         {
@@ -109,6 +114,28 @@ export const createShortcutSlice: StateCreator<NotemacShortcutSlice, [], [], Not
             {
                 return false;
             }
+        },
+
+        SetActivePreset: (presetId: string) =>
+        {
+            set(
+                produce((state: NotemacShortcutSlice) =>
+                {
+                    state.activePresetId = presetId;
+                })
+            );
+            SaveActivePresetId(presetId);
+        },
+
+        LoadActivePresetFromStorage: () =>
+        {
+            const loaded = LoadActivePresetId();
+            set(
+                produce((state: NotemacShortcutSlice) =>
+                {
+                    state.activePresetId = loaded;
+                })
+            );
         }
     }
 );

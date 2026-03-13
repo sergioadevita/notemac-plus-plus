@@ -252,24 +252,34 @@ Keyboard commands registered for hex operations:
 - Validates shortcut syntax
 - Exports/imports shortcuts as JSON
 - Dynamic command dispatch with NormalizeKeyboardEvent
+- Manages preset switching via `GetAvailablePresets()`, `SetActivePreset()`, `GetActivePresetShortcuts()`
 
 **ShortcutModel.ts** holds keyboard mapping state:
 - Default shortcut definitions by category
 - Custom override dictionary
 - Conflict detection and tracking
+- Active preset ID (`activePresetId`) with localStorage persistence
+
+**ShortcutPresets.ts** defines shortcut mapping presets:
+- `ShortcutMappingPreset` interface: `{ id, name, description, shortcuts }`
+- Built-in presets: Notemac++ Default, ReSharper
+- `GetPresetById()`, `LoadActivePresetId()`, `SaveActivePresetId()`
+- Resolution order: Active Preset (base) → User Overrides → `GetEffectiveShortcuts()` merges
 
 **ShortcutConfig Extensions:**
-- `GetEffectiveShortcuts()`: Merges defaults with custom overrides
-- `FindConflict()`: Detects shortcut collisions
+- `GetEffectiveShortcuts(overrides?, baseShortcuts?)`: Merges preset base with custom overrides
+- `FindConflict(shortcut, excludeAction, overrides?, baseShortcuts?)`: Detects shortcut collisions with preset awareness
 - `NormalizeKeyboardEvent()`: Cross-platform key event normalization
 - localStorage persistence with key `notemac-custom-shortcuts`
 
-**UI Component:**
-- **ShortcutEditorController.test.ts**: Tests conflict detection and persistence
+**Plugin Presets:**
+- Plugins register presets via `PluginContributions.presets` (partial overrides merged with defaults)
+- `PluginModel` manages `pluginPresets` state with register/unregister lifecycle
 
 **AppController Refactor:**
 - Migrated from if-else chains to dynamic lookup map for command dispatch
 - Commands resolved by action ID from shortcut registry
+- Resolves base shortcuts from active preset via `GetPresetById()`
 - Enables extensibility for plugin-registered commands
 
 ## Plugin System Architecture

@@ -9,7 +9,10 @@ import {
   ResetShortcutToDefault,
   ResetAllToDefaults,
   ExportShortcuts,
-  ImportShortcuts
+  ImportShortcuts,
+  SetActivePreset,
+  GetAvailablePresets,
+  GetActivePresetShortcuts
 } from "../Controllers/ShortcutEditorController";
 import { useFocusTrap } from './hooks/useFocusTrap';
 
@@ -221,12 +224,36 @@ function useStyles(theme: ThemeColors) {
       justifyContent: 'center',
       transition: 'color 0.2s',
     } as React.CSSProperties,
+    presetRow: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 12,
+    } as React.CSSProperties,
+    presetLabel: {
+      color: theme.textSecondary,
+      fontSize: 12,
+      fontWeight: 600,
+      whiteSpace: 'nowrap',
+    } as React.CSSProperties,
+    presetSelect: {
+      flex: 1,
+      height: 32,
+      backgroundColor: theme.bg,
+      color: theme.text,
+      border: `1px solid ${theme.border}`,
+      borderRadius: 6,
+      padding: '0 10px',
+      fontSize: 13,
+      cursor: 'pointer',
+      outline: 'none',
+    } as React.CSSProperties,
   }), [theme]);
 }
 
 export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
 {
-  const { setShowShortcutMapper, customShortcutOverrides } = useNotemacStore();
+  const { setShowShortcutMapper, customShortcutOverrides, activePresetId } = useNotemacStore();
   const [filter, setFilter] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
   const [editingAction, setEditingAction] = useState<string | null>(null);
@@ -237,8 +264,19 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
   const styles = useStyles(theme);
 
-  const shortcuts = GetEffectiveShortcuts(customShortcutOverrides);
-  const categories = ['all', ...GetShortcutCategories()];
+  const availablePresets = GetAvailablePresets();
+  const baseShortcuts = GetActivePresetShortcuts();
+  const shortcuts = GetEffectiveShortcuts(customShortcutOverrides, baseShortcuts);
+  const categories = ['all', ...GetShortcutCategories(baseShortcuts)];
+  const activePresetName = availablePresets.find(p => p.id === activePresetId)?.name ?? 'Default';
+
+  const HandlePresetChange = useCallback((presetId: string) =>
+  {
+    SetActivePreset(presetId);
+    setEditingAction(null);
+    setCapturedShortcut('');
+    setEditError(null);
+  }, []);
   const filtered = shortcuts.filter(s =>
   {
     const matchesCategory = 'all' === activeCategory || s.category === activeCategory;
@@ -386,6 +424,23 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
           <h3 id="shortcut-mapper-title" style={styles.dialogTitle}>
             Shortcut Mapper
           </h3>
+
+          {/* Preset dropdown */}
+          <div style={styles.presetRow}>
+            <span style={styles.presetLabel}>Mapping:</span>
+            <select
+              value={activePresetId}
+              onChange={(e) => HandlePresetChange(e.target.value)}
+              style={styles.presetSelect}
+              aria-label="Shortcut mapping preset"
+            >
+              {availablePresets.map(preset => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Category tabs */}
           <div style={styles.categoryTabsContainer}>
@@ -536,7 +591,7 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
           >
             <div style={styles.confirmTitle}>Reset All Shortcuts?</div>
             <div style={styles.confirmMessage}>
-              This will reset all custom shortcuts to their defaults. This action cannot be undone.
+              This will reset all custom shortcuts to the {activePresetName} defaults. This action cannot be undone.
             </div>
             <div style={styles.confirmActions}>
               <button

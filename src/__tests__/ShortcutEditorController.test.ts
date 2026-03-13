@@ -29,6 +29,8 @@ describe('EditShortcut', () =>
     {
         const mockStore = {
             customShortcutOverrides: {},
+            activePresetId: 'notemac-default',
+            pluginPresets: [],
             UpdateShortcut: vi.fn()
         };
 
@@ -44,7 +46,9 @@ describe('EditShortcut', () =>
     it('returns error for invalid shortcut (empty)', () =>
     {
         const mockStore = {
-            customShortcutOverrides: {}
+            customShortcutOverrides: {},
+            activePresetId: 'notemac-default',
+            pluginPresets: [],
         };
 
         vi.mocked(useNotemacStore.getState).mockReturnValue(mockStore as any);
@@ -59,6 +63,8 @@ describe('EditShortcut', () =>
     {
         const mockStore = {
             customShortcutOverrides: {},
+            activePresetId: 'notemac-default',
+            pluginPresets: [],
             UpdateShortcut: vi.fn()
         };
 
@@ -77,6 +83,8 @@ describe('EditShortcut', () =>
     {
         const mockStore = {
             customShortcutOverrides: {},
+            activePresetId: 'notemac-default',
+            pluginPresets: [],
             UpdateShortcut: vi.fn()
         };
 

@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] - 2026-03-13
+
+### Added — Shortcut Mapping Presets
+- **Preset Dropdown**: Select from different shortcut mapping presets via a dropdown in the Shortcut Mapper dialog
+- **Notemac++ Default Preset**: Standard Notemac++ keyboard shortcuts (the existing defaults)
+- **ReSharper Preset**: JetBrains ReSharper / IntelliJ IDEA style keyboard shortcuts covering all 60 actions with key differences (Cmd+Alt+N for New File, Cmd+Y for Delete Line, Cmd+Shift+A for Command Palette, Alt+1 for Toggle Sidebar, etc.)
+- **Plugin Preset Support**: Plugins can register custom shortcut mapping presets via the `PluginContributions.presets` API
+- **Preset + Override Merging**: Active preset provides base shortcuts; user overrides persist across preset switches
+- **Preset Persistence**: Active preset ID saved to localStorage and restored on app startup
+
+### Added — Testing
+- 2 new test files (51 new unit tests) covering ShortcutPresets structure/storage and ShortcutPresetsIntegration (preset+override merging, conflict detection)
+- Total: 2,992 unit tests across 144 suites
+
+### Changed
+- Version bumped to 4.2.1
+- `ShortcutConfig.GetEffectiveShortcuts()` now accepts optional base shortcuts parameter for preset-aware merging
+- `ShortcutConfig.FindConflict()` now accepts optional base shortcuts parameter
+- `ShortcutConfig.GetShortcutCategories()` and `GetShortcutsByCategory()` accept optional base parameter
+- Exported `DEFAULT_SHORTCUTS` from ShortcutConfig (previously unexported)
+- Added `activePresetId` state to ShortcutModel with `SetActivePreset` and `LoadActivePresetFromStorage`
+- Extended `PluginTypes` with `PluginPresetDef`, `RegisteredPreset`, and `PluginContributions.presets`
+- Extended `PluginModel` with `pluginPresets` state and register/unregister methods
+- Added `GetActivePresetId`, `GetActivePresetShortcuts`, `SetActivePreset`, `GetAvailablePresets` to ShortcutEditorController
+- Updated `AppController.HandleKeyDown` to resolve base shortcuts from active preset
+- Updated `ShortcutMapperDialogViewPresenter` with preset dropdown UI
+- Updated `AppViewPresenter` to load preset from storage on init
+
+### New Files (1 source + 2 test = 3 total)
+- `src/Notemac/Configs/ShortcutPresets.ts` — Preset interfaces, built-in presets (Default + ReSharper), storage helpers
+- `src/__tests__/ShortcutPresets.test.ts` — 35 unit tests for preset structure, key differences, storage
+- `src/__tests__/ShortcutPresetsIntegration.test.ts` — 16 integration tests for preset+override merging, conflict detection
+
 ## [4.2.0] - 2026-03-13
 
 ### Added — Keyboard Shortcut Editor

@@ -1,5 +1,6 @@
 import { useNotemacStore } from "../Model/Store";
 import { GetEffectiveShortcuts, NormalizeKeyboardEvent } from "../Configs/ShortcutConfig";
+import { GetPresetById } from "../Configs/ShortcutPresets";
 import { HandleMenuAction } from "./MenuActionController";
 
 /**
@@ -40,7 +41,10 @@ export function HandleKeyDown(e: KeyboardEvent, activeTabId: string | null, zoom
     }
 
     // Build dynamic lookup map from effective shortcuts
-    const effectiveShortcuts = GetEffectiveShortcuts(store.customShortcutOverrides);
+    // Resolve base shortcuts from active preset
+    const activePreset = GetPresetById(store.activePresetId);
+    const baseShortcuts = null !== activePreset ? activePreset.shortcuts : undefined;
+    const effectiveShortcuts = GetEffectiveShortcuts(store.customShortcutOverrides, baseShortcuts);
     const shortcutMap: Record<string, string> = {};
 
     for (const item of effectiveShortcuts)

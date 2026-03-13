@@ -6,7 +6,7 @@ export interface ShortcutItem
     action: string;
 }
 
-const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
+export const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     // File
     { category: 'File', name: 'New File', shortcut: 'Cmd+N', action: 'new' },
     { category: 'File', name: 'Open File', shortcut: 'Cmd+O', action: 'open' },
@@ -82,6 +82,12 @@ const DEFAULT_SHORTCUTS: readonly ShortcutItem[] = [
     // Plugins
     { category: 'Plugins', name: 'Plugin Manager', shortcut: 'Cmd+Shift+X', action: 'show-plugin-manager' },
     { category: 'Plugins', name: 'Reload Plugins', shortcut: '', action: 'reload-plugins' },
+
+    // Hex Editor
+    { category: 'Hex', name: 'View as Hex', shortcut: '', action: 'view-as-hex' },
+    { category: 'Hex', name: 'View as Text', shortcut: '', action: 'view-as-text' },
+    { category: 'Hex', name: 'Go to Hex Offset', shortcut: '', action: 'hex-goto-offset' },
+    { category: 'Hex', name: 'Toggle Hex Bytes Per Row', shortcut: '', action: 'hex-toggle-bytes-per-row' },
 ] as const;
 
 const STORAGE_KEY: string = 'notemac-custom-shortcuts';
@@ -132,30 +138,32 @@ export function SaveCustomShortcuts(overrides: Record<string, string>): void
     }
 }
 
-export function GetEffectiveShortcuts(overrides?: Record<string, string>): ShortcutItem[]
+export function GetEffectiveShortcuts(overrides?: Record<string, string>, baseShortcuts?: readonly ShortcutItem[]): ShortcutItem[]
 {
     const customOverrides = overrides ?? LoadCustomShortcuts();
+    const base = baseShortcuts ?? DEFAULT_SHORTCUTS;
 
-    return DEFAULT_SHORTCUTS.map((defaultItem) =>
+    return base.map((baseItem) =>
     {
-        const overriddenShortcut = customOverrides[defaultItem.action];
+        const overriddenShortcut = customOverrides[baseItem.action];
 
         if (undefined !== overriddenShortcut && '' !== overriddenShortcut)
         {
             return {
-                ...defaultItem,
+                ...baseItem,
                 shortcut: overriddenShortcut
             };
         }
 
-        return defaultItem;
+        return baseItem;
     });
 }
 
 export function FindConflict(
     shortcut: string,
     excludeAction: string,
-    overrides?: Record<string, string>
+    overrides?: Record<string, string>,
+    baseShortcuts?: readonly ShortcutItem[]
 ): ShortcutItem | null
 {
     if ('' === shortcut)
@@ -164,7 +172,7 @@ export function FindConflict(
     }
 
     const customOverrides = overrides ?? LoadCustomShortcuts();
-    const effective = GetEffectiveShortcuts(customOverrides);
+    const effective = GetEffectiveShortcuts(customOverrides, baseShortcuts);
 
     for (const item of effective)
     {
@@ -275,17 +283,19 @@ export function GetDefaultShortcuts(): readonly ShortcutItem[]
     return DEFAULT_SHORTCUTS;
 }
 
-export function GetShortcutCategories(): string[]
+export function GetShortcutCategories(baseShortcuts?: readonly ShortcutItem[]): string[]
 {
+    const base = baseShortcuts ?? DEFAULT_SHORTCUTS;
     const categories = new Set<string>();
-    for (const shortcut of DEFAULT_SHORTCUTS)
+    for (const shortcut of base)
     {
         categories.add(shortcut.category);
     }
     return Array.from(categories);
 }
 
-export function GetShortcutsByCategory(category: string): ShortcutItem[]
+export function GetShortcutsByCategory(category: string, baseShortcuts?: readonly ShortcutItem[]): ShortcutItem[]
 {
-    return DEFAULT_SHORTCUTS.filter(s => s.category === category) as ShortcutItem[];
+    const base = baseShortcuts ?? DEFAULT_SHORTCUTS;
+    return base.filter(s => s.category === category) as ShortcutItem[];
 }
