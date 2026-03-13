@@ -115,16 +115,19 @@ test.describe('Tauri Native Features', () => {
 
   test('App renders menu items (web mode with MenuBar)', async () => {
     // App runs in web mode, so the web MenuBar should render
-    // Check for menu item text like "File", "Edit", etc.
-    const hasMenuText = await page.evaluate(() => {
-      const divs = document.querySelectorAll('div, span, button');
-      for (const el of divs) {
-        const text = (el.textContent || '').trim();
+    // Check for menu items via role="menuitem" or role="menubar"
+    const hasMenuBar = await page.evaluate(() => {
+      const menubar = document.querySelector('[role="menubar"]');
+      if (menubar) return true;
+      // Fallback: check for menu item elements with File/Edit text
+      const items = document.querySelectorAll('[role="menuitem"]');
+      for (const item of items) {
+        const text = (item.textContent || '').trim();
         if (text === 'File' || text === 'Edit') return true;
       }
       return false;
     });
-    expect(hasMenuText).toBe(true);
+    expect(hasMenuBar).toBe(true);
   });
 
   test('Zustand store is exposed for testing', async () => {
