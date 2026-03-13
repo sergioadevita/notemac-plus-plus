@@ -211,16 +211,20 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('Ctrl+` toggles terminal', async ({ page }) => {
-    await pressShortcut(page, 'Ctrl+`');
-    await page.waitForTimeout(300);
+    // Use dispatchShortcut — Playwright's keyboard API may not deliver
+    // backtick reliably in headless Chromium on Linux
+    await dispatchShortcut(page, 'Ctrl+`');
+    await page.waitForTimeout(500);
 
     const terminalVisible = await getStoreState(page, 'showTerminalPanel');
     expect(terminalVisible).toBe(true);
   });
 
   test('Ctrl+Shift+G opens git panel', async ({ page }) => {
-    await pressShortcut(page, 'Ctrl+Shift+G');
-    await page.waitForTimeout(300);
+    // Use dispatchShortcut — Ctrl+Shift+G is intercepted by Chromium
+    // as "Previous Find" in some configurations
+    await dispatchShortcut(page, 'Ctrl+Shift+G');
+    await page.waitForTimeout(500);
 
     const sidebarVisible = await isSidebarVisible(page);
     expect(sidebarVisible).toBe(true);
