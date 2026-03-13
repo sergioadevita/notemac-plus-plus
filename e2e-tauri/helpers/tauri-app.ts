@@ -301,7 +301,7 @@ export async function launchTauriApp(): Promise<{ context: BrowserContext; page:
 
   const page = await context.newPage();
 
-  await page.goto(`http://localhost:${PREVIEW_PORT}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`http://localhost:${PREVIEW_PORT}/app`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('.notemac-app, #root > div', { timeout: 30000 });
   await page.waitForTimeout(2000);
 

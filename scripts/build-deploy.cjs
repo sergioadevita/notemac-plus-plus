@@ -61,6 +61,12 @@ fs.copyFileSync(
   path.join(dist, 'robots.txt')
 );
 
+// 7. Keep a copy of icon.png at dist/ root for Tauri generate_context!() macro
+const appIconSrc = path.join(dist, 'app', 'icon.png');
+if (fs.existsSync(appIconSrc)) {
+  fs.copyFileSync(appIconSrc, path.join(dist, 'icon.png'));
+}
+
 console.log('Deploy build ready:');
 console.log('  dist/index.html       (landing page)');
 console.log('  dist/Icons/            (icon assets)');

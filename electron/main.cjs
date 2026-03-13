@@ -24,7 +24,11 @@ function createWindow() {
   // false when running via "electron ." during development.
   // In test mode (NODE_ENV=test), load from built dist/ to avoid needing a dev server.
   if (app.isPackaged || process.env.NODE_ENV === 'test') {
-    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+    // After build-deploy.cjs, the Vite app is at dist/app/index.html
+    // (dist/index.html is the landing page for GitHub Pages)
+    const appIndex = path.join(__dirname, '..', 'dist', 'app', 'index.html');
+    const fallbackIndex = path.join(__dirname, '..', 'dist', 'index.html');
+    mainWindow.loadFile(fs.existsSync(appIndex) ? appIndex : fallbackIndex);
   } else {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();

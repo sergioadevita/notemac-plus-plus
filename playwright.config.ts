@@ -11,7 +11,7 @@ export default defineConfig({
   expect: { timeout: 5_000 },
 
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:4173/app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 10_000,
