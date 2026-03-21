@@ -173,6 +173,10 @@ vi.mock('../Notemac/UI/AISettingsViewPresenter', () => ({
   AISettingsViewPresenter: () => <div>AISettings</div>,
 }));
 
+vi.mock('../Notemac/Services/PluginAPIService', () => ({
+  CreatePluginContext: vi.fn(),
+}));
+
 vi.mock('../Notemac/Controllers/PluginController', () => ({
   InitializePluginSystem: vi.fn(),
 }));

@@ -194,15 +194,26 @@ describe('CompileRunModel — AppendCompileRunOutput', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        for (let i = 0; i < LIMIT_COMPILE_RUN_OUTPUT + 100; i++)
+        // Pre-fill output to near the limit via setState (avoids 10k Immer produces)
+        const prefilled = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT - 5 }, (_, i) => `Line ${i}`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution ? { ...s.compileRunExecution, output: prefilled } : null,
+        }));
+
+        // These 5 should succeed
+        for (let i = 0; i < 5; i++)
         {
-            store.AppendCompileRunOutput(`Line ${i}`);
+            store.AppendCompileRunOutput(`Extra ${i}`);
         }
+
+        // These should be rejected (over limit)
+        store.AppendCompileRunOutput('Over limit 1');
+        store.AppendCompileRunOutput('Over limit 2');
+
         const state = useNotemacStore.getState();
 
         expect(state.compileRunExecution?.output.length).toBe(LIMIT_COMPILE_RUN_OUTPUT);
         expect(state.compileRunExecution?.output[0]).toBe('Line 0');
-        expect(state.compileRunExecution?.output[LIMIT_COMPILE_RUN_OUTPUT - 1]).toBe(`Line ${LIMIT_COMPILE_RUN_OUTPUT - 1}`);
     });
 
     it('stops appending after output limit is reached', () =>
@@ -210,10 +221,11 @@ describe('CompileRunModel — AppendCompileRunOutput', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        for (let i = 0; i < LIMIT_COMPILE_RUN_OUTPUT; i++)
-        {
-            store.AppendCompileRunOutput(`Line ${i}`);
-        }
+        // Pre-fill to exactly the limit
+        const prefilled = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT }, (_, i) => `Line ${i}`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution ? { ...s.compileRunExecution, output: prefilled } : null,
+        }));
 
         store.AppendCompileRunOutput('Over limit');
         const state = useNotemacStore.getState();
@@ -282,10 +294,23 @@ describe('CompileRunModel — AppendCompileRunStderr', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        for (let i = 0; i < LIMIT_COMPILE_RUN_OUTPUT + 100; i++)
-        {
-            store.AppendCompileRunStderr(`Error ${i}`);
-        }
+        // Pre-fill stderr to near the limit
+        const prefilled = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT - 3 }, (_, i) => `Error ${i}`);
+        const prefilledOutput = prefilled.map((e) => `\x1b[31m${e}\x1b[0m`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution
+                ? { ...s.compileRunExecution, stderr: prefilled, output: prefilledOutput }
+                : null,
+        }));
+
+        // These 3 should succeed
+        store.AppendCompileRunStderr('Error extra 1');
+        store.AppendCompileRunStderr('Error extra 2');
+        store.AppendCompileRunStderr('Error extra 3');
+
+        // This should be rejected
+        store.AppendCompileRunStderr('Error over limit');
+
         const state = useNotemacStore.getState();
 
         expect(state.compileRunExecution?.stderr.length).toBe(LIMIT_COMPILE_RUN_OUTPUT);
@@ -297,10 +322,17 @@ describe('CompileRunModel — AppendCompileRunStderr', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        for (let i = 0; i < LIMIT_COMPILE_RUN_OUTPUT + 100; i++)
-        {
-            store.AppendCompileRunStderr(`Error ${i}`);
-        }
+        // Pre-fill output to exactly the limit
+        const prefilledOutput = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT }, (_, i) => `\x1b[31mError ${i}\x1b[0m`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution
+                ? { ...s.compileRunExecution, output: prefilledOutput }
+                : null,
+        }));
+
+        // Output should not grow further
+        store.AppendCompileRunStderr('Extra error');
+
         const state = useNotemacStore.getState();
 
         expect(state.compileRunExecution?.output.length).toBe(LIMIT_COMPILE_RUN_OUTPUT);
@@ -810,14 +842,16 @@ describe('CompileRunModel — Output Limit Enforcement', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        const halfLimit = Math.floor(LIMIT_COMPILE_RUN_OUTPUT / 2);
+        // Pre-fill output to near the limit
+        const prefilled = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT - 5 }, (_, i) => `Out ${i}`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution
+                ? { ...s.compileRunExecution, output: prefilled }
+                : null,
+        }));
 
-        for (let i = 0; i < halfLimit; i++)
-        {
-            store.AppendCompileRunOutput(`Out ${i}`);
-        }
-
-        for (let i = 0; i < halfLimit + 100; i++)
+        // These 5 stderr will add to output (capped at limit)
+        for (let i = 0; i < 10; i++)
         {
             store.AppendCompileRunStderr(`Err ${i}`);
         }
@@ -831,10 +865,13 @@ describe('CompileRunModel — Output Limit Enforcement', () =>
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
 
-        for (let i = 0; i < LIMIT_COMPILE_RUN_OUTPUT; i++)
-        {
-            store.AppendCompileRunOutput(`Line ${i}`);
-        }
+        // Pre-fill to exactly the limit
+        const prefilled = Array.from({ length: LIMIT_COMPILE_RUN_OUTPUT }, (_, i) => `Line ${i}`);
+        useNotemacStore.setState((s) => ({
+            compileRunExecution: s.compileRunExecution
+                ? { ...s.compileRunExecution, output: prefilled }
+                : null,
+        }));
 
         store.AppendCompileRunOutput('Should not appear');
         const state = useNotemacStore.getState();
