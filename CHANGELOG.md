@@ -527,6 +527,8 @@ Initial release of Notemac++: A powerful, feature-rich text and source code edit
 
 ---
 
+[5.0.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v5.0.0
+[4.2.1]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v4.2.1
 [4.2.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v4.2.0
 [3.4.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.4.0
 [3.3.0]: https://github.com/sergioadevita/notemac-plus-plus/releases/tag/v3.3.0
