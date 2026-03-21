@@ -10,6 +10,7 @@ jobs:
   unit-tests:
     name: Unit Tests & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -32,6 +33,7 @@ jobs:
   e2e-web:
     name: Web E2E Tests (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -65,6 +67,7 @@ jobs:
   e2e-electron:
     name: Electron E2E Tests
     runs-on: macos-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -98,6 +101,7 @@ jobs:
   e2e-tauri:
     name: Tauri E2E Tests (WebKit)
     runs-on: macos-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -131,6 +135,7 @@ jobs:
   tauri-build:
     name: Tauri Binary Build & Rust Tests
     runs-on: macos-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
