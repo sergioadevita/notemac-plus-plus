@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { useNotemacStore } from "../Model/Store";
 import type { ThemeColors } from "../Configs/ThemeConfig";
 import { GetEffectiveShortcuts, GetShortcutCategories } from "../Configs/ShortcutConfig";
@@ -251,7 +251,7 @@ function useStyles(theme: ThemeColors) {
   }), [theme]);
 }
 
-export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
+export const ShortcutMapperDialog = React.memo(function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
 {
   const { setShowShortcutMapper, customShortcutOverrides, activePresetId } = useNotemacStore();
   const [filter, setFilter] = useState('');
@@ -615,4 +615,4 @@ export function ShortcutMapperDialog({ theme }: ShortcutMapperDialogProps)
       )}
     </>
   );
-}
+});
