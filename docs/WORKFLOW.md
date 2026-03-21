@@ -46,7 +46,7 @@ git push -u origin feature/your-feature-name
 gh pr create --title "feat: Add shortcut mapping presets" --body "Summary of changes"
 ```
 
-CI runs automatically on every PR targeting main.
+CI runs automatically on every PR targeting main. If the PR only changes docs, markdown, or other non-code files, the test jobs will pass immediately without running — no wasted CI time.
 
 ### 4. Wait for CI
 
