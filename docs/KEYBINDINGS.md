@@ -116,6 +116,15 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 
 **Note:** Git Blame, Merge Conflict Resolution, and Collaborative Editing features are accessed primarily through menu commands and inline controls. Breadcrumb Navigation, Sticky Scroll, Emmet Support, Print Support, and Git Stash Management are controlled via Settings or menu options.
 
+## Compile & Run
+
+| Shortcut | Action |
+|---|---|
+| `F5` | Run File |
+| `Shift+F5` | Run with Arguments |
+| `Ctrl+F5` | Stop Execution |
+| `Cmd+Shift+Y` | Toggle Output Panel |
+
 ## Plugins
 
 | Shortcut | Action |

@@ -9,10 +9,11 @@ import { createGitSlice, NotemacGitSlice } from "./GitModel";
 import { createAISlice, NotemacAISlice } from "./AIModel";
 import { createPluginSlice, NotemacPluginSlice } from "./PluginModel";
 import { createTaskRunnerSlice, NotemacTaskRunnerSlice } from "./TaskRunnerModel";
+import { createCompileRunSlice, NotemacCompileRunSlice } from "./CompileRunModel";
 import { createLanguageDefinitionSlice, NotemacLanguageDefinitionSlice } from "./LanguageDefinitionModel";
 import { createShortcutSlice, NotemacShortcutSlice } from "./ShortcutModel";
 
-export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice & NotemacPluginSlice & NotemacTaskRunnerSlice & NotemacLanguageDefinitionSlice & NotemacShortcutSlice;
+export type NotemacState = NotemacTabSlice & NotemacSearchSlice & NotemacMacroSlice & NotemacUISlice & NotemacFileTreeSlice & NotemacSnippetSlice & NotemacGitSlice & NotemacAISlice & NotemacPluginSlice & NotemacTaskRunnerSlice & NotemacCompileRunSlice & NotemacLanguageDefinitionSlice & NotemacShortcutSlice;
 
 export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createTabSlice(...a),
@@ -25,6 +26,7 @@ export const useNotemacStore = create<NotemacState>()((...a) => ({
     ...createAISlice(...a),
     ...createPluginSlice(...a),
     ...createTaskRunnerSlice(...a),
+    ...createCompileRunSlice(...a),
     ...createLanguageDefinitionSlice(...a),
     ...createShortcutSlice(...a),
 }));

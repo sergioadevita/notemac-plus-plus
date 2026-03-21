@@ -38,6 +38,7 @@ const PluginManagerViewPresenter = lazy(() => import('./PluginManagerViewPresent
 const PluginDialogViewPresenter = lazy(() => import('./PluginDialogViewPresenter').then(m => ({ default: m.PluginDialogViewPresenter })));
 const ConfigureTasksDialogViewPresenter = lazy(() => import('./ConfigureTasksDialogViewPresenter').then(m => ({ default: m.ConfigureTasksDialogViewPresenter })));
 const TaskExecutionPanelViewPresenter = lazy(() => import('./TaskExecutionPanelViewPresenter').then(m => ({ default: m.TaskExecutionPanelViewPresenter })));
+const RunOutputPanelViewPresenter = lazy(() => import('./RunOutputPanelViewPresenter').then(m => ({ default: m.RunOutputPanel })));
 
 export default function App()
 {
@@ -68,6 +69,8 @@ export default function App()
   const pluginDialogComponent = useNotemacStore(s => s.pluginDialogComponent);
   const showConfigureTasksDialog = useNotemacStore(s => s.showConfigureTasksDialog);
   const isTaskPanelVisible = useNotemacStore(s => s.isTaskPanelVisible);
+  const compileRunPanelVisible = useNotemacStore(s => s.compileRunPanelVisible);
+  const compileRunExecution = useNotemacStore(s => s.compileRunExecution);
   const splitView = useNotemacStore(s => s.splitView);
   const splitTabId = useNotemacStore(s => s.splitTabId);
   const addTab = useNotemacStore(s => s.addTab);
@@ -276,6 +279,15 @@ export default function App()
             <ErrorBoundary fallbackMessage="Task execution panel failed to load">
               <Suspense fallback={null}>
                 <TaskExecutionPanelViewPresenter theme={theme} />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+
+          {/* Compile & Run output panel — all platforms */}
+          {(compileRunPanelVisible || null !== compileRunExecution) && (
+            <ErrorBoundary fallbackMessage="Compile & Run panel failed to load">
+              <Suspense fallback={null}>
+                <RunOutputPanelViewPresenter theme={theme} />
               </Suspense>
             </ErrorBoundary>
           )}

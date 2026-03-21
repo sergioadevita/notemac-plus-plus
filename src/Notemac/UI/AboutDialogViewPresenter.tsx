@@ -177,6 +177,7 @@ export function AboutDialog({ theme }: AboutDialogProps) {
             FEATURES
           </div>
           <div style={styles.featuresGrid}>
+            <span>Compile & Run (73+ langs)</span>
             <span>Syntax Highlighting (70+ langs)</span>
             <span>Git Integration</span>
             <span>AI Assistant (Multi-provider)</span>

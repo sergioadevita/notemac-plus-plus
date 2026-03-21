@@ -173,6 +173,21 @@ vi.mock('../Notemac/UI/AISettingsViewPresenter', () => ({
   AISettingsViewPresenter: () => <div>AISettings</div>,
 }));
 
+vi.mock('../Notemac/Services/PluginAPIService', () => ({
+  CreatePluginContext: vi.fn(),
+  CleanupPluginContext: vi.fn(),
+}));
+
+vi.mock('../Notemac/Services/PluginRegistryService', () => ({
+  FetchRegistryIndex: vi.fn().mockResolvedValue([]),
+  GetDemoRegistryEntries: vi.fn().mockReturnValue([]),
+}));
+
+vi.mock('../Notemac/Services/PluginLoaderService', () => ({
+  ScanPluginDirectory: vi.fn().mockResolvedValue([]),
+  LoadPluginFromDirectory: vi.fn().mockResolvedValue(null),
+}));
+
 vi.mock('../Notemac/Controllers/PluginController', () => ({
   InitializePluginSystem: vi.fn(),
 }));
@@ -339,7 +354,7 @@ describe('AppViewPresenter', () => {
   it('registers keyboard handler on mount', () => {
     render(<App />);
     // Should not throw and component should render
-    expect(screen.getByTestId('error-boundary')).toBeTruthy();
+    expect(screen.getAllByTestId('error-boundary').length).toBeGreaterThan(0);
   });
 
   it('applies correct background color from theme', () => {

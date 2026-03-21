@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-03-21
+
+### Added — Compile & Run (73+ Languages)
+- **Universal Code Execution**: Run code in 73+ languages on Desktop (Electron/Tauri) and Web, with no "desktop only" limitations
+- **Runtime Adapter Architecture**: Unified `RuntimeAdapter` interface with platform-specific backends — DesktopRuntimeAdapter (OS processes), WebJsRuntimeAdapter (sandboxed iframe for JS/TS/CoffeeScript), WebValidationAdapter (JSON/XML/YAML/HTML/CSS/Markdown), WasmRuntimeAdapter (CDN-loaded WASM runtimes for Python, Lua, SQL, and more)
+- **WASM Runtime Support**: Lazy-loaded WASM runtimes from CDN via `<script>` tag injection with deduplication; three concrete loaders (Pyodide, Wasmoon, sql.js) plus stub runtimes for future languages
+- **Background Caching**: RuntimeCacheService with IndexedDB persistence, predictive preloading based on open file types, and Service Worker registration for offline WASM caching
+- **Run Output Panel**: Resizable output panel with ANSI color support, elapsed time display, drag-to-resize handle, auto-scroll, and status indicators (Ready/Running/Success/Failed/Cancelled)
+- **Run Menu Integration**: 6 new menu items (Run File, Run with Arguments, Stop, separator, Clear Output, Toggle Output Panel) added to the Run menu
+- **Keyboard Shortcuts**: F5 (Run File), Shift+F5 (Run with Arguments), Ctrl+F5 (Stop Execution), Cmd+Shift+Y (Toggle Output Panel)
+- **Language Command Map**: Maps all 73 languages to desktop commands and web runtime types across 5 categories — A (JS-based), B (existing WASM ports), C (Emscripten builds), D (self-hosted compilers), E (custom TS interpreters)
+- **Command Registry**: 5 new compile-run commands registered in the Run category
+
+### Added — Testing
+- 2 new test files: `CompileRunModel.test.ts` (69 tests), `LanguageCommandMap.test.ts` (63 tests)
+- Total: 3,124 unit tests across 146 suites
+
+### Changed
+- Version bumped from 4.2.1 to 5.0.0 (major: new execution platform)
+- `AppViewPresenter` — added lazy-loaded RunOutputPanelViewPresenter
+- `MenuBarViewPresenter` — added compile-run items to Run menu
+- `MenuActionController` — added compile-run action handler with dynamic import
+- `ShortcutConfig` — added 5 Run category shortcuts
+- `ShortcutPresets` — added 5 Run shortcuts to ReSharper preset
+- `CommandRegistry` — added 5 compile-run commands
+- `Constants` — added compile-run panel, history, output, and timeout constants
+- `Store` — added CompileRunSlice to combined Zustand store
+- `EventDispatcher` — added COMPILE_RUN_STARTED and COMPILE_RUN_COMPLETED events
+
+### New Files (8 source + 2 test = 10 total)
+- `src/Notemac/Services/RuntimeAdapter.ts` — Core RuntimeAdapter interface and types
+- `src/Notemac/Services/Runtimes/LanguageCommandMap.ts` — 73-language command/runtime map
+- `src/Notemac/Services/Runtimes/DesktopRuntimeAdapter.ts` — Desktop execution via OS processes
+- `src/Notemac/Services/Runtimes/WebJsRuntimeAdapter.ts` — Sandboxed iframe execution for JS/TS
+- `src/Notemac/Services/Runtimes/WebValidationAdapter.ts` — Validation/preview for JSON/XML/YAML/HTML/CSS
+- `src/Notemac/Services/Runtimes/WasmRuntimeAdapter.ts` — CDN-loaded WASM runtime adapter
+- `src/Notemac/Services/Runtimes/RuntimeCacheService.ts` — IndexedDB caching + Service Worker
+- `src/Notemac/Model/CompileRunModel.ts` — Zustand slice for execution state
+- `src/Notemac/Controllers/CompileRunController.ts` — Orchestrator routing to correct adapter
+- `src/Notemac/UI/RunOutputPanelViewPresenter.tsx` — Resizable output panel with ANSI colors
+- `src/__tests__/CompileRunModel.test.ts` — 69 unit tests for execution state management
+- `src/__tests__/LanguageCommandMap.test.ts` — 63 unit tests for language command map
+
 ## [4.2.1] - 2026-03-13
 
 ### Added — Shortcut Mapping Presets

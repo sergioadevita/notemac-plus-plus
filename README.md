@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.1-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-5.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/tests-4000%2B%20passing-brightgreen" alt="Tests">
-  <img src="https://img.shields.io/badge/languages-70%2B-orange" alt="Languages">
+  <img src="https://img.shields.io/badge/languages-73%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
 
@@ -27,7 +27,7 @@
 
 ---
 
-Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Tauri or Electron) and as a web application. It features syntax highlighting for 70+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, **built-in Git integration**, an **AI coding assistant** with multi-provider support, an **integrated terminal**, **code snippets**, and much more.
+Notemac++ brings the familiar power of Notepad++ to macOS — both as a native desktop app (via Tauri or Electron) and as a web application. It features syntax highlighting for 73+ languages, a tabbed interface with drag-and-drop reordering, split views, macro recording, bookmarks, powerful find/replace with regex, **built-in Git integration**, an **AI coding assistant** with multi-provider support, an **integrated terminal**, **code snippets**, **Compile & Run** execution in 73+ languages, and much more.
 
 ## Screenshots
 
@@ -287,6 +287,20 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 </details>
 
 <details>
+<summary><strong>Compile & Run</strong> — Execute code in 73+ languages</summary>
+
+&nbsp;
+
+- **Multi-language support**: 73+ programming languages including C, C++, Python, JavaScript, TypeScript, Rust, Go, Java, Ruby, PHP, Swift, Kotlin, and many more
+- **Desktop execution**: Run code natively on your local system
+- **Web execution**: WASM runtimes with Service Worker caching for browser-based execution
+- **Keyboard shortcuts**: `F5` (run), `Shift+F5` (clear and run), `Ctrl+F5` (run and focus output)
+- **Output panel**: Real-time output streaming with ANSI color support for colorized terminal output
+- **Category A-E runtime architecture**: Optimized performance and memory usage tiers
+
+</details>
+
+<details>
 <summary><strong>More Features</strong></summary>
 
 &nbsp;
@@ -453,6 +467,7 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 
 ## Roadmap
 
+- ✅ **Compile & Run** — Execute code in 73+ languages (DONE)
 - **Workspace & Project Settings** — Per-folder editor and formatter settings
 - **Remote File Editing** — Edit files over SSH/SFTP
 - **Debug Support** — Breakpoints and step-through debugging

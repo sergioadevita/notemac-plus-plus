@@ -14,9 +14,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 ## Test Summary
 
-**2,992 total tests** across 144 suites and three test layers:
+**3,124 total tests** across 146 suites and three test layers:
 
-### Unit Tests — 2,018 tests across 98 suites (Vitest)
+### Unit Tests — 2,150 tests across 100 suites (Vitest)
 
 #### Configs & Settings
 
@@ -68,6 +68,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Snippet Model | `SnippetModel.test.ts` | 10 | Snippet storage, CRUD, language categories |
 | Tab Model | `TabModel.test.ts` | 56 | Tab creation, closing, switching, pinning, color coding, restoration |
 | UI Model | `UIModel.test.ts` | 40 | Sidebar, zoom, split view, clipboard history, dialog toggles, settings |
+| Compile Run Model | `CompileRunModel.test.ts` | 69 | Execution state, output/stderr streaming, history limits, cache status, run configurations |
 
 #### Services & Helpers
 
@@ -86,6 +87,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Safe Storage Service | `SafeStorageService.test.ts` | 4 | Electron safe storage, encryption, decryption |
 | Secure Encryption Service | `SecureEncryptionService.test.ts` | 6 | Encryption/decryption, key initialization, availability checks |
 | Tauri Bridge | `TauriBridge.test.ts` | 6 | Tauri API integration, IPC communication |
+| Language Command Map | `LanguageCommandMap.test.ts` | 63 | All 73 languages, desktop commands, web runtime types, helper functions |
 | Text Helpers | `TextHelpers.test.ts` | 33 | String manipulation, trimming, case conversion, formatting |
 
 #### Hooks

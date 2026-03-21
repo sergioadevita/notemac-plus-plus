@@ -4,6 +4,7 @@ Complete reference of every feature in Notemac++.
 
 ## Table of Contents
 
+- [Compile & Run](#compile--run)
 - [Breadcrumb Navigation](#breadcrumb-navigation)
 - [Sticky Scroll](#sticky-scroll)
 - [Code Formatting](#code-formatting)
@@ -42,6 +43,29 @@ Complete reference of every feature in Notemac++.
 - [Monitoring](#monitoring)
 - [Feedback & Support](#feedback--support)
 - [Dialogs](#dialogs)
+
+## Compile & Run
+
+Execute code in 73+ languages directly from the editor with desktop and web execution environments. Desktop execution runs code natively on your machine, while web execution uses WebAssembly (WASM) runtimes with Service Worker caching for optimal performance.
+
+**Execution Modes:**
+- Desktop: Native execution on local system
+- Web: WASM-based execution in browser with Service Worker caching
+
+**Keyboard Shortcuts:**
+- `F5`: Run code and show output
+- `Shift+F5`: Clear output panel and run
+- `Ctrl+F5` (Windows) / `Cmd+F5` (macOS): Run and focus output panel
+
+**Features:**
+- Support for 73+ programming languages (C, C++, Python, JavaScript, TypeScript, Rust, Go, Java, Ruby, PHP, Swift, Kotlin, and many more)
+- Output panel with ANSI color support for colored terminal output
+- Category A-E runtime architecture for optimal performance and memory usage
+- Service Worker caching for fast web execution
+- Real-time output streaming
+- Error and success status indicators
+
+---
 
 ## Breadcrumb Navigation
 
