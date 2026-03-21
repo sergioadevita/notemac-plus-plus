@@ -36,6 +36,7 @@ State is managed with **Zustand** and **Immer**, split into composable slices:
 | `uiSlice` | Sidebar, zoom, split view, dialogs, settings, clipboard history |
 | `fileTreeSlice` | File tree nodes, expansion state, workspace root |
 | `pluginSlice` | Installed plugins, enabled state, plugin metadata, registry cache |
+| `compileRunSlice` | Execution state, output, history, runtime cache statuses, run configurations |
 
 Each slice is independently testable and follows the same patterns: initial state, action creators with Immer drafts, and explicit getter methods.
 
@@ -71,6 +72,8 @@ src/Notemac/
 ├── Configs/         # EditorConfig, ThemeConfig
 ├── Controllers/     # Business logic controllers
 ├── Model/           # Data models (runtime state slices)
+├── Services/        # Platform bridge, runtime adapters
+│   └── Runtimes/    # Language command map, Desktop/Web/WASM adapters, cache service
 └── UI/              # ViewPresenter components
     └── Params/      # Parameter/DTO classes for views
 ```
@@ -114,6 +117,26 @@ The `Shared/` library is reusable infrastructure. Project-specific logic never g
 - **Loop count caching**: `for (int i = 0, maxCount = list.Count; i < maxCount; i++)`.
 - **Collections**: prefer native methods (`Find`, `filter`, `map`) over heavy query frameworks.
 - **Tuples**: use value tuples for lightweight groupings.
+
+## Compile & Run Architecture
+
+Code execution uses a unified `RuntimeAdapter` interface with platform-specific backends, orchestrated by `CompileRunController`.
+
+```
+CompileRunController (orchestrator)
+├── DetectPlatform() → 'tauri' | 'electron' | 'web'
+├── SelectAdapter() → RuntimeAdapter
+│   ├── DesktopRuntimeAdapter    (Electron/Tauri — OS process spawning)
+│   └── SelectWebAdapter()
+│       ├── WebJsRuntimeAdapter  (sandboxed iframe for JS/TS/CoffeeScript)
+│       ├── WebValidationAdapter (JSON/XML/YAML validation, HTML/CSS/MD preview)
+│       └── WasmRuntimeAdapter   (CDN-loaded WASM runtimes: Pyodide, Wasmoon, sql.js)
+└── CompileRunModel (Zustand slice — execution state, output, history)
+```
+
+Languages are categorized in `LanguageCommandMap.ts` across 5 web runtime types: `js-sandbox` (Category A), `wasm` (B — existing ports), `emscripten` (C — future Emscripten builds), `self-hosted` (D — compilers-in-JS), and `interpreter` (E — custom TS interpreters).
+
+`RuntimeCacheService` provides background WASM caching via IndexedDB with predictive preloading based on open file types. A Service Worker intercepts fetch requests for WASM files and serves from cache.
 
 ## Credential Storage Architecture
 
