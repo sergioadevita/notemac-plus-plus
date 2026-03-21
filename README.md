@@ -460,6 +460,8 @@ Notemac++ is purpose-built for macOS and web users seeking Notepad++ familiarity
 Have a feature request? Open an [issue](https://github.com/sergioadevita/notemac-plus-plus/issues) or [discussion](https://github.com/sergioadevita/notemac-plus-plus/discussions).
 ## Contributing
 
+All changes go through pull requests with mandatory CI checks — no direct pushes to main. See [docs/WORKFLOW.md](docs/WORKFLOW.md) for the full branching and PR workflow.
+
 We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
 
 - Setting up your development environment
