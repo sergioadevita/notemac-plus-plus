@@ -175,6 +175,17 @@ vi.mock('../Notemac/UI/AISettingsViewPresenter', () => ({
 
 vi.mock('../Notemac/Services/PluginAPIService', () => ({
   CreatePluginContext: vi.fn(),
+  CleanupPluginContext: vi.fn(),
+}));
+
+vi.mock('../Notemac/Services/PluginRegistryService', () => ({
+  FetchRegistryIndex: vi.fn().mockResolvedValue([]),
+  GetDemoRegistryEntries: vi.fn().mockReturnValue([]),
+}));
+
+vi.mock('../Notemac/Services/PluginLoaderService', () => ({
+  ScanPluginDirectory: vi.fn().mockResolvedValue([]),
+  LoadPluginFromDirectory: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('../Notemac/Controllers/PluginController', () => ({
