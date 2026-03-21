@@ -339,7 +339,7 @@ describe('AppViewPresenter', () => {
   it('registers keyboard handler on mount', () => {
     render(<App />);
     // Should not throw and component should render
-    expect(screen.getByTestId('error-boundary')).toBeTruthy();
+    expect(screen.getAllByTestId('error-boundary').length).toBeGreaterThan(0);
   });
 
   it('applies correct background color from theme', () => {

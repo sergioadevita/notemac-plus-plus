@@ -106,6 +106,13 @@ export function GetAllCommands(): CommandDefinition[]
         { id: 'ai-settings', label: 'AI Settings', category: 'AI', action: 'ai-settings' },
         { id: 'ai-toggle-inline', label: 'AI: Toggle Inline Completions', category: 'AI', action: 'ai-toggle-inline' },
 
+        // Compile & Run commands — all platforms
+        { id: 'compile-run', label: 'Run File', category: 'Run', action: 'compile-run' },
+        { id: 'compile-run-args', label: 'Run with Arguments...', category: 'Run', action: 'compile-run-args' },
+        { id: 'compile-run-stop', label: 'Stop Execution', category: 'Run', action: 'compile-run-stop' },
+        { id: 'compile-run-clear', label: 'Clear Run Output', category: 'Run', action: 'compile-run-clear' },
+        { id: 'compile-run-toggle-panel', label: 'Toggle Run Output Panel', category: 'Run', action: 'compile-run-toggle-panel' },
+
         // Task Runner commands — desktop only (real process execution)
         ...(IsDesktopEnvironment() ? [
             { id: 'run-task', label: 'Run Task...', category: 'Tasks', action: 'run-task' },

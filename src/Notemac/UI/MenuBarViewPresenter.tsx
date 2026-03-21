@@ -359,6 +359,13 @@ export function MenuBar({ theme, onAction, isElectron }: MenuBarProps) {
       { label: 'Git Settings...', action: 'git-settings' },
     ],
     Run: [
+      { label: 'Run File', shortcut: GetShortcutLabel('compile-run'), action: 'compile-run' },
+      { label: 'Run with Arguments...', shortcut: GetShortcutLabel('compile-run-args'), action: 'compile-run-args' },
+      { label: 'Stop Execution', shortcut: GetShortcutLabel('compile-run-stop'), action: 'compile-run-stop' },
+      { type: 'separator' as const, label: '' },
+      { label: 'Clear Output', action: 'compile-run-clear' },
+      { label: 'Toggle Output Panel', shortcut: GetShortcutLabel('compile-run-toggle-panel'), action: 'compile-run-toggle-panel' },
+      { type: 'separator' as const, label: '' },
       ...(IsDesktopEnvironment() ? [
         { label: 'Run Task...', action: 'run-task' },
         { label: 'Run Build Task', action: 'run-build-task' },

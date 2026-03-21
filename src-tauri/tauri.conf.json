@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicechute/tauri-releases/main/tauri-conf-schema.json",
   "productName": "Notemac++",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "identifier": "com.notemac.plusplus",
   "build": {
     "beforeBuildCommand": "npm run build",

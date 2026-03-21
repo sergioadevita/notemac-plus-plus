@@ -211,6 +211,18 @@ export const LIMIT_TASK_HISTORY = 50;
 export const LIMIT_TASK_OUTPUT_LINES = 5000;
 export const TASK_CONFIG_FILENAME = '.notemac/tasks.json';
 
+// Compile & Run
+export const UI_COMPILE_RUN_PANEL = "CompileRun";
+export const DB_COMPILE_RUN_HISTORY = "CompileRunHistory";
+export const DB_RUN_CONFIGURATIONS = "RunConfigurations";
+export const DB_ACTIVE_RUNTIME_CACHE = "ActiveRuntimeCache";
+export const LIMIT_COMPILE_RUN_HISTORY = 50;
+export const LIMIT_COMPILE_RUN_OUTPUT = 10000;
+export const COMPILE_RUN_DEFAULT_TIMEOUT = 30000;
+export const COMPILE_RUN_PANEL_DEFAULT_HEIGHT = 200;
+export const COMPILE_RUN_PANEL_MIN_HEIGHT = 100;
+export const COMPILE_RUN_PANEL_MAX_HEIGHT = 600;
+
 // Custom Languages
 export const DB_CUSTOM_LANGUAGES = "CustomLanguages";
 export const DB_FILE_ASSOCIATION_OVERRIDES = "FileAssociationOverrides";

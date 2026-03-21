@@ -76,6 +76,8 @@ export const NOTEMAC_EVENTS =
     TASK_COMPLETED: 'notemac-task-completed',
     TASK_FAILED: 'notemac-task-failed',
     TASK_TERMINATED: 'notemac-task-terminated',
+    COMPILE_RUN_STARTED: 'notemac-compile-run-started',
+    COMPILE_RUN_COMPLETED: 'notemac-compile-run-completed',
     LANGUAGE_REGISTERED: 'notemac-language-registered',
     LANGUAGE_UNREGISTERED: 'notemac-language-unregistered',
 } as const;

@@ -383,6 +383,23 @@ export function HandleMenuAction(
             break;
         }
 
+        // Compile & Run actions
+        case 'compile-run':
+        case 'compile-run-args':
+        case 'compile-run-stop':
+        case 'compile-run-clear':
+        case 'compile-run-toggle-panel':
+            import('./CompileRunController').then(mod =>
+            {
+                if ('compile-run' === action) mod.RunCurrentFile();
+                else if ('compile-run-args' === action) mod.RunWithArguments();
+                else if ('compile-run-stop' === action) mod.StopExecution();
+                else if ('compile-run-clear' === action) mod.ClearOutput();
+                else if ('compile-run-toggle-panel' === action)
+                    store.SetCompileRunPanelVisible(!store.compileRunPanelVisible);
+            });
+            break;
+
         // Task Runner actions
         case 'run-task':
         case 'run-build-task':

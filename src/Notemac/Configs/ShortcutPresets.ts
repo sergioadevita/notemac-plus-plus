@@ -153,6 +153,13 @@ export const RESHARPER_PRESET: ShortcutMappingPreset =
         { category: 'Plugins', name: 'Plugin Manager', shortcut: 'Cmd+Shift+X', action: 'show-plugin-manager' },
         { category: 'Plugins', name: 'Reload Plugins', shortcut: '', action: 'reload-plugins' },
 
+        // Compile & Run (same as default — no ReSharper-specific overrides)
+        { category: 'Run', name: 'Run File', shortcut: 'F5', action: 'compile-run' },
+        { category: 'Run', name: 'Run with Arguments', shortcut: 'Shift+F5', action: 'compile-run-args' },
+        { category: 'Run', name: 'Stop Execution', shortcut: 'Ctrl+F5', action: 'compile-run-stop' },
+        { category: 'Run', name: 'Clear Output', shortcut: '', action: 'compile-run-clear' },
+        { category: 'Run', name: 'Toggle Output Panel', shortcut: 'Cmd+Shift+Y', action: 'compile-run-toggle-panel' },
+
         // Hex
         { category: 'Hex', name: 'View as Hex', shortcut: '', action: 'view-as-hex' },
         { category: 'Hex', name: 'View as Text', shortcut: '', action: 'view-as-text' },
