@@ -118,6 +118,32 @@ const Icons = {
       <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" />
     </svg>
   ),
+  // ─── Compile & Run Icons ──────────────────────────────────────
+  run: (color: string) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill={color}>
+      <polygon points="4,2 14,8 4,14" />
+    </svg>
+  ),
+  stopExecution: (color: string) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="3" y="3" width="10" height="10" rx="1.5" fill={color} />
+    </svg>
+  ),
+  runWithArgs: (color: string) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <polygon points="3,2 10,8 3,14" fill={color} />
+      <circle cx="13" cy="5" r="1" fill={color} />
+      <circle cx="13" cy="8" r="1" fill={color} />
+      <circle cx="13" cy="11" r="1" fill={color} />
+    </svg>
+  ),
+  outputPanel: (color: string) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="12" height="12" rx="1" />
+      <path d="M2 10h12" />
+      <path d="M5 12.5l1.5-1L5 10.5" />
+    </svg>
+  ),
 };
 
 function ToolbarButton({ icon, title, onClick, theme, active, danger }: {
@@ -162,9 +188,11 @@ function ToolbarSeparator({ theme }: { theme: ThemeColors }) {
 }
 
 export function Toolbar({ theme, onAction }: ToolbarProps) {
-  const { isRecordingMacro, settings } = useNotemacStore();
+  const { isRecordingMacro, settings, compileRunStatus, compileRunPanelVisible } = useNotemacStore();
   const iconColor = theme.textSecondary;
   const dangerColor = theme.danger || '#e53e3e';
+  const successColor = theme.success || '#38a169';
+  const isRunning = 'running' === compileRunStatus || 'compiling' === compileRunStatus;
 
   return (
     <div style={{
@@ -208,6 +236,35 @@ export function Toolbar({ theme, onAction }: ToolbarProps) {
         danger={isRecordingMacro}
       />
       <ToolbarButton icon={Icons.play(iconColor)} title="Playback Macro" onClick={() => onAction('macro-playback')} theme={theme} />
+
+      <ToolbarSeparator theme={theme} />
+
+      <ToolbarButton
+        icon={Icons.run(isRunning ? successColor : iconColor)}
+        title="Run File (F5)"
+        onClick={() => onAction('compile-run')}
+        theme={theme}
+        active={isRunning}
+      />
+      <ToolbarButton
+        icon={Icons.stopExecution(isRunning ? dangerColor : iconColor)}
+        title="Stop Execution (Ctrl+F5)"
+        onClick={() => onAction('compile-run-stop')}
+        theme={theme}
+      />
+      <ToolbarButton
+        icon={Icons.runWithArgs(iconColor)}
+        title="Run with Arguments (Shift+F5)"
+        onClick={() => onAction('compile-run-args')}
+        theme={theme}
+      />
+      <ToolbarButton
+        icon={Icons.outputPanel(iconColor)}
+        title="Toggle Output Panel (Cmd+Shift+Y)"
+        onClick={() => onAction('compile-run-toggle-panel')}
+        theme={theme}
+        active={compileRunPanelVisible}
+      />
 
       <ToolbarSeparator theme={theme} />
 

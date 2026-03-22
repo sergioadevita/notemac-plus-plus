@@ -11,6 +11,8 @@ vi.mock('../Notemac/Model/Store', () => ({
       wordWrap: false,
       showWhitespace: false,
     },
+    compileRunStatus: 'idle',
+    compileRunPanelVisible: false,
   }),
 }));
 
@@ -76,6 +78,10 @@ describe('Toolbar', () => {
       'Zoom Out (Cmd+-)',
       'Start Recording',
       'Playback Macro',
+      'Run File (F5)',
+      'Stop Execution (Ctrl+F5)',
+      'Run with Arguments (Shift+F5)',
+      'Toggle Output Panel (Cmd+Shift+Y)',
       'Toggle Sidebar (Cmd+B)',
       'Word Wrap',
       'Show Whitespace',
@@ -204,6 +210,42 @@ describe('Toolbar', () => {
     fireEvent.click(playbackButton);
 
     expect(onAction).toHaveBeenCalledWith('macro-playback');
+  });
+
+  it('calls onAction with "compile-run" when Run File button is clicked', () => {
+    render(<Toolbar theme={mockTheme} onAction={onAction} />);
+
+    const runButton = screen.getByLabelText('Run File (F5)');
+    fireEvent.click(runButton);
+
+    expect(onAction).toHaveBeenCalledWith('compile-run');
+  });
+
+  it('calls onAction with "compile-run-stop" when Stop Execution button is clicked', () => {
+    render(<Toolbar theme={mockTheme} onAction={onAction} />);
+
+    const stopButton = screen.getByLabelText('Stop Execution (Ctrl+F5)');
+    fireEvent.click(stopButton);
+
+    expect(onAction).toHaveBeenCalledWith('compile-run-stop');
+  });
+
+  it('calls onAction with "compile-run-args" when Run with Arguments button is clicked', () => {
+    render(<Toolbar theme={mockTheme} onAction={onAction} />);
+
+    const argsButton = screen.getByLabelText('Run with Arguments (Shift+F5)');
+    fireEvent.click(argsButton);
+
+    expect(onAction).toHaveBeenCalledWith('compile-run-args');
+  });
+
+  it('calls onAction with "compile-run-toggle-panel" when Toggle Output Panel button is clicked', () => {
+    render(<Toolbar theme={mockTheme} onAction={onAction} />);
+
+    const panelButton = screen.getByLabelText('Toggle Output Panel (Cmd+Shift+Y)');
+    fireEvent.click(panelButton);
+
+    expect(onAction).toHaveBeenCalledWith('compile-run-toggle-panel');
   });
 
   it('calls onAction with "toggle-sidebar" when Sidebar button is clicked', () => {
