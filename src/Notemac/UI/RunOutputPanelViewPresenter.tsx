@@ -1,15 +1,15 @@
 /**
- * RunOutputPanelViewPresenter — Bottom panel showing compile/run output.
+ * RunOutputPanelViewPresenter — Console panel showing compile/run output.
  *
  * Displays streaming output from file execution with ANSI color support,
- * run/stop buttons, and exit code indicator. Auto-scrolls and supports
- * resizing via drag handle.
+ * run/stop/clear/close buttons, exit code indicator, and stdin input field.
+ * Auto-scrolls and supports resizing via drag handle.
  */
 
-import React, { useEffect, useRef, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { useNotemacStore } from '../Model/Store';
 import type { ThemeColors } from '../Configs/ThemeConfig';
-import { RunCurrentFile, StopExecution, ClearOutput } from '../Controllers/CompileRunController';
+import { RunCurrentFile, StopExecution, ClearOutput, SendStdinLine } from '../Controllers/CompileRunController';
 import { FormatTaskDuration, ParseANSIColors } from '../Services/TaskRunnerService';
 
 interface RunOutputPanelProps
@@ -23,12 +23,15 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
         compileRunExecution,
         compileRunStatus,
         compileRunPanelVisible,
+        SetCompileRunPanelVisible,
     } = useNotemacStore();
 
     const outputRef = useRef<HTMLDivElement>(null);
+    const stdinRef = useRef<HTMLInputElement>(null);
     const [elapsedTime, setElapsedTime] = useState<string>('');
     const [isDragging, setIsDragging] = useState(false);
     const [dragHandleHovered, setDragHandleHovered] = useState(false);
+    const [stdinValue, setStdinValue] = useState('');
 
     // Auto-scroll to bottom when output changes
     useEffect(() =>
@@ -91,6 +94,27 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
         ClearOutput();
     };
 
+    const handleClose = () =>
+    {
+        SetCompileRunPanelVisible(false);
+    };
+
+    const handleStdinSubmit = useCallback((e: React.FormEvent) =>
+    {
+        e.preventDefault();
+        if ('' === stdinValue.trim())
+            return;
+
+        SendStdinLine(stdinValue);
+        setStdinValue('');
+
+        // Re-focus the input
+        if (stdinRef.current)
+        {
+            stdinRef.current.focus();
+        }
+    }, [stdinValue]);
+
     const handleMouseDown = () =>
     {
         setIsDragging(true);
@@ -135,13 +159,50 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                 background: theme.editorBg,
                 borderTop: `1px solid ${theme.border}`,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: theme.text,
-                opacity: 0.5,
-                fontSize: 12,
+                flexDirection: 'column' as const,
             }}>
-                No output to display.
+                {/* Toolbar even when empty — so user can close */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px 8px',
+                    borderBottom: `1px solid ${theme.border}`,
+                    gap: 8,
+                    flexShrink: 0,
+                }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: theme.text, flex: 1 }}>
+                        Console
+                    </span>
+                    <button
+                        onClick={handleClose}
+                        style={{
+                            background: 'transparent',
+                            color: theme.text,
+                            border: 'none',
+                            borderRadius: 3,
+                            padding: '2px 6px',
+                            fontSize: 13,
+                            cursor: 'pointer',
+                            opacity: 0.6,
+                            lineHeight: 1,
+                        }}
+                        title="Close Console"
+                        aria-label="Close Console"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: theme.text,
+                    opacity: 0.5,
+                    fontSize: 12,
+                }}>
+                    No output to display.
+                </div>
             </div>
         );
     }
@@ -227,6 +288,55 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
             whiteSpace: 'pre-wrap' as const,
             wordBreak: 'break-word' as const,
         },
+        closeButton: {
+            background: 'transparent',
+            color: theme.text,
+            border: 'none',
+            borderRadius: 3,
+            padding: '2px 6px',
+            fontSize: 13,
+            cursor: 'pointer',
+            opacity: 0.6,
+            lineHeight: 1,
+            transition: 'opacity 0.2s',
+        },
+        stdinBar: {
+            display: 'flex',
+            alignItems: 'center',
+            borderTop: `1px solid ${theme.border}`,
+            padding: '2px 4px',
+            gap: 4,
+            flexShrink: 0,
+        },
+        stdinLabel: {
+            fontSize: 11,
+            color: theme.text,
+            opacity: 0.5,
+            fontFamily: "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace",
+            flexShrink: 0,
+        },
+        stdinInput: {
+            flex: 1,
+            background: 'transparent',
+            border: `1px solid ${theme.border}`,
+            borderRadius: 3,
+            color: theme.text,
+            fontFamily: "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace",
+            fontSize: 12,
+            padding: '2px 6px',
+            outline: 'none',
+        },
+        stdinButton: {
+            background: 'transparent',
+            color: theme.text,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 3,
+            padding: '2px 8px',
+            fontSize: 11,
+            cursor: 'pointer',
+            opacity: 0.7,
+            flexShrink: 0,
+        },
     }), [theme, isDragging, dragHandleHovered]);
 
     return (
@@ -267,7 +377,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                 <button
                     onClick={handleClear}
                     style={panelStyles.button as React.CSSProperties}
-                    title="Clear output"
+                    title="Clear console"
                 >
                     ✕ Clear
                 </button>
@@ -298,6 +408,16 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                         )}
                     </span>
                 )}
+
+                {/* Close Button */}
+                <button
+                    onClick={handleClose}
+                    style={panelStyles.closeButton as React.CSSProperties}
+                    title="Close Console"
+                    aria-label="Close Console"
+                >
+                    ✕
+                </button>
             </div>
 
             {/* Output Area */}
@@ -309,6 +429,34 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                     <OutputLine key={index} text={line} />
                 ))}
             </div>
+
+            {/* Stdin Input Bar */}
+            {isRunning && (
+                <form
+                    onSubmit={handleStdinSubmit}
+                    style={panelStyles.stdinBar as React.CSSProperties}
+                >
+                    <span style={panelStyles.stdinLabel as React.CSSProperties}>&gt;</span>
+                    <input
+                        ref={stdinRef}
+                        type="text"
+                        value={stdinValue}
+                        onChange={(e) => setStdinValue(e.target.value)}
+                        placeholder="Type input here and press Enter..."
+                        style={panelStyles.stdinInput as React.CSSProperties}
+                        aria-label="Standard input"
+                        autoComplete="off"
+                        spellCheck={false}
+                    />
+                    <button
+                        type="submit"
+                        style={panelStyles.stdinButton as React.CSSProperties}
+                        title="Send input"
+                    >
+                        Send
+                    </button>
+                </form>
+            )}
         </div>
     );
 }
@@ -319,13 +467,13 @@ function FormatStatusLabel(status: string): string
 {
     switch (status)
     {
-        case 'idle':      return 'Ready';
+        case 'idle':      return 'Console';
         case 'compiling': return 'Compiling...';
         case 'running':   return 'Running...';
         case 'success':   return 'Completed';
         case 'failed':    return 'Failed';
         case 'cancelled': return 'Cancelled';
-        default:          return 'Ready';
+        default:          return 'Console';
     }
 }
 

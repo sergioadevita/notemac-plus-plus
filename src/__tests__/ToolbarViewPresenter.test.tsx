@@ -81,7 +81,7 @@ describe('Toolbar', () => {
       'Run File (F5)',
       'Stop Execution (Ctrl+F5)',
       'Run with Arguments (Shift+F5)',
-      'Toggle Output Panel (Cmd+Shift+Y)',
+      'Toggle Console (Cmd+Shift+Y)',
       'Toggle Sidebar (Cmd+B)',
       'Word Wrap',
       'Show Whitespace',
@@ -239,10 +239,10 @@ describe('Toolbar', () => {
     expect(onAction).toHaveBeenCalledWith('compile-run-args');
   });
 
-  it('calls onAction with "compile-run-toggle-panel" when Toggle Output Panel button is clicked', () => {
+  it('calls onAction with "compile-run-toggle-panel" when Toggle Console button is clicked', () => {
     render(<Toolbar theme={mockTheme} onAction={onAction} />);
 
-    const panelButton = screen.getByLabelText('Toggle Output Panel (Cmd+Shift+Y)');
+    const panelButton = screen.getByLabelText('Toggle Console (Cmd+Shift+Y)');
     fireEvent.click(panelButton);
 
     expect(onAction).toHaveBeenCalledWith('compile-run-toggle-panel');

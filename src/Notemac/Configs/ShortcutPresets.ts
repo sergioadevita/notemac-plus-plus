@@ -157,8 +157,8 @@ export const RESHARPER_PRESET: ShortcutMappingPreset =
         { category: 'Run', name: 'Run File', shortcut: 'F5', action: 'compile-run' },
         { category: 'Run', name: 'Run with Arguments', shortcut: 'Shift+F5', action: 'compile-run-args' },
         { category: 'Run', name: 'Stop Execution', shortcut: 'Ctrl+F5', action: 'compile-run-stop' },
-        { category: 'Run', name: 'Clear Output', shortcut: '', action: 'compile-run-clear' },
-        { category: 'Run', name: 'Toggle Output Panel', shortcut: 'Cmd+Shift+Y', action: 'compile-run-toggle-panel' },
+        { category: 'Run', name: 'Clear Console', shortcut: '', action: 'compile-run-clear' },
+        { category: 'Run', name: 'Toggle Console', shortcut: 'Cmd+Shift+Y', action: 'compile-run-toggle-panel' },
 
         // Hex
         { category: 'Hex', name: 'View as Hex', shortcut: '', action: 'view-as-hex' },

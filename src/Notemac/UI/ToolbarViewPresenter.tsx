@@ -260,7 +260,7 @@ export function Toolbar({ theme, onAction }: ToolbarProps) {
       />
       <ToolbarButton
         icon={Icons.outputPanel(iconColor)}
-        title="Toggle Output Panel (Cmd+Shift+Y)"
+        title="Toggle Console (Cmd+Shift+Y)"
         onClick={() => onAction('compile-run-toggle-panel')}
         theme={theme}
         active={compileRunPanelVisible}
