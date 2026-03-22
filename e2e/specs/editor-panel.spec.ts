@@ -208,10 +208,24 @@ test.describe('EditorPanel and Monaco Editor', () => {
   test('Cursor line updates after Enter key', async ({ page }) => {
     await typeInEditor(page, 'line1');
     await page.keyboard.press('Enter');
+
+    // Wait until Monaco has actually processed the Enter keystroke
+    // by verifying the editor content contains a newline
+    await expect(async () => {
+      const lineCount = await page.evaluate(() => {
+        const editors = (window as any).monaco?.editor?.getEditors?.();
+        const editor = editors?.[0];
+        if (editor) {
+          return editor.getModel()?.getLineCount() || 0;
+        }
+        return 0;
+      });
+      expect(lineCount).toBeGreaterThanOrEqual(2);
+    }).toPass({ intervals: [100, 200, 500, 1000], timeout: 5000 });
+
     await typeInEditor(page, 'line2');
 
-    // Poll for cursor position — Monaco may take a moment to propagate
-    // the position update, especially under CI load
+    // Now verify cursor is on line 2+
     await expect(async () => {
       const cursorLine = await page.evaluate(() => {
         const editors = (window as any).monaco?.editor?.getEditors?.();
@@ -220,16 +234,10 @@ test.describe('EditorPanel and Monaco Editor', () => {
           const pos = editor.getPosition();
           return pos?.lineNumber || 0;
         }
-        const store = (window as any).__ZUSTAND_STORE__;
-        if (store) {
-          const state = store.getState();
-          const tab = state.tabs.find((t: any) => t.id === state.activeTabId);
-          return tab?.cursorLine || 0;
-        }
         return 0;
       });
       expect(cursorLine).toBeGreaterThanOrEqual(2);
-    }).toPass({ intervals: [200, 500, 1000, 2000], timeout: 10000 });
+    }).toPass({ intervals: [100, 200, 500, 1000], timeout: 5000 });
   });
 
   test('Cursor moves with arrow keys', async ({ page }) => {
