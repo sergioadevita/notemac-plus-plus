@@ -123,7 +123,7 @@ Note: In web mode, `Cmd+Shift+P` opens the Command Palette. Macro playback is ac
 | `F5` | Run File |
 | `Shift+F5` | Run with Arguments |
 | `Ctrl+F5` | Stop Execution |
-| `Cmd+Shift+Y` | Toggle Output Panel |
+| `Cmd+Shift+Y` | Toggle Console |
 
 ## Plugins
 

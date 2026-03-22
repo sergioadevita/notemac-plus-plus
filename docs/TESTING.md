@@ -14,9 +14,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 ## Test Summary
 
-**3,124 total tests** across 146 suites and three test layers:
+**3,147 total tests** across 147 suites and three test layers:
 
-### Unit Tests — 2,150 tests across 100 suites (Vitest)
+### Unit Tests — 2,169 tests across 101 suites (Vitest)
 
 #### Configs & Settings
 
@@ -69,6 +69,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Tab Model | `TabModel.test.ts` | 56 | Tab creation, closing, switching, pinning, color coding, restoration |
 | UI Model | `UIModel.test.ts` | 40 | Sidebar, zoom, split view, clipboard history, dialog toggles, settings |
 | Compile Run Model | `CompileRunModel.test.ts` | 69 | Execution state, output/stderr streaming, history limits, cache status, run configurations |
+| Run Output Panel | `RunOutputPanelViewPresenter.test.tsx` | 19 | Console panel rendering, close button, stdin input, status labels, exit codes, visibility |
 
 #### Services & Helpers
 
@@ -122,7 +123,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | StatusBarViewPresenter | `StatusBarViewPresenter.test.tsx` | 14 | Cursor position, encoding, language, line ending display |
 | TabBarViewPresenter | `TabBarViewPresenter.test.tsx` | 26 | Tab rendering, close buttons, drag-drop indicators |
 | TerminalPanelViewPresenter | `TerminalPanelViewPresenter.test.tsx` | 15 | Terminal rendering, command execution, output display |
-| ToolbarViewPresenter | `ToolbarViewPresenter.test.tsx` | 20 | Button rendering, action dispatch, icon display |
+| ToolbarViewPresenter | `ToolbarViewPresenter.test.tsx` | 24 | Button rendering, action dispatch, icon display |
 | WelcomeScreenViewPresenter | `WelcomeScreenViewPresenter.test.tsx` | 19 | Welcome screen, recent files, quick actions |
 
 #### Dialogs

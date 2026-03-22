@@ -11,6 +11,7 @@ import { useNotemacStore } from '../Model/Store';
 import type { ThemeColors } from '../Configs/ThemeConfig';
 import { RunCurrentFile, StopExecution, ClearOutput, SendStdinLine } from '../Controllers/CompileRunController';
 import { FormatTaskDuration, ParseANSIColors } from '../Services/TaskRunnerService';
+import { COMPILE_RUN_PANEL_DEFAULT_HEIGHT } from '../Commons/Constants';
 
 interface RunOutputPanelProps
 {
@@ -155,7 +156,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
     {
         return (
             <div style={{
-                height: 200,
+                height: COMPILE_RUN_PANEL_DEFAULT_HEIGHT,
                 background: theme.editorBg,
                 borderTop: `1px solid ${theme.border}`,
                 display: 'flex',
@@ -209,7 +210,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
 
     const panelStyles = useMemo(() => ({
         container: {
-            height: 200,
+            height: COMPILE_RUN_PANEL_DEFAULT_HEIGHT,
             background: theme.editorBg,
             borderTop: `1px solid ${theme.border}`,
             display: 'flex',
