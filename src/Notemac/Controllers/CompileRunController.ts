@@ -78,11 +78,30 @@ export function StopExecution(): void
 }
 
 /**
- * Clear the compile/run output panel.
+ * Clear the console output.
  */
 export function ClearOutput(): void
 {
     useNotemacStore.getState().ClearCompileRunHistory();
+}
+
+/**
+ * Send a line of stdin input to the currently running process.
+ * The input is echoed to the console output and forwarded to the adapter.
+ */
+export function SendStdinLine(line: string): void
+{
+    const store = useNotemacStore.getState();
+
+    // Echo the input to the console output
+    store.AppendCompileRunOutput(`\x1b[36m> ${line}\x1b[0m`);
+
+    // Forward to the active adapter if it supports stdin writing
+    const adapter = GetActiveAdapter();
+    if (null !== adapter && 'WriteStdin' in adapter)
+    {
+        (adapter as any).WriteStdin(line + '\n');
+    }
 }
 
 // ─── Execution Core ─────────────────────────────────────────────────

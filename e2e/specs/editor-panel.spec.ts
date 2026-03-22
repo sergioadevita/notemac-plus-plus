@@ -209,26 +209,27 @@ test.describe('EditorPanel and Monaco Editor', () => {
     await typeInEditor(page, 'line1');
     await page.keyboard.press('Enter');
     await typeInEditor(page, 'line2');
-    await page.waitForTimeout(500);
 
-    // Monaco cursor position is read directly from the editor instance
-    // because store updates may lag behind
-    const cursorLine = await page.evaluate(() => {
-      const editors = (window as any).monaco?.editor?.getEditors?.();
-      const editor = editors?.[0];
-      if (editor) {
-        const pos = editor.getPosition();
-        return pos?.lineNumber || 0;
-      }
-      const store = (window as any).__ZUSTAND_STORE__;
-      if (store) {
-        const state = store.getState();
-        const tab = state.tabs.find((t: any) => t.id === state.activeTabId);
-        return tab?.cursorLine || 0;
-      }
-      return 0;
-    });
-    expect(cursorLine).toBeGreaterThanOrEqual(2);
+    // Poll for cursor position — Monaco may take a moment to propagate
+    // the position update, especially under CI load
+    await expect(async () => {
+      const cursorLine = await page.evaluate(() => {
+        const editors = (window as any).monaco?.editor?.getEditors?.();
+        const editor = editors?.[0];
+        if (editor) {
+          const pos = editor.getPosition();
+          return pos?.lineNumber || 0;
+        }
+        const store = (window as any).__ZUSTAND_STORE__;
+        if (store) {
+          const state = store.getState();
+          const tab = state.tabs.find((t: any) => t.id === state.activeTabId);
+          return tab?.cursorLine || 0;
+        }
+        return 0;
+      });
+      expect(cursorLine).toBeGreaterThanOrEqual(2);
+    }).toPass({ intervals: [200, 500, 1000, 2000], timeout: 10000 });
   });
 
   test('Cursor moves with arrow keys', async ({ page }) => {
