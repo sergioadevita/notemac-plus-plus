@@ -1,19 +1,20 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
-// Mock PluginRegistryService globally — FetchRegistryIndex calls fetch()
-// which leaks pending promises and causes "Closing rpc while fetch was
-// pending" errors when vitest workers terminate. We must NOT use
-// importOriginal() here because loading the real module triggers the leak.
-vi.mock('../Notemac/Services/PluginRegistryService', () => ({
-    FetchRegistryIndex: vi.fn().mockResolvedValue([]),
-    GetDemoRegistryEntries: vi.fn().mockReturnValue([]),
-    SearchRegistry: vi.fn().mockReturnValue([]),
-    InstallPlugin: vi.fn().mockResolvedValue(null),
-    UninstallPlugin: vi.fn().mockResolvedValue(undefined),
-    CheckForUpdates: vi.fn().mockReturnValue([]),
-    ValidateRegistryEntry: vi.fn().mockReturnValue(true),
-}));
+// Prevent PluginRegistryService fetch leaks — mock global fetch with
+// a safe fallback that returns empty data for registry URLs. Tests that
+// need real fetch (like OAuthIntegration) still work because those hit
+// different endpoints. This prevents "Closing rpc while fetch was pending".
+const originalFetch = globalThis.fetch;
+globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) =>
+{
+    const url = 'string' === typeof input ? input : input.toString();
+    if (url.includes('/plugins'))
+    {
+        return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return originalFetch(input, init);
+}) as typeof fetch;
 
 // Mock Monaco Editor — not available in jsdom
 vi.mock('@monaco-editor/react', () => ({
