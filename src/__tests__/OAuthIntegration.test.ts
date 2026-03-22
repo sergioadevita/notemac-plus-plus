@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPE } from '../Notemac/Commons/Constants';
 
 /**
@@ -16,6 +16,20 @@ import { GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPE } from '../Notemac/Commons/C
 
 describe('GitHub OAuth Integration — Real API', () =>
 {
+    // Restore real fetch for these integration tests (global setup stubs it)
+    const realFetch = (globalThis as any).__realFetch as typeof fetch;
+    let stubbedFetch: typeof fetch;
+
+    beforeAll(() =>
+    {
+        stubbedFetch = globalThis.fetch;
+        globalThis.fetch = realFetch;
+    });
+
+    afterAll(() =>
+    {
+        globalThis.fetch = stubbedFetch;
+    });
     it('GITHUB_OAUTH_CLIENT_ID is configured (not placeholder)', () =>
     {
         expect(GITHUB_OAUTH_CLIENT_ID).not.toBe('Iv1.CONFIGURE_YOUR_APP');
