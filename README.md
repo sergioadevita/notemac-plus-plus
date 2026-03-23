@@ -420,7 +420,7 @@ src/
 │   └── Git/                    # Git integration adapter
 ├── components/                 # React UI components
 ├── store/                      # Zustand store slices
-└── __tests__/                  # 2,018 unit tests (98 suites, Vitest)
+└── __tests__/                  # 2,169 unit tests (101 suites, Vitest)
 ```
 
 ## Testing
@@ -429,7 +429,7 @@ src/
 npx vitest run
 ```
 
-2,018 unit tests across 98 test suites, ~760 web E2E tests across 42 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
+2,169 unit tests across 101 test suites, ~760 web E2E tests across 42 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
 
 ```bash
 npx playwright test          # E2E tests

@@ -1,17 +1,20 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
-// Mock PluginRegistryService globally — its FetchRegistryIndex calls
-// fetch() which leaks pending promises and causes "Closing rpc while
-// fetch was pending" errors when vitest workers terminate.
-vi.mock('../Notemac/Services/PluginRegistryService', async (importOriginal) =>
-{
-    const actual = await importOriginal() as Record<string, unknown>;
-    return {
-        ...actual,
-        FetchRegistryIndex: vi.fn().mockResolvedValue([]),
-    };
-});
+// Stub global fetch to prevent "Closing rpc while fetch was pending" errors.
+// PluginRegistryService calls fetch() during module import chains and the
+// pending promise causes vitest workers to exit with code 1. Tests that need
+// real fetch (like OAuthIntegration) restore it via beforeAll/afterAll.
+const _realFetch = globalThis.fetch;
+(globalThis as any).__realFetch = _realFetch;
+vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ([]),
+    text: async () => '',
+    headers: new Headers(),
+    clone: () => ({ ok: true, status: 200, json: async () => ([]), text: async () => '' }),
+})));
 
 // Mock Monaco Editor — not available in jsdom
 vi.mock('@monaco-editor/react', () => ({

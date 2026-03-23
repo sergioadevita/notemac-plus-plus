@@ -12,9 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Runtime Adapter Architecture**: Unified `RuntimeAdapter` interface with platform-specific backends — DesktopRuntimeAdapter (OS processes), WebJsRuntimeAdapter (sandboxed iframe for JS/TS/CoffeeScript), WebValidationAdapter (JSON/XML/YAML/HTML/CSS/Markdown), WasmRuntimeAdapter (CDN-loaded WASM runtimes for Python, Lua, SQL, and more)
 - **WASM Runtime Support**: Lazy-loaded WASM runtimes from CDN via `<script>` tag injection with deduplication; three concrete loaders (Pyodide, Wasmoon, sql.js) plus stub runtimes for future languages
 - **Background Caching**: RuntimeCacheService with IndexedDB persistence, predictive preloading based on open file types, and Service Worker registration for offline WASM caching
-- **Run Output Panel**: Resizable output panel with ANSI color support, elapsed time display, drag-to-resize handle, auto-scroll, and status indicators (Ready/Running/Success/Failed/Cancelled)
-- **Run Menu Integration**: 6 new menu items (Run File, Run with Arguments, Stop, separator, Clear Output, Toggle Output Panel) added to the Run menu
-- **Keyboard Shortcuts**: F5 (Run File), Shift+F5 (Run with Arguments), Ctrl+F5 (Stop Execution), Cmd+Shift+Y (Toggle Output Panel)
+- **Console Panel**: Resizable console panel with close button, stdin input field, ANSI color support, elapsed time display, drag-to-resize handle, auto-scroll, and status indicators (Console/Running/Completed/Failed/Cancelled)
+- **Toolbar Buttons**: 4 new toolbar buttons after macros — Run File, Stop Execution, Run with Arguments, Toggle Console
+- **Run Menu Integration**: 6 new menu items (Run File, Run with Arguments, Stop, separator, Clear Console, Toggle Console) added to the Run menu
+- **Keyboard Shortcuts**: F5 (Run File), Shift+F5 (Run with Arguments), Ctrl+F5 (Stop Execution), Cmd+Shift+Y (Toggle Console)
 - **Language Command Map**: Maps all 73 languages to desktop commands and web runtime types across 5 categories — A (JS-based), B (existing WASM ports), C (Emscripten builds), D (self-hosted compilers), E (custom TS interpreters)
 - **Command Registry**: 5 new compile-run commands registered in the Run category
 
