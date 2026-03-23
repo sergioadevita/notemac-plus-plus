@@ -12,7 +12,8 @@ import { GetRuntimeDisplayName, IsLanguageExecutable, GetWebRuntimeConfig } from
 import { DesktopRuntimeAdapter } from '../Services/Runtimes/DesktopRuntimeAdapter';
 import { WebJsRuntimeAdapter } from '../Services/Runtimes/WebJsRuntimeAdapter';
 import { WebValidationAdapter } from '../Services/Runtimes/WebValidationAdapter';
-import { WasmRuntimeAdapter } from '../Services/Runtimes/WasmRuntimeAdapter';
+import { WasmRuntimeAdapter, IsRuntimeLoaded } from '../Services/Runtimes/WasmRuntimeAdapter';
+import { CloudRuntimeAdapter, IsCloudRuntimeAvailable } from '../Services/Runtimes/CloudRuntimeAdapter';
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
 import { FormatTaskDuration } from '../Services/TaskRunnerService';
 import type { RuntimeAdapter } from '../Services/RuntimeAdapter';
@@ -197,6 +198,9 @@ function SelectAdapter(languageId: string): RuntimeAdapter
     return adapter;
 }
 
+/** Languages that have actual native WASM loaders (not stubs). */
+const NATIVE_WASM_LANGUAGES = new Set(['python', 'lua', 'sql']);
+
 function SelectWebAdapter(languageId: string): RuntimeAdapter
 {
     // JS/TS/CoffeeScript → sandboxed iframe execution
@@ -211,7 +215,19 @@ function SelectWebAdapter(languageId: string): RuntimeAdapter
         return WebValidationAdapter;
     }
 
-    // Check if this is a WASM language
+    // Languages with native WASM loaders → use WASM adapter
+    if (NATIVE_WASM_LANGUAGES.has(languageId) || IsRuntimeLoaded(languageId))
+    {
+        return WasmRuntimeAdapter;
+    }
+
+    // Languages supported by the cloud execution API → use cloud adapter
+    if (IsCloudRuntimeAvailable(languageId))
+    {
+        return CloudRuntimeAdapter;
+    }
+
+    // Check if this is a WASM language (future loaders / stubs)
     const config = GetWebRuntimeConfig(languageId);
     if (null !== config && 'wasm' === config.webType)
     {
