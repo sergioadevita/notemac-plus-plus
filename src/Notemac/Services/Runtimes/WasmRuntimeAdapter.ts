@@ -470,37 +470,39 @@ async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
  * First run downloads ~25MB (dotnet.wasm + Roslyn DLLs + BCL DLLs).
  * Subsequent runs use cached assets.
  *
- * Bootstrap sequence:
- *   1. mono-config.js   → sets global `config` (DLL file list, prefixes)
- *   2. runtime.js        → sets global `Module` with onRuntimeInitialized callback
- *   3. dotnet.js          → boots Emscripten/Mono, triggers onRuntimeInitialized
- *   4. onRuntimeInitialized loads all managed DLLs, then calls App.init()
- *   5. App.init() calls BINDING.call_static_method to initialise the C# side
+ * Architecture (from CSharp-In-Browser by nbarkhina):
+ *   - mono-config.js sets global `config` with DLL manifest
+ *   - runtime.js sets global `Module` with onRuntimeInitialized hook
+ *   - dotnet.js boots Emscripten+Mono, triggers onRuntimeInitialized
+ *   - After DLLs load, runtime calls App.init()
+ *   - App.init() calls BINDING.call_static_method to init the C# side
  *
- * To run code we call:
- *   BINDING.call_static_method("[WasmRoslyn]WasmRoslyn.Program:Run", [callback, code])
- * The C# side calls back into JS via callback.setCompileLog() and callback.setRunLog().
+ * The C# CompileAndRun method:
+ *   1. Compiles user code with Roslyn into an in-memory assembly
+ *   2. Finds the first exported type and calls its Run() method
+ *   3. Run() must return Task<string> — the string is the program output
+ *
+ * Since user code typically uses Console.WriteLine + Main(), we wrap it
+ * to redirect Console output into a Run() method that returns the output.
  */
 async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 {
     const G = globalThis as any;
     const baseUrl = GetCSharpWasmBaseUrl();
 
-    // ── Set up the global App object expected by runtime.js ──────────
-    // runtime.js defines Module.onRuntimeInitialized which, after DLL
-    // loading finishes, calls App.init(). We need to intercept that to
-    // know when the runtime is ready.
+    // ── Promise that resolves when Mono runtime is fully initialised ─
     const runtimeReady = new Promise<void>((resolve, reject) =>
     {
         G.App = {
+            // Called by runtime.js after all managed DLLs are loaded
             init()
             {
                 try
                 {
-                    // Initialise the C# side (WasmRoslyn.Program:Main)
                     const BINDING = G.BINDING;
                     if (BINDING)
                     {
+                        // Init the C# CompileService (loads Roslyn references)
                         BINDING.call_static_method(
                             '[WasmRoslyn]WasmRoslyn.Program:Main',
                             [G.App, null]
@@ -513,15 +515,18 @@ async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
                     reject(e);
                 }
             },
+
+            // These may be called during Init or by other C# code
+            displayAssemblies() { /* no-op in our headless context */ },
         };
     });
 
-    // ── Load scripts in order ────────────────────────────────────────
+    // ── Load scripts in strict order ─────────────────────────────────
     await LoadScript(`${baseUrl}/mono-config.js`);
     await LoadScript(`${baseUrl}/runtime.js`);
     await LoadScript(`${baseUrl}/dotnet.js`);
 
-    // Wait for the full bootstrap (DLL loading + App.init)
+    // Wait for the full bootstrap
     await runtimeReady;
 
     const BINDING = G.BINDING;
@@ -540,36 +545,79 @@ async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
         {
             try
             {
-                // Capture output via callback object
-                let compileLog = '';
-                let runLog = '';
+                // ── Wrap user code ──────────────────────────────────
+                // The Mono WASM runtime compiles the code with Roslyn,
+                // then finds the first exported type and calls its
+                // async Task<string> Run() method. The returned string
+                // is the program output.
+                //
+                // Users write normal C# with Main() and Console.Write*.
+                // We wrap it so Console output is captured and returned
+                // from a Run() method that the runtime expects.
+                const wrappedCode = WrapCSharpCode(code);
 
-                const callback = {
-                    setCompileLog(log: string) { compileLog = log; },
-                    setRunLog(log: string) { runLog = log; },
-                };
+                // ── Set up result capture via async callbacks ────────
+                // Program.Run fires Task.Run(CompileAndRun) and returns
+                // immediately. The C# side calls back via JSObject.Invoke
+                // on the callback object when done.
+                const result = await new Promise<{ compileLog: string; runLog: string }>((resolve) =>
+                {
+                    let compileLog = '';
+                    let runLog = '';
+                    let resolved = false;
 
-                BINDING.call_static_method(
-                    '[WasmRoslyn]WasmRoslyn.Program:Run',
-                    [callback, code]
-                );
+                    const callback = {
+                        setCompileLog(log: string)
+                        {
+                            compileLog = log;
+                            // setCompileLog is always called (in finally block).
+                            // If compilation fails, setRunLog won't be called.
+                            // If compilation succeeds, setRunLog is called first.
+                            // Either way, resolve after compileLog arrives.
+                            if (!resolved)
+                            {
+                                resolved = true;
+                                resolve({ compileLog, runLog });
+                            }
+                        },
+                        setRunLog(log: string)
+                        {
+                            runLog = log;
+                        },
+                    };
 
-                // Parse compile result
-                const compileFailed = compileLog &&
-                    !compileLog.includes('Compilation success');
+                    BINDING.call_static_method(
+                        '[WasmRoslyn]WasmRoslyn.Program:Run',
+                        [callback, wrappedCode]
+                    );
+
+                    // Safety timeout — if callbacks never fire (e.g. runtime error)
+                    setTimeout(() =>
+                    {
+                        if (!resolved)
+                        {
+                            resolved = true;
+                            resolve({ compileLog, runLog });
+                        }
+                    }, 30000);
+                });
+
+                // ── Parse results ───────────────────────────────────
+                const compileFailed = result.compileLog &&
+                    !result.compileLog.includes('Compilation success');
 
                 if (compileFailed)
                 {
+                    // Strip HTML tags the runtime may have added
+                    const cleanLog = result.compileLog.replace(/<[^>]*>/g, '');
                     return {
                         stdout: '',
-                        stderr: compileLog.replace(/<[^>]*>/g, ''),
+                        stderr: cleanLog,
                         exitCode: 1,
                     };
                 }
 
-                // Strip any HTML tags the runtime may have added
-                const output = runLog.replace(/<[^>]*>/g, '');
-
+                const output = result.runLog.replace(/<[^>]*>/g, '');
                 return {
                     stdout: output,
                     stderr: '',
@@ -582,6 +630,84 @@ async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
             }
         },
     };
+}
+
+/**
+ * Wraps user C# code so it works with the CSharp-In-Browser runtime.
+ *
+ * The Mono WASM CompileAndRun expects the compiled assembly to have
+ * an exported type with a public async Task<string> Run() method.
+ * But users write normal C# with Console.WriteLine in a Main method.
+ *
+ * This wrapper:
+ *   1. Redirects Console.Out to a StringWriter
+ *   2. Calls the user's Main method (handling both void and async variants)
+ *   3. Returns the captured console output as the Run() result
+ */
+function WrapCSharpCode(userCode: string): string
+{
+    // Check if the user already has a Run() method (advanced usage)
+    if (/public\s+(async\s+)?Task<string>\s+Run\s*\(/.test(userCode))
+    {
+        return userCode;
+    }
+
+    // Extract the class containing Main. We need to detect the user's
+    // namespace, class name, and Main signature.
+    const nsMatch = userCode.match(/namespace\s+([\w.]+)/);
+    const classMatch = userCode.match(/class\s+(\w+)/);
+    const ns = nsMatch ? nsMatch[1] : 'UserCode';
+    const cls = classMatch ? classMatch[1] : 'Program';
+
+    return `
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+
+// ─── User code (embedded) ────────────────────────────────────────
+${userCode}
+// ─── End user code ───────────────────────────────────────────────
+
+namespace WasmRoslyn.Demo
+{
+    public class RunClass
+    {
+        public async Task<string> Run()
+        {
+            var sw = new StringWriter();
+            Console.SetOut(sw);
+            Console.SetError(sw);
+            try
+            {
+                // Use reflection to call Main — it may be private
+                var type = typeof(${ns}.${cls});
+                var main = type.GetMethod("Main",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (main == null)
+                    throw new Exception("Could not find Main method in ${ns}.${cls}");
+
+                var args = main.GetParameters().Length > 0
+                    ? new object[] { new string[0] }
+                    : new object[0];
+
+                var result = main.Invoke(null, args);
+                if (result is Task task)
+                    await task;
+            }
+            catch (TargetInvocationException tie)
+            {
+                sw.WriteLine(tie.InnerException?.ToString() ?? tie.ToString());
+            }
+            catch (Exception ex)
+            {
+                sw.WriteLine(ex.ToString());
+            }
+            return sw.ToString();
+        }
+    }
+}
+`;
 }
 
 /**
