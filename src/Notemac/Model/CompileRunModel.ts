@@ -125,7 +125,8 @@ export const createCompileRunSlice: StateCreator<NotemacCompileRunSlice, [], [],
 
         set(produce((state: NotemacCompileRunSlice) =>
         {
-            state.compileRunExecution = null;
+            // Keep the completed execution visible in the panel (not null)
+            state.compileRunExecution = completed as any;
             state.compileRunStatus = completed.status;
             state.compileRunHistory.unshift(completed);
             if (state.compileRunHistory.length > LIMIT_COMPILE_RUN_HISTORY)
@@ -150,7 +151,8 @@ export const createCompileRunSlice: StateCreator<NotemacCompileRunSlice, [], [],
 
         set(produce((state: NotemacCompileRunSlice) =>
         {
-            state.compileRunExecution = null;
+            // Keep the cancelled execution visible in the panel (not null)
+            state.compileRunExecution = cancelled as any;
             state.compileRunStatus = 'cancelled';
             state.compileRunHistory.unshift(cancelled);
             if (state.compileRunHistory.length > LIMIT_COMPILE_RUN_HISTORY)
@@ -188,6 +190,26 @@ export const createCompileRunSlice: StateCreator<NotemacCompileRunSlice, [], [],
 
     ClearCompileRunHistory: () =>
     {
-        set({ compileRunHistory: [] });
+        const current = get().compileRunExecution;
+        const isRunning = null !== current && undefined === current.exitCode;
+
+        if (isRunning)
+        {
+            // Clear output but keep the active execution alive
+            set(produce((state: NotemacCompileRunSlice) =>
+            {
+                if (null !== state.compileRunExecution)
+                {
+                    state.compileRunExecution.output = [];
+                    state.compileRunExecution.stderr = [];
+                }
+                state.compileRunHistory = [];
+            }));
+        }
+        else
+        {
+            // Clear everything including the completed/cancelled execution
+            set({ compileRunExecution: null, compileRunHistory: [], compileRunStatus: 'idle' });
+        }
     },
 });

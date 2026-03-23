@@ -150,7 +150,8 @@ export function RegisterCompletionProviders(monaco: MonacoNamespace, editorInsta
  */
 export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, _editorInstance: editor.IStandaloneCodeEditor): IDisposable
 {
-    const provider = monaco.languages.registerInlineCompletionsProvider('*', {
+    // Cast needed: newer Monaco expects disposeInlineCompletions but the TS types lag behind
+    const providerImpl: Record<string, unknown> = {
         provideInlineCompletions: async (model: editor.ITextModel, position: { lineNumber: number; column: number }, _context: languages.InlineCompletionContext, token: { onCancellationRequested: (fn: () => void) => void }) =>
         {
             const store = useNotemacStore.getState();
@@ -279,7 +280,14 @@ export function RegisterAIInlineCompletionProvider(monaco: MonacoNamespace, _edi
         {
             // Nothing to clean up
         },
-    });
+
+        // Required by newer Monaco API — missing from TS types
+        disposeInlineCompletions: () =>
+        {
+            // Nothing to clean up
+        },
+    };
+    const provider = monaco.languages.registerInlineCompletionsProvider('*', providerImpl as any);
 
     return provider;
 }

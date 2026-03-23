@@ -399,14 +399,16 @@ describe('CompileRunModel — CompleteCompileRun', () =>
         expect(state.compileRunHistory[0].endTime! <= afterTime).toBe(true);
     });
 
-    it('clears current execution', () =>
+    it('keeps completed execution visible in panel', () =>
     {
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
         store.CompleteCompileRun(0);
         const state = useNotemacStore.getState();
 
-        expect(state.compileRunExecution).toBeNull();
+        expect(state.compileRunExecution).not.toBeNull();
+        expect(state.compileRunExecution?.exitCode).toBe(0);
+        expect(state.compileRunExecution?.status).toBe('success');
     });
 
     it('moves execution to history with all properties', () =>
@@ -528,14 +530,16 @@ describe('CompileRunModel — CancelCompileRun', () =>
         expect(state.compileRunHistory[0].endTime! <= afterTime).toBe(true);
     });
 
-    it('clears current execution', () =>
+    it('keeps cancelled execution visible in panel', () =>
     {
         const store = useNotemacStore.getState();
         store.StartCompileRun('python');
         store.CancelCompileRun();
         const state = useNotemacStore.getState();
 
-        expect(state.compileRunExecution).toBeNull();
+        expect(state.compileRunExecution).not.toBeNull();
+        expect(state.compileRunExecution?.exitCode).toBe(-1);
+        expect(state.compileRunExecution?.status).toBe('cancelled');
     });
 
     it('preserves output and stderr when cancelling', () =>
@@ -896,7 +900,8 @@ describe('CompileRunModel — Integration Scenarios', () =>
 
         const state = useNotemacStore.getState();
 
-        expect(state.compileRunExecution).toBeNull();
+        expect(state.compileRunExecution).not.toBeNull();
+        expect(state.compileRunExecution?.status).toBe('success');
         expect(state.compileRunStatus).toBe('success');
         expect(state.compileRunHistory[0].output.length).toBe(3);
         expect(state.compileRunHistory[0].exitCode).toBe(0);
