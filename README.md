@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/version-5.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Web-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/tests-4000%2B%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-3215%2B%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/languages-73%2B-orange" alt="Languages">
   <a href="https://ko-fi.com/sergioadevita"><img src="https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
@@ -294,6 +294,7 @@ UPPERCASE, lowercase, Proper Case, Sentence case, iNVERT cASE, and RaNdOm CaSe.
 - **Multi-language support**: 73+ programming languages including C, C++, Python, JavaScript, TypeScript, Rust, Go, Java, Ruby, PHP, Swift, Kotlin, and many more
 - **Desktop execution**: Run code natively on your local system
 - **Web execution**: WASM runtimes with Service Worker caching for browser-based execution
+- **Cloud execution**: Piston API for cloud-based execution of 40+ languages without native WASM runtimes
 - **Keyboard shortcuts**: `F5` (run), `Shift+F5` (clear and run), `Ctrl+F5` (run and focus output)
 - **Output panel**: Real-time output streaming with ANSI color support for colorized terminal output
 - **Category A-E runtime architecture**: Optimized performance and memory usage tiers
@@ -429,7 +430,7 @@ src/
 npx vitest run
 ```
 
-2,169 unit tests across 101 test suites, ~760 web E2E tests across 42 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
+2,237 unit tests across 102 test suites, ~800 web E2E tests across 43 Playwright spec files, and 214 Electron E2E tests across 4 Playwright Electron spec files — covering every source file, all UI components, panels, dialogs, keyboard shortcuts, menu actions, and user flows for both web and desktop.
 
 ```bash
 npx playwright test          # E2E tests

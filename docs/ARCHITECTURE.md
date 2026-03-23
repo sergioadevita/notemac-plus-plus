@@ -127,6 +127,7 @@ CompileRunController (orchestrator)
 ├── DetectPlatform() → 'tauri' | 'electron' | 'web'
 ├── SelectAdapter() → RuntimeAdapter
 │   ├── DesktopRuntimeAdapter    (Electron/Tauri — OS process spawning)
+│   ├── CloudRuntimeAdapter      (Piston API — cloud execution for 40+ languages)
 │   └── SelectWebAdapter()
 │       ├── WebJsRuntimeAdapter  (sandboxed iframe for JS/TS/CoffeeScript)
 │       ├── WebValidationAdapter (JSON/XML/YAML validation, HTML/CSS/MD preview)

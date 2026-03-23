@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added — Compile & Run (73+ Languages)
 - **Universal Code Execution**: Run code in 73+ languages on Desktop (Electron/Tauri) and Web, with no "desktop only" limitations
-- **Runtime Adapter Architecture**: Unified `RuntimeAdapter` interface with platform-specific backends — DesktopRuntimeAdapter (OS processes), WebJsRuntimeAdapter (sandboxed iframe for JS/TS/CoffeeScript), WebValidationAdapter (JSON/XML/YAML/HTML/CSS/Markdown), WasmRuntimeAdapter (CDN-loaded WASM runtimes for Python, Lua, SQL, and more)
+- **Runtime Adapter Architecture**: Unified `RuntimeAdapter` interface with platform-specific backends — DesktopRuntimeAdapter (OS processes), WebJsRuntimeAdapter (sandboxed iframe for JS/TS/CoffeeScript), WebValidationAdapter (JSON/XML/YAML/HTML/CSS/Markdown), WasmRuntimeAdapter (CDN-loaded WASM runtimes for Python, Lua, SQL, and more), CloudRuntimeAdapter (cloud execution via Piston API for 40+ languages)
 - **WASM Runtime Support**: Lazy-loaded WASM runtimes from CDN via `<script>` tag injection with deduplication; three concrete loaders (Pyodide, Wasmoon, sql.js) plus stub runtimes for future languages
 - **Background Caching**: RuntimeCacheService with IndexedDB persistence, predictive preloading based on open file types, and Service Worker registration for offline WASM caching
 - **Console Panel**: Resizable console panel with close button, stdin input field, ANSI color support, elapsed time display, drag-to-resize handle, auto-scroll, and status indicators (Console/Running/Completed/Failed/Cancelled)
@@ -20,8 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Command Registry**: 5 new compile-run commands registered in the Run category
 
 ### Added — Testing
-- 2 new test files: `CompileRunModel.test.ts` (69 tests), `LanguageCommandMap.test.ts` (63 tests)
-- Total: 3,124 unit tests across 146 suites
+- 2 new test files: `CompileRunModel.test.ts` (69 tests), `LanguageCommandMap.test.ts` (63 tests), `CloudRuntimeAdapter.test.ts` (68 tests)
+- Total: 3,215 unit tests across 146 suites
 
 ### Changed
 - Version bumped from 4.2.1 to 5.0.0 (major: new execution platform)

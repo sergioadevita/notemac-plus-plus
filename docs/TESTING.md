@@ -14,9 +14,9 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 
 ## Test Summary
 
-**3,147 total tests** across 147 suites and three test layers:
+**3,215 total tests** across 147 suites and three test layers:
 
-### Unit Tests — 2,169 tests across 101 suites (Vitest)
+### Unit Tests — 2,237 tests across 102 suites (Vitest)
 
 #### Configs & Settings
 
@@ -90,6 +90,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | Tauri Bridge | `TauriBridge.test.ts` | 6 | Tauri API integration, IPC communication |
 | Language Command Map | `LanguageCommandMap.test.ts` | 63 | All 73 languages, desktop commands, web runtime types, helper functions |
 | Text Helpers | `TextHelpers.test.ts` | 33 | String manipulation, trimming, case conversion, formatting |
+| Cloud Runtime Adapter | `CloudRuntimeAdapter.test.ts` | 68 | Piston API integration, cloud execution, language support, error handling |
 
 #### Hooks
 
@@ -196,6 +197,7 @@ xvfb-run --auto-servernum npx playwright test --config=playwright-electron.confi
 | `tools-encoding.spec.ts` | Base64, URL encode, hash, encoding conversions |
 | `welcome-screen.spec.ts` | Welcome page, quick actions |
 | `zoom-statusbar.spec.ts` | Zoom in/out/reset, status bar display |
+| `compile-run-panel.spec.ts` | Compile & Run panel, cloud execution, output display |
 
 ### Electron E2E Tests — 214 tests across 4 spec files (Playwright Electron)
 
