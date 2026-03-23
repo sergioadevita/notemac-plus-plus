@@ -210,7 +210,7 @@ test.describe('EditorPanel and Monaco Editor', () => {
     await page.keyboard.press('Enter');
 
     // Wait until Monaco has actually processed the Enter keystroke
-    // by verifying the editor content contains a newline
+    // by verifying the model has at least 2 lines
     await expect(async () => {
       const lineCount = await page.evaluate(() => {
         const editors = (window as any).monaco?.editor?.getEditors?.();
@@ -223,9 +223,12 @@ test.describe('EditorPanel and Monaco Editor', () => {
       expect(lineCount).toBeGreaterThanOrEqual(2);
     }).toPass({ intervals: [100, 200, 500, 1000], timeout: 5000 });
 
-    await typeInEditor(page, 'line2');
+    // Type directly via keyboard (NOT typeInEditor) to avoid re-clicking
+    // the editor which could move cursor back to line 1
+    await page.keyboard.type('line2');
+    await page.waitForTimeout(200);
 
-    // Now verify cursor is on line 2+
+    // Verify cursor is on line 2+ by checking via Monaco API
     await expect(async () => {
       const cursorLine = await page.evaluate(() => {
         const editors = (window as any).monaco?.editor?.getEditors?.();
