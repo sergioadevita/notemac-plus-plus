@@ -467,54 +467,111 @@ async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
 /**
  * Loads the Mono WASM runtime with Roslyn for in-browser C# compilation.
  * Assets are hosted alongside the app in /app/wasm/csharp/.
- * First run downloads ~14MB (dotnet.wasm + Roslyn DLLs + BCL DLLs).
+ * First run downloads ~25MB (dotnet.wasm + Roslyn DLLs + BCL DLLs).
  * Subsequent runs use cached assets.
+ *
+ * Bootstrap sequence:
+ *   1. mono-config.js   → sets global `config` (DLL file list, prefixes)
+ *   2. runtime.js        → sets global `Module` with onRuntimeInitialized callback
+ *   3. dotnet.js          → boots Emscripten/Mono, triggers onRuntimeInitialized
+ *   4. onRuntimeInitialized loads all managed DLLs, then calls App.init()
+ *   5. App.init() calls BINDING.call_static_method to initialise the C# side
+ *
+ * To run code we call:
+ *   BINDING.call_static_method("[WasmRoslyn]WasmRoslyn.Program:Run", [callback, code])
+ * The C# side calls back into JS via callback.setCompileLog() and callback.setRunLog().
  */
 async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 {
-    // The Mono WASM runtime assets must be hosted alongside the app.
-    // Load order matters: mono-config.js (sets global `config`),
-    // then runtime.js (sets global `Module`), then dotnet.js (reads both).
+    const G = globalThis as any;
     const baseUrl = GetCSharpWasmBaseUrl();
 
+    // ── Set up the global App object expected by runtime.js ──────────
+    // runtime.js defines Module.onRuntimeInitialized which, after DLL
+    // loading finishes, calls App.init(). We need to intercept that to
+    // know when the runtime is ready.
+    const runtimeReady = new Promise<void>((resolve, reject) =>
+    {
+        G.App = {
+            init()
+            {
+                try
+                {
+                    // Initialise the C# side (WasmRoslyn.Program:Main)
+                    const BINDING = G.BINDING;
+                    if (BINDING)
+                    {
+                        BINDING.call_static_method(
+                            '[WasmRoslyn]WasmRoslyn.Program:Main',
+                            [G.App, null]
+                        );
+                    }
+                    resolve();
+                }
+                catch (e)
+                {
+                    reject(e);
+                }
+            },
+        };
+    });
+
+    // ── Load scripts in order ────────────────────────────────────────
     await LoadScript(`${baseUrl}/mono-config.js`);
     await LoadScript(`${baseUrl}/runtime.js`);
     await LoadScript(`${baseUrl}/dotnet.js`);
 
-    const monoRuntime = (globalThis as any).Module ?? (globalThis as any).MONO;
-    if (!monoRuntime)
+    // Wait for the full bootstrap (DLL loading + App.init)
+    await runtimeReady;
+
+    const BINDING = G.BINDING;
+    if (!BINDING)
     {
         throw new Error(
-            'C# WASM runtime is not yet available.\n' +
-            'The Mono WASM runtime assets need to be built and deployed.\n' +
-            'This will be available in the next release.'
+            'C# WASM runtime loaded but BINDING global not found.\n' +
+            'The Mono WASM runtime may not have initialised correctly.'
         );
     }
 
     return {
         languageId,
-        module: monoRuntime,
+        module: G.Module,
         async execute(code: string)
         {
             try
             {
-                // Call the CompileAndRun function exposed by the Mono WASM runtime
-                const compileAndRun = (globalThis as any).CompileAndRun
-                    ?? (globalThis as any).Module?.CompileAndRun;
+                // Capture output via callback object
+                let compileLog = '';
+                let runLog = '';
 
-                if (!compileAndRun)
+                const callback = {
+                    setCompileLog(log: string) { compileLog = log; },
+                    setRunLog(log: string) { runLog = log; },
+                };
+
+                BINDING.call_static_method(
+                    '[WasmRoslyn]WasmRoslyn.Program:Run',
+                    [callback, code]
+                );
+
+                // Parse compile result
+                const compileFailed = compileLog &&
+                    !compileLog.includes('Compilation success');
+
+                if (compileFailed)
                 {
                     return {
                         stdout: '',
-                        stderr: 'C# runtime loaded but CompileAndRun function not found. ' +
-                            'The Mono WASM runtime assets may need to be rebuilt.',
+                        stderr: compileLog.replace(/<[^>]*>/g, ''),
                         exitCode: 1,
                     };
                 }
 
-                const result = compileAndRun(code);
+                // Strip any HTML tags the runtime may have added
+                const output = runLog.replace(/<[^>]*>/g, '');
+
                 return {
-                    stdout: result ?? '',
+                    stdout: output,
                     stderr: '',
                     exitCode: 0,
                 };
