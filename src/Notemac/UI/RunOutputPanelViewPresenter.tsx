@@ -147,67 +147,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
         };
     }, [isDragging]);
 
-    if (!compileRunExecution && !compileRunPanelVisible)
-    {
-        return null;
-    }
-
-    if (!compileRunExecution)
-    {
-        return (
-            <div style={{
-                height: COMPILE_RUN_PANEL_DEFAULT_HEIGHT,
-                background: theme.editorBg,
-                borderTop: `1px solid ${theme.border}`,
-                display: 'flex',
-                flexDirection: 'column' as const,
-            }}>
-                {/* Toolbar even when empty — so user can close */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '4px 8px',
-                    borderBottom: `1px solid ${theme.border}`,
-                    gap: 8,
-                    flexShrink: 0,
-                }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: theme.text, flex: 1 }}>
-                        Console
-                    </span>
-                    <button
-                        onClick={handleClose}
-                        style={{
-                            background: 'transparent',
-                            color: theme.text,
-                            border: 'none',
-                            borderRadius: 3,
-                            padding: '2px 6px',
-                            fontSize: 13,
-                            cursor: 'pointer',
-                            opacity: 0.6,
-                            lineHeight: 1,
-                        }}
-                        title="Close Console"
-                        aria-label="Close Console"
-                    >
-                        ✕
-                    </button>
-                </div>
-                <div style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: theme.text,
-                    opacity: 0.5,
-                    fontSize: 12,
-                }}>
-                    No output to display.
-                </div>
-            </div>
-        );
-    }
-
+    // ─── Memoized Styles (must be called before early returns to satisfy Rules of Hooks) ───
     const panelStyles = useMemo(() => ({
         container: {
             height: COMPILE_RUN_PANEL_DEFAULT_HEIGHT,
@@ -339,6 +279,59 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
             flexShrink: 0,
         },
     }), [theme, isDragging, dragHandleHovered]);
+
+    // ─── Early Returns (after all hooks) ─────────────────────────────────
+
+    if (!compileRunExecution && !compileRunPanelVisible)
+    {
+        return null;
+    }
+
+    if (!compileRunExecution)
+    {
+        return (
+            <div style={{
+                height: COMPILE_RUN_PANEL_DEFAULT_HEIGHT,
+                background: theme.editorBg,
+                borderTop: `1px solid ${theme.border}`,
+                display: 'flex',
+                flexDirection: 'column' as const,
+            }}>
+                {/* Toolbar even when empty — so user can close */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px 8px',
+                    borderBottom: `1px solid ${theme.border}`,
+                    gap: 8,
+                    flexShrink: 0,
+                }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: theme.text, flex: 1 }}>
+                        Console
+                    </span>
+                    <button
+                        onClick={handleClose}
+                        style={panelStyles.closeButton as React.CSSProperties}
+                        title="Close Console"
+                        aria-label="Close Console"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: theme.text,
+                    opacity: 0.5,
+                    fontSize: 12,
+                }}>
+                    No output to display.
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={panelStyles.container as React.CSSProperties}>
