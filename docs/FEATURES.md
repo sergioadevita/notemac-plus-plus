@@ -46,11 +46,12 @@ Complete reference of every feature in Notemac++.
 
 ## Compile & Run
 
-Execute code in 73+ languages directly from the editor with desktop and web execution environments. Desktop execution runs code natively on your machine, while web execution uses WebAssembly (WASM) runtimes with Service Worker caching for optimal performance.
+Execute code in 73+ languages directly from the editor with desktop, web, and cloud execution environments. Desktop execution runs code natively on your machine, web execution uses WebAssembly (WASM) runtimes with Service Worker caching for optimal performance, and cloud execution via Piston API supports 40+ languages without native WASM runtimes.
 
 **Execution Modes:**
 - Desktop: Native execution on local system
 - Web: WASM-based execution in browser with Service Worker caching
+- Cloud: Piston API for cloud execution of 40+ languages
 
 **Keyboard Shortcuts:**
 - `F5`: Run code and show output

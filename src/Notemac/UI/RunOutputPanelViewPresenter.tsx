@@ -356,6 +356,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                         ...(isRunning ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
                     } as React.CSSProperties}
                     title="Run current file"
+                    aria-label="Run current file"
                 >
                     ▶ Run
                 </button>
@@ -365,6 +366,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                         onClick={handleStop}
                         style={panelStyles.buttonStop as React.CSSProperties}
                         title="Stop execution"
+                        aria-label="Stop execution"
                     >
                         ■ Stop
                     </button>
@@ -374,6 +376,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                     onClick={handleClear}
                     style={panelStyles.button as React.CSSProperties}
                     title="Clear console"
+                    aria-label="Clear console"
                 >
                     ✕ Clear
                 </button>
@@ -448,6 +451,7 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
                         type="submit"
                         style={panelStyles.stdinButton as React.CSSProperties}
                         title="Send input"
+                        aria-label="Send input"
                     >
                         Send
                     </button>
