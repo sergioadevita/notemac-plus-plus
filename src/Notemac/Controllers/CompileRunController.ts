@@ -13,7 +13,7 @@ import { DesktopRuntimeAdapter } from '../Services/Runtimes/DesktopRuntimeAdapte
 import { WebJsRuntimeAdapter } from '../Services/Runtimes/WebJsRuntimeAdapter';
 import { WebValidationAdapter } from '../Services/Runtimes/WebValidationAdapter';
 import { WasmRuntimeAdapter, IsRuntimeLoaded } from '../Services/Runtimes/WasmRuntimeAdapter';
-import { CloudRuntimeAdapter, IsCloudRuntimeAvailable } from '../Services/Runtimes/CloudRuntimeAdapter';
+// CloudRuntimeAdapter removed — all execution is now browser-local via WASM runtimes.
 import { Dispatch, NOTEMAC_EVENTS } from '../../Shared/EventDispatcher/EventDispatcher';
 import { FormatTaskDuration } from '../Services/TaskRunnerService';
 import type { RuntimeAdapter } from '../Services/RuntimeAdapter';
@@ -199,7 +199,7 @@ function SelectAdapter(languageId: string): RuntimeAdapter
 }
 
 /** Languages that have actual native WASM loaders (not stubs). */
-const NATIVE_WASM_LANGUAGES = new Set(['python', 'lua', 'sql']);
+const NATIVE_WASM_LANGUAGES = new Set(['python', 'lua', 'sql', 'c', 'cpp', 'ruby', 'csharp']);
 
 function SelectWebAdapter(languageId: string): RuntimeAdapter
 {
@@ -221,13 +221,7 @@ function SelectWebAdapter(languageId: string): RuntimeAdapter
         return WasmRuntimeAdapter;
     }
 
-    // Languages supported by the cloud execution API → use cloud adapter
-    if (IsCloudRuntimeAvailable(languageId))
-    {
-        return CloudRuntimeAdapter;
-    }
-
-    // Check if this is a WASM language (future loaders / stubs)
+    // Check if this is a WASM language (real loader or stub for future WASM build)
     const config = GetWebRuntimeConfig(languageId);
     if (null !== config && 'wasm' === config.webType)
     {

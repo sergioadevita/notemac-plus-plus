@@ -1,9 +1,9 @@
 /**
- * CloudRuntimeAdapter — Executes code via the Piston API for languages
+ * CloudRuntimeAdapter — Executes code via the Judge0 CE API for languages
  * that don't have native WASM runtimes available in the browser.
  *
- * Piston is a free, open-source code execution engine supporting 50+ languages.
- * https://github.com/engineer-man/piston
+ * Judge0 CE is a free, open-source online code execution system supporting 60+ languages.
+ * https://ce.judge0.com/
  *
  * Used as a fallback when WasmRuntimeAdapter has no built-in loader.
  */
@@ -14,69 +14,63 @@ import { GetRuntimeDisplayName } from './LanguageCommandMap';
 
 // ─── Constants ───────────────────────────────────────────────────
 
-const PISTON_API_URL = 'https://emkc.org/api/v2/piston/execute';
+const JUDGE0_API_URL = 'https://ce.judge0.com/submissions';
 
 /**
- * Maps Notemac++ language IDs to Piston language identifiers and versions.
- * Only languages that Piston actually supports are listed here.
+ * Maps Notemac++ language IDs to Judge0 CE language numeric IDs.
+ * Uses the latest available compiler/runtime version for each language.
+ * Full list at: https://ce.judge0.com/languages
  */
-const PISTON_LANGUAGE_MAP: Record<string, { language: string; version: string; filename: string }> =
+const JUDGE0_LANGUAGE_MAP: Record<string, { languageId: number; displaySuffix: string }> =
 {
     // ── .NET Languages ───────────────────────────────────────────
-    'csharp':        { language: 'csharp',        version: '5.0.201',  filename: 'main.cs'   },
-    'fsharp':        { language: 'fsharp.net',    version: '5.0.201',  filename: 'main.fs'   },
-    'visual-basic':  { language: 'basic.net',     version: '5.0.201',  filename: 'main.vb'   },
-    'powershell':    { language: 'pwsh',          version: '7.1.4',    filename: 'main.ps1'  },
+    'csharp':        { languageId: 51,  displaySuffix: 'Mono 6.6'           },
+    'fsharp':        { languageId: 87,  displaySuffix: '.NET Core 3.1'      },
+    'visual-basic':  { languageId: 84,  displaySuffix: 'vbnc'               },
 
     // ── C/C++ ────────────────────────────────────────────────────
-    'c':             { language: 'c',             version: '10.2.0',   filename: 'main.c'    },
-    'cpp':           { language: 'c++',           version: '10.2.0',   filename: 'main.cpp'  },
-    'objective-c':   { language: 'objective-c',   version: '10.2.0',   filename: 'main.m'    },
+    'c':             { languageId: 103, displaySuffix: 'GCC 14.1'           },
+    'cpp':           { languageId: 105, displaySuffix: 'GCC 14.1'           },
+    'objective-c':   { languageId: 79,  displaySuffix: 'Clang 7.0'          },
 
     // ── JVM Languages ────────────────────────────────────────────
-    'java':          { language: 'java',          version: '15.0.2',   filename: 'Main.java' },
-    'kotlin':        { language: 'kotlin',        version: '1.8.20',   filename: 'main.kt'   },
-    'scala':         { language: 'scala',         version: '3.2.2',    filename: 'main.scala' },
-    'groovy':        { language: 'groovy',        version: '3.0.7',    filename: 'main.groovy' },
+    'java':          { languageId: 91,  displaySuffix: 'JDK 17'             },
+    'kotlin':        { languageId: 111, displaySuffix: '2.1'                },
+    'scala':         { languageId: 112, displaySuffix: '3.4'                },
+    'groovy':        { languageId: 88,  displaySuffix: '3.0'                },
 
     // ── Compiled Languages ───────────────────────────────────────
-    'go':            { language: 'go',            version: '1.16.2',   filename: 'main.go'   },
-    'rust':          { language: 'rust',          version: '1.68.2',   filename: 'main.rs'   },
-    'swift':         { language: 'swift',         version: '5.3.3',    filename: 'main.swift' },
-    'dart':          { language: 'dart',          version: '2.19.6',   filename: 'main.dart' },
-    'pascal':        { language: 'pascal',        version: '3.2.0',    filename: 'main.pas'  },
-    'fortran':       { language: 'fortran',       version: '10.2.0',   filename: 'main.f90'  },
-    'cobol':         { language: 'cobol',         version: '3.1.2',    filename: 'main.cbl'  },
-    'd':             { language: 'd',             version: '10.2.0',   filename: 'main.d'    },
-    'nim':           { language: 'nim',           version: '1.6.2',    filename: 'main.nim'  },
-    'haskell':       { language: 'haskell',       version: '9.0.1',    filename: 'main.hs'   },
-    'assembly':      { language: 'nasm',          version: '2.15.5',   filename: 'main.asm'  },
+    'go':            { languageId: 107, displaySuffix: '1.23'               },
+    'rust':          { languageId: 108, displaySuffix: '1.85'               },
+    'swift':         { languageId: 83,  displaySuffix: '5.2'                },
+    'dart':          { languageId: 90,  displaySuffix: '2.19'               },
+    'pascal':        { languageId: 67,  displaySuffix: 'FPC 3.0'            },
+    'fortran':       { languageId: 59,  displaySuffix: 'GFortran 9.2'       },
+    'cobol':         { languageId: 77,  displaySuffix: 'GnuCOBOL 2.2'      },
+    'd':             { languageId: 56,  displaySuffix: 'DMD 2.089'          },
+    'haskell':       { languageId: 61,  displaySuffix: 'GHC 8.8'            },
+    'assembly':      { languageId: 45,  displaySuffix: 'NASM 2.14'          },
 
     // ── Scripting Languages ──────────────────────────────────────
-    'ruby':          { language: 'ruby',          version: '3.0.1',    filename: 'main.rb'   },
-    'php':           { language: 'php',           version: '8.2.3',    filename: 'main.php'  },
-    'perl':          { language: 'perl',          version: '5.36.0',   filename: 'main.pl'   },
-    'r':             { language: 'r',             version: '4.1.1',    filename: 'main.r'    },
-    'shell':         { language: 'bash',          version: '5.2.0',    filename: 'main.sh'   },
-    'tcl':           { language: 'tcl',           version: '8.6.12',   filename: 'main.tcl'  },
-    'raku':          { language: 'raku',          version: '6.100.0',  filename: 'main.raku' },
-    'awk':           { language: 'gawk',          version: '5.1.0',    filename: 'main.awk'  },
-    'julia':         { language: 'julia',         version: '1.6.1',    filename: 'main.jl'   },
+    'ruby':          { languageId: 72,  displaySuffix: '2.7'                },
+    'php':           { languageId: 98,  displaySuffix: '8.3'                },
+    'perl':          { languageId: 85,  displaySuffix: '5.28'               },
+    'r':             { languageId: 99,  displaySuffix: '4.4'                },
+    'shell':         { languageId: 46,  displaySuffix: 'Bash 5.0'           },
+    'typescript':    { languageId: 101, displaySuffix: '5.6'                },
 
     // ── Lisp Family ──────────────────────────────────────────────
-    'lisp':          { language: 'lisp',          version: '2.1.2',    filename: 'main.lisp' },
-    'clojure':       { language: 'clojure',       version: '1.10.3',   filename: 'main.clj'  },
-    'scheme':        { language: 'chez',          version: '9.5.4',    filename: 'main.scm'  },
-    'racket':        { language: 'racket',        version: '8.3.0',    filename: 'main.rkt'  },
+    'lisp':          { languageId: 55,  displaySuffix: 'SBCL 2.0'           },
+    'clojure':       { languageId: 86,  displaySuffix: '1.10'               },
 
     // ── ML Family ────────────────────────────────────────────────
-    'ocaml':         { language: 'ocaml',         version: '4.12.0',   filename: 'main.ml'   },
-    'erlang':        { language: 'erlang',        version: '23.0.0',   filename: 'main.erl'  },
-    'elixir':        { language: 'elixir',        version: '1.11.3',   filename: 'main.exs'  },
+    'ocaml':         { languageId: 65,  displaySuffix: '4.09'               },
+    'erlang':        { languageId: 58,  displaySuffix: 'OTP 22'             },
+    'elixir':        { languageId: 57,  displaySuffix: '1.9'                },
 
     // ── Other ────────────────────────────────────────────────────
-    'prolog':        { language: 'prolog',        version: '8.2.4',    filename: 'main.pl'   },
-    'ada':           { language: 'ada',           version: '',          filename: 'main.adb'  },
+    'prolog':        { languageId: 69,  displaySuffix: 'GNU Prolog 1.4'     },
+    'octave':        { languageId: 66,  displaySuffix: '5.1'                },
 };
 
 // ─── State ───────────────────────────────────────────────────────
@@ -98,7 +92,7 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
         const startTime = Date.now();
         const timeout = options?.timeout ?? COMPILE_RUN_DEFAULT_TIMEOUT;
 
-        const mapping = PISTON_LANGUAGE_MAP[languageId];
+        const mapping = JUDGE0_LANGUAGE_MAP[languageId];
         if (!mapping)
         {
             return {
@@ -114,18 +108,12 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
             options.onStdout(`Executing via cloud runtime...`);
         }
 
-        // Build the Piston API request
+        // Build the Judge0 CE API request
         const requestBody: Record<string, unknown> = {
-            language: mapping.language,
-            version: '*',
-            files: [
-                {
-                    name: mapping.filename,
-                    content: code,
-                },
-            ],
-            run_timeout: timeout,
-            compile_timeout: timeout,
+            source_code: code,
+            language_id: mapping.languageId,
+            cpu_time_limit: Math.min(timeout / 1000, 15),   // Judge0 expects seconds, max 15s on CE
+            wall_time_limit: Math.min(timeout / 1000, 20),
         };
 
         if (options?.stdin)
@@ -135,13 +123,15 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
 
         if (options?.args && 0 < options.args.length)
         {
-            requestBody.args = options.args;
+            requestBody.command_line_arguments = options.args.join(' ');
         }
 
         try
         {
             abortController = new AbortController();
-            const response = await fetch(PISTON_API_URL, {
+
+            // Submit with ?wait=true so Judge0 returns the result synchronously
+            const response = await fetch(`${JUDGE0_API_URL}?base64_encoded=false&wait=true`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
@@ -167,31 +157,93 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
 
             const result = await response.json();
 
-            // Handle compilation errors
-            if (result.compile && result.compile.stderr && 0 < result.compile.stderr.length)
+            // Judge0 status IDs:
+            //   1 = In Queue, 2 = Processing, 3 = Accepted,
+            //   4 = Wrong Answer, 5 = Time Limit Exceeded,
+            //   6 = Compilation Error, 7-12 = Runtime Errors, 13 = Internal Error
+            const statusId = result.status?.id ?? 0;
+
+            // Handle compilation errors (status 6)
+            if (6 === statusId)
             {
+                const compileErr = result.compile_output ?? 'Compilation failed';
                 if (options?.onStderr)
                 {
-                    for (const line of result.compile.stderr.split('\n'))
+                    for (const line of compileErr.split('\n'))
                     {
                         options.onStderr(line);
                     }
                 }
-            }
-
-            if (result.compile && 0 !== result.compile.code)
-            {
                 return {
-                    stdout: result.compile.stdout ? result.compile.stdout.split('\n') : [],
-                    stderr: result.compile.stderr ? result.compile.stderr.split('\n') : [],
-                    exitCode: result.compile.code ?? 1,
+                    stdout: [],
+                    stderr: compileErr.split('\n'),
+                    exitCode: 1,
                     duration: Date.now() - startTime,
                 };
             }
 
-            // Stream stdout via callback
-            const stdout = result.run?.stdout ?? '';
-            const stderr = result.run?.stderr ?? '';
+            // Handle time limit exceeded (status 5)
+            if (5 === statusId)
+            {
+                const msg = 'Execution timed out (time limit exceeded)';
+                if (options?.onStderr)
+                {
+                    options.onStderr(msg);
+                }
+                return {
+                    stdout: result.stdout ? result.stdout.split('\n') : [],
+                    stderr: [msg],
+                    exitCode: 124,
+                    duration: Date.now() - startTime,
+                };
+            }
+
+            // Handle runtime errors (status 7-12)
+            if (7 <= statusId && 12 >= statusId)
+            {
+                const runtimeErr = result.stderr ?? result.compile_output ?? 'Runtime error';
+                if (options?.onStderr)
+                {
+                    for (const line of runtimeErr.split('\n'))
+                    {
+                        options.onStderr(line);
+                    }
+                }
+                // Still include stdout if any was produced before the error
+                if (options?.onStdout && result.stdout && 0 < result.stdout.length)
+                {
+                    for (const line of result.stdout.split('\n'))
+                    {
+                        options.onStdout(line);
+                    }
+                }
+                return {
+                    stdout: result.stdout ? result.stdout.split('\n') : [],
+                    stderr: runtimeErr.split('\n'),
+                    exitCode: result.exit_code ?? 1,
+                    duration: Date.now() - startTime,
+                };
+            }
+
+            // Handle internal error (status 13)
+            if (13 === statusId)
+            {
+                const msg = result.message ?? 'Internal Judge0 error';
+                if (options?.onStderr)
+                {
+                    options.onStderr(msg);
+                }
+                return {
+                    stdout: [],
+                    stderr: [msg],
+                    exitCode: 1,
+                    duration: Date.now() - startTime,
+                };
+            }
+
+            // Success path (status 3 = Accepted, or status 4 = Wrong Answer which still has output)
+            const stdout = result.stdout ?? '';
+            const stderr = result.stderr ?? '';
 
             if (options?.onStdout && 0 < stdout.length)
             {
@@ -212,7 +264,7 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
             return {
                 stdout: stdout ? stdout.split('\n') : [],
                 stderr: stderr ? stderr.split('\n') : [],
-                exitCode: result.run?.code ?? 0,
+                exitCode: result.exit_code ?? 0,
                 duration: Date.now() - startTime,
             };
         }
@@ -260,12 +312,12 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
 
     GetLanguages(): string[]
     {
-        return Object.keys(PISTON_LANGUAGE_MAP);
+        return Object.keys(JUDGE0_LANGUAGE_MAP);
     },
 
     GetRuntimeInfo(languageId: string): RuntimeInfo | null
     {
-        const mapping = PISTON_LANGUAGE_MAP[languageId];
+        const mapping = JUDGE0_LANGUAGE_MAP[languageId];
         if (!mapping)
         {
             return null;
@@ -283,9 +335,9 @@ export const CloudRuntimeAdapter: RuntimeAdapter =
 // ─── Public Helpers ──────────────────────────────────────────────
 
 /**
- * Check if a language has a cloud runtime available via Piston.
+ * Check if a language has a cloud runtime available via Judge0 CE.
  */
 export function IsCloudRuntimeAvailable(languageId: string): boolean
 {
-    return languageId in PISTON_LANGUAGE_MAP;
+    return languageId in JUDGE0_LANGUAGE_MAP;
 }

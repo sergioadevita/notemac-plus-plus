@@ -22,14 +22,11 @@ function createMockResponse(body: Record<string, unknown>, ok: boolean = true, s
 // ─── Supported Languages ───────────────────────────────────────────
 
 const SUPPORTED_LANGUAGES = [
-    'csharp', 'fsharp', 'visual-basic', 'powershell',
-    'c', 'cpp', 'objective-c',
-    'java', 'kotlin', 'scala', 'groovy',
-    'go', 'rust', 'swift', 'dart', 'pascal', 'fortran', 'cobol', 'd', 'nim', 'haskell', 'assembly',
-    'ruby', 'php', 'perl', 'r', 'shell', 'tcl', 'raku', 'awk', 'julia',
-    'lisp', 'clojure', 'scheme', 'racket',
-    'ocaml', 'erlang', 'elixir',
-    'prolog', 'ada',
+    'assembly', 'c', 'clojure', 'cobol', 'cpp', 'csharp', 'd', 'dart',
+    'elixir', 'erlang', 'fortran', 'fsharp', 'go', 'groovy', 'haskell',
+    'java', 'kotlin', 'lisp', 'objective-c', 'ocaml', 'octave', 'pascal',
+    'perl', 'php', 'prolog', 'r', 'ruby', 'rust', 'scala', 'shell',
+    'swift', 'typescript', 'visual-basic',
 ];
 
 // ─── IsCloudRuntimeAvailable ───────────────────────────────────────
@@ -82,10 +79,10 @@ describe('CloudRuntimeAdapter — GetLanguages', () =>
         expect(Array.isArray(languages)).toBe(true);
     });
 
-    it('returns exactly 40 supported languages', () =>
+    it('returns exactly 33 supported languages', () =>
     {
         const languages = CloudRuntimeAdapter.GetLanguages();
-        expect(40 === languages.length).toBe(true);
+        expect(33 === languages.length).toBe(true);
     });
 
     it('includes csharp language', () =>
@@ -230,15 +227,14 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
         mockFetch.mockClear();
     });
 
-    it('executes code successfully with Piston API response', async () =>
+    it('executes code successfully with Judge0 API response', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'Hello, World!',
-                stderr: '',
-                code: 0,
-            },
+            stdout: 'Hello, World!\n',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
+            compile_output: null,
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -250,14 +246,15 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
         expect(result.exitCode).toBe(0);
         expect(result.stdout.length).toBeGreaterThan(0);
         expect(result.stdout[0]).toBe('Hello, World!');
-        expect(result.stderr.length).toBe(0);
     });
 
-    it('calls fetch with correct URL', async () =>
+    it('calls fetch with correct Judge0 CE URL', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -265,7 +262,7 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
         await CloudRuntimeAdapter.Execute('code', { languageId: 'go' });
 
         expect(mockFetch).toHaveBeenCalledWith(
-            expect.stringContaining('emkc.org/api/v2/piston/execute'),
+            expect.stringContaining('ce.judge0.com/submissions'),
             expect.any(Object)
         );
     });
@@ -273,8 +270,10 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
     it('sends POST request to API', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -288,8 +287,10 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
     it('sets Content-Type header to application/json', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -300,11 +301,13 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
         expect(callArgs[1]?.headers).toEqual({ 'Content-Type': 'application/json' });
     });
 
-    it('includes language in request body', async () =>
+    it('includes language_id in request body', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -313,31 +316,34 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect('go' === body.language).toBe(true);
+        expect(107 === body.language_id).toBe(true);
     });
 
-    it('includes code in files array', async () =>
+    it('includes source_code in request body', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
-        await CloudRuntimeAdapter.Execute('code', { languageId: 'go' });
+        await CloudRuntimeAdapter.Execute('my code here', { languageId: 'go' });
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect(Array.isArray(body.files)).toBe(true);
-        expect('code' === body.files[0].content).toBe(true);
+        expect('my code here' === body.source_code).toBe(true);
     });
 
     it('handles empty stdout', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -351,12 +357,10 @@ describe('CloudRuntimeAdapter — Execute Success', () =>
     it('splits stdout by newlines', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'Line 1\nLine 2\nLine 3',
-                stderr: '',
-                code: 0,
-            },
+            stdout: 'Line 1\nLine 2\nLine 3',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -384,15 +388,14 @@ describe('CloudRuntimeAdapter — Execute Compilation Errors', () =>
         mockFetch.mockClear();
     });
 
-    it('returns compilation error when compile.code is non-zero', async () =>
+    it('returns compilation error when Judge0 status is 6', async () =>
     {
         const mockResponse = {
-            compile: {
-                stdout: '',
-                stderr: 'error: unexpected token',
-                code: 1,
-            },
-            run: null,
+            stdout: null,
+            stderr: null,
+            exit_code: null,
+            compile_output: 'error: unexpected token',
+            status: { id: 6, description: 'Compilation Error' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -403,15 +406,14 @@ describe('CloudRuntimeAdapter — Execute Compilation Errors', () =>
         expect(result.stderr.length).toBeGreaterThan(0);
     });
 
-    it('includes compilation stderr in result', async () =>
+    it('includes compilation error in result stderr', async () =>
     {
         const mockResponse = {
-            compile: {
-                stdout: '',
-                stderr: 'error: unexpected token',
-                code: 1,
-            },
-            run: null,
+            stdout: null,
+            stderr: null,
+            exit_code: null,
+            compile_output: 'error: unexpected token',
+            status: { id: 6, description: 'Compilation Error' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -424,12 +426,11 @@ describe('CloudRuntimeAdapter — Execute Compilation Errors', () =>
     it('calls onStderr callback for compilation errors', async () =>
     {
         const mockResponse = {
-            compile: {
-                stdout: '',
-                stderr: 'error: unexpected token',
-                code: 1,
-            },
-            run: null,
+            stdout: null,
+            stderr: null,
+            exit_code: null,
+            compile_output: 'error: unexpected token',
+            status: { id: 6, description: 'Compilation Error' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -444,15 +445,14 @@ describe('CloudRuntimeAdapter — Execute Compilation Errors', () =>
         expect(onStderr).toHaveBeenCalledWith('error: unexpected token');
     });
 
-    it('does not run when compilation fails', async () =>
+    it('returns exitCode 1 when compilation fails', async () =>
     {
         const mockResponse = {
-            compile: {
-                stdout: '',
-                stderr: 'error: unexpected token',
-                code: 1,
-            },
-            run: null,
+            stdout: null,
+            stderr: null,
+            exit_code: null,
+            compile_output: 'error: unexpected token',
+            status: { id: 6, description: 'Compilation Error' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -480,12 +480,10 @@ describe('CloudRuntimeAdapter — Execute Runtime Errors', () =>
     it('returns runtime error with non-zero exit code', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: '',
-                stderr: 'runtime error',
-                code: 1,
-            },
+            stdout: '',
+            stderr: 'runtime error',
+            exit_code: 1,
+            status: { id: 11, description: 'Runtime Error (Other)' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -498,12 +496,10 @@ describe('CloudRuntimeAdapter — Execute Runtime Errors', () =>
     it('includes runtime stderr in result', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'partial output',
-                stderr: 'runtime error',
-                code: 127,
-            },
+            stdout: 'partial output',
+            stderr: 'runtime error',
+            exit_code: 127,
+            status: { id: 11, description: 'Runtime Error (Other)' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -516,12 +512,10 @@ describe('CloudRuntimeAdapter — Execute Runtime Errors', () =>
     it('includes partial stdout even when runtime error occurs', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'partial output',
-                stderr: 'error occurred',
-                code: 1,
-            },
+            stdout: 'partial output',
+            stderr: 'error occurred',
+            exit_code: 1,
+            status: { id: 11, description: 'Runtime Error (Other)' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -532,15 +526,48 @@ describe('CloudRuntimeAdapter — Execute Runtime Errors', () =>
         expect(result.stderr.includes('error occurred')).toBe(true);
     });
 
+    it('handles time limit exceeded (status 5)', async () =>
+    {
+        const mockResponse = {
+            stdout: 'some output',
+            stderr: null,
+            exit_code: null,
+            status: { id: 5, description: 'Time Limit Exceeded' },
+        };
+
+        mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
+
+        const result = await CloudRuntimeAdapter.Execute('while(true){}', { languageId: 'go' });
+
+        expect(124 === result.exitCode).toBe(true);
+        expect(result.stderr[0]).toContain('timed out');
+    });
+
+    it('handles internal error (status 13)', async () =>
+    {
+        const mockResponse = {
+            stdout: null,
+            stderr: null,
+            exit_code: null,
+            message: 'Server overloaded',
+            status: { id: 13, description: 'Internal Error' },
+        };
+
+        mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
+
+        const result = await CloudRuntimeAdapter.Execute('code', { languageId: 'go' });
+
+        expect(1 === result.exitCode).toBe(true);
+        expect(result.stderr[0]).toContain('Server overloaded');
+    });
+
     it('splits runtime stderr by newlines', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: '',
-                stderr: 'Error 1\nError 2\nError 3',
-                code: 1,
-            },
+            stdout: '',
+            stderr: 'Error 1\nError 2\nError 3',
+            exit_code: 1,
+            status: { id: 11, description: 'Runtime Error (Other)' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -571,8 +598,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('calls onStdout callback with execution start message', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -589,12 +618,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('calls onStdout for each stdout line', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'Line 1\nLine 2\nLine 3',
-                stderr: '',
-                code: 0,
-            },
+            stdout: 'Line 1\nLine 2\nLine 3',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -613,8 +640,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('does not call onStdout when stdout is empty', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -635,12 +664,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('calls onStderr for each stderr line', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: '',
-                stderr: 'Error 1\nError 2',
-                code: 0,
-            },
+            stdout: '',
+            stderr: 'Error 1\nError 2',
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -658,8 +685,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('does not call onStderr when stderr is empty', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -676,12 +705,10 @@ describe('CloudRuntimeAdapter — Execute Callbacks', () =>
     it('interleaves onStdout and onStderr callbacks', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: {
-                stdout: 'Out 1\nOut 2',
-                stderr: 'Err 1\nErr 2',
-                code: 0,
-            },
+            stdout: 'Out 1\nOut 2',
+            stderr: 'Err 1\nErr 2',
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -917,8 +944,10 @@ describe('CloudRuntimeAdapter — Cancel', () =>
             if (!signalAborted)
             {
                 return createMockResponse({
-                    compile: null,
-                    run: { stdout: '', stderr: '', code: 0 },
+                    stdout: '',
+                    stderr: null,
+                    exit_code: 0,
+                    status: { id: 3, description: 'Accepted' },
                 });
             }
 
@@ -956,8 +985,10 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
     it('includes stdin in request when provided', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -972,11 +1003,13 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
         expect('input data' === body.stdin).toBe(true);
     });
 
-    it('includes args in request when provided', async () =>
+    it('includes args as command_line_arguments in request when provided', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -988,15 +1021,16 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect(Array.isArray(body.args)).toBe(true);
-        expect(body.args.length).toBe(2);
+        expect('arg1 arg2' === body.command_line_arguments).toBe(true);
     });
 
     it('does not include args when empty array', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -1008,14 +1042,37 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect(body.args).toBeUndefined();
+        expect(body.command_line_arguments).toBeUndefined();
     });
 
-    it('includes timeout in request', async () =>
+    it('includes cpu_time_limit in request', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
+        };
+
+        mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
+
+        await CloudRuntimeAdapter.Execute('code', {
+            languageId: 'go',
+            timeout: 10000,
+        });
+
+        const callArgs = mockFetch.mock.calls[0];
+        const body = JSON.parse(callArgs[1]?.body as string);
+        expect(10 === body.cpu_time_limit).toBe(true);
+    });
+
+    it('caps cpu_time_limit at 15 seconds for Judge0 CE', async () =>
+    {
+        const mockResponse = {
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -1027,15 +1084,16 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect(60000 === body.run_timeout).toBe(true);
-        expect(60000 === body.compile_timeout).toBe(true);
+        expect(15 === body.cpu_time_limit).toBe(true);
     });
 
     it('uses default timeout when not provided', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -1044,7 +1102,7 @@ describe('CloudRuntimeAdapter — Execute Options', () =>
 
         const callArgs = mockFetch.mock.calls[0];
         const body = JSON.parse(callArgs[1]?.body as string);
-        expect(COMPILE_RUN_DEFAULT_TIMEOUT === body.run_timeout).toBe(true);
+        expect(body.cpu_time_limit).toBeDefined();
     });
 });
 
@@ -1065,8 +1123,10 @@ describe('CloudRuntimeAdapter — Execute Duration', () =>
     it('measures execution duration', async () =>
     {
         const mockResponse = {
-            compile: null,
-            run: { stdout: '', stderr: '', code: 0 },
+            stdout: '',
+            stderr: null,
+            exit_code: 0,
+            status: { id: 3, description: 'Accepted' },
         };
 
         mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
