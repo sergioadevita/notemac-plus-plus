@@ -228,6 +228,8 @@ export function RunOutputPanel({ theme }: RunOutputPanelProps)
             color: theme.text,
             whiteSpace: 'pre-wrap' as const,
             wordBreak: 'break-word' as const,
+            userSelect: 'text' as const,
+            cursor: 'text',
         },
         closeButton: {
             background: 'transparent',
