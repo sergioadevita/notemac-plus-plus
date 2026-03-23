@@ -473,9 +473,12 @@ async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
 async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 {
     // The Mono WASM runtime assets must be hosted alongside the app.
-    // We load dotnet.js which bootstraps the runtime and loads managed DLLs.
+    // Load order matters: mono-config.js (sets global `config`),
+    // then runtime.js (sets global `Module`), then dotnet.js (reads both).
     const baseUrl = GetCSharpWasmBaseUrl();
 
+    await LoadScript(`${baseUrl}/mono-config.js`);
+    await LoadScript(`${baseUrl}/runtime.js`);
     await LoadScript(`${baseUrl}/dotnet.js`);
 
     const monoRuntime = (globalThis as any).Module ?? (globalThis as any).MONO;
@@ -526,15 +529,23 @@ async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 
 /**
  * Determine the base URL for C# WASM assets.
- * In production, these are hosted at /app/wasm/csharp/ on gh-pages.
- * In development, they're at /wasm/csharp/.
+ * In production (gh-pages), assets live alongside the app at <base>/app/wasm/csharp/.
+ * The base path varies (e.g. /notemac-plus-plus/app/...) so we derive it from
+ * the current location rather than hard-coding it.
+ * In development, they're served from the Vite public dir at /wasm/csharp/.
  */
 function GetCSharpWasmBaseUrl(): string
 {
     const loc = globalThis.location;
-    if (loc && loc.pathname.startsWith('/app/'))
+    if (loc)
     {
-        return '/app/wasm/csharp';
+        // Match paths like /notemac-plus-plus/app/... or /app/...
+        const match = loc.pathname.match(/^(\/.*?)\/app\//);
+        if (match)
+        {
+            const basePath = match[1] === '' ? '' : match[1];
+            return `${basePath}/app/wasm/csharp`;
+        }
     }
     return '/wasm/csharp';
 }
