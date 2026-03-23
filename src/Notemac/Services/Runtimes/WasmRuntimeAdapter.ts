@@ -242,6 +242,8 @@ async function DoLoadRuntime(
 
 async function LoadPyodide(languageId: string): Promise<LoadedRuntime>
 {
+    // Load the Pyodide script which sets globalThis.loadPyodide
+    await LoadScript('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js');
     // @ts-expect-error — Pyodide is loaded from CDN
     const pyodide = await globalThis.loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
@@ -275,7 +277,7 @@ sys.stderr = io.StringIO()
 
 async function LoadWasmoon(languageId: string): Promise<LoadedRuntime>
 {
-    await LoadScript('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/dist/glue.js');
+    await LoadScript('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/dist/index.min.js');
     const LuaFactory = (globalThis as any).wasmoon?.LuaFactory;
     if (!LuaFactory)
     {
@@ -309,14 +311,14 @@ async function LoadWasmoon(languageId: string): Promise<LoadedRuntime>
 
 async function LoadSqlJs(languageId: string): Promise<LoadedRuntime>
 {
-    await LoadScript('https://cdn.jsdelivr.net/npm/sql.js@1.10.0/dist/sql-wasm.js');
+    await LoadScript('https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js');
     const initSqlJs = (globalThis as any).initSqlJs;
     if (!initSqlJs)
     {
         throw new Error('Failed to load sql.js from CDN');
     }
     const SQL = await initSqlJs({
-        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.10.0/dist/${file}`,
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${file}`,
     });
 
     return {
@@ -353,9 +355,11 @@ async function LoadSqlJs(languageId: string): Promise<LoadedRuntime>
 async function LoadJSCPP(languageId: string): Promise<LoadedRuntime>
 {
     // JSCPP is a JavaScript-based C/C++ interpreter.
-    // Load via script injection from jsdelivr CDN.
-    await LoadScript('https://cdn.jsdelivr.net/npm/JSCPP@2.0.9/lib/launcher.js');
-    const JSCPP = (globalThis as any).JSCPP;
+    // The npm package is CommonJS-only (no browser bundle), so we use
+    // the jsdelivr ESM endpoint which auto-bundles it for the browser.
+    // @ts-expect-error — dynamic import from CDN
+    const mod = await import('https://cdn.jsdelivr.net/npm/JSCPP@2.0.9/+esm');
+    const JSCPP = mod.default ?? mod;
     if (!JSCPP || 'function' !== typeof JSCPP.run)
     {
         throw new Error('Failed to load JSCPP from CDN');
@@ -417,7 +421,8 @@ async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
     // Load the Ruby WASM browser script from CDN
     await LoadScript('https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/browser.script.iife.js');
 
-    const rubyModule = (globalThis as any).ruby;
+    // The IIFE sets globalThis.rubyVM (not globalThis.ruby)
+    const rubyModule = (globalThis as any).rubyVM;
     if (!rubyModule)
     {
         throw new Error('Failed to load Ruby WASM from CDN');
