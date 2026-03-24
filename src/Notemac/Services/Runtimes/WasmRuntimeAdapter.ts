@@ -277,8 +277,11 @@ sys.stderr = io.StringIO()
 
 async function LoadWasmoon(languageId: string): Promise<LoadedRuntime>
 {
-    await LoadScript('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/dist/index.min.js');
-    const LuaFactory = (globalThis as any).wasmoon?.LuaFactory;
+    // Use dynamic import — the UMD script tag approach fails because the
+    // UMD checks for 'exports'/'module' which can be polluted in some contexts.
+    // @ts-expect-error — dynamic import from CDN
+    const wasmoon = await import('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/+esm');
+    const LuaFactory = wasmoon.LuaFactory;
     if (!LuaFactory)
     {
         throw new Error('Failed to load wasmoon from CDN');
@@ -418,18 +421,18 @@ async function LoadJSCPP(languageId: string): Promise<LoadedRuntime>
 
 async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
 {
-    // Load the Ruby WASM browser script from CDN
-    await LoadScript('https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/browser.script.iife.js');
-
-    // The IIFE sets globalThis.rubyVM (not globalThis.ruby)
-    const rubyModule = (globalThis as any).rubyVM;
-    if (!rubyModule)
+    // Use the ESM version which exports DefaultRubyVM directly.
+    // The IIFE version auto-runs and sets globalThis.rubyVM asynchronously,
+    // which races with our LoadScript resolution.
+    // @ts-expect-error — dynamic import from CDN
+    const rubyModule = await import('https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/browser.esm.js');
+    const { DefaultRubyVM } = rubyModule;
+    if (!DefaultRubyVM)
     {
         throw new Error('Failed to load Ruby WASM from CDN');
     }
 
-    // Initialize the Ruby VM
-    const { DefaultRubyVM } = rubyModule;
+    // Fetch and compile the Ruby WASM binary (~15MB on first load)
     const wasmUrl = 'https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/ruby.wasm';
     const response = await fetch(wasmUrl);
     const wasmBuffer = await response.arrayBuffer();
