@@ -242,6 +242,8 @@ async function DoLoadRuntime(
 
 async function LoadPyodide(languageId: string): Promise<LoadedRuntime>
 {
+    // Load the Pyodide script which sets globalThis.loadPyodide
+    await LoadScript('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js');
     // @ts-expect-error — Pyodide is loaded from CDN
     const pyodide = await globalThis.loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
@@ -275,8 +277,11 @@ sys.stderr = io.StringIO()
 
 async function LoadWasmoon(languageId: string): Promise<LoadedRuntime>
 {
-    await LoadScript('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/dist/glue.js');
-    const LuaFactory = (globalThis as any).wasmoon?.LuaFactory;
+    // Use dynamic import — the UMD script tag approach fails because the
+    // UMD checks for 'exports'/'module' which can be polluted in some contexts.
+    // @ts-expect-error — dynamic import from CDN
+    const wasmoon = await import('https://cdn.jsdelivr.net/npm/wasmoon@1.16.0/+esm');
+    const LuaFactory = wasmoon.LuaFactory;
     if (!LuaFactory)
     {
         throw new Error('Failed to load wasmoon from CDN');
@@ -309,14 +314,14 @@ async function LoadWasmoon(languageId: string): Promise<LoadedRuntime>
 
 async function LoadSqlJs(languageId: string): Promise<LoadedRuntime>
 {
-    await LoadScript('https://cdn.jsdelivr.net/npm/sql.js@1.10.0/dist/sql-wasm.js');
+    await LoadScript('https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js');
     const initSqlJs = (globalThis as any).initSqlJs;
     if (!initSqlJs)
     {
         throw new Error('Failed to load sql.js from CDN');
     }
     const SQL = await initSqlJs({
-        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.10.0/dist/${file}`,
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${file}`,
     });
 
     return {
@@ -353,9 +358,11 @@ async function LoadSqlJs(languageId: string): Promise<LoadedRuntime>
 async function LoadJSCPP(languageId: string): Promise<LoadedRuntime>
 {
     // JSCPP is a JavaScript-based C/C++ interpreter.
-    // Load via script injection from jsdelivr CDN.
-    await LoadScript('https://cdn.jsdelivr.net/npm/JSCPP@2.0.9/lib/launcher.js');
-    const JSCPP = (globalThis as any).JSCPP;
+    // The npm package is CommonJS-only (no browser bundle), so we use
+    // the jsdelivr ESM endpoint which auto-bundles it for the browser.
+    // @ts-expect-error — dynamic import from CDN
+    const mod = await import('https://cdn.jsdelivr.net/npm/JSCPP@2.0.9/+esm');
+    const JSCPP = mod.default ?? mod;
     if (!JSCPP || 'function' !== typeof JSCPP.run)
     {
         throw new Error('Failed to load JSCPP from CDN');
@@ -414,17 +421,18 @@ async function LoadJSCPP(languageId: string): Promise<LoadedRuntime>
 
 async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
 {
-    // Load the Ruby WASM browser script from CDN
-    await LoadScript('https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/browser.script.iife.js');
-
-    const rubyModule = (globalThis as any).ruby;
-    if (!rubyModule)
+    // Use the ESM version which exports DefaultRubyVM directly.
+    // The IIFE version auto-runs and sets globalThis.rubyVM asynchronously,
+    // which races with our LoadScript resolution.
+    // @ts-expect-error — dynamic import from CDN
+    const rubyModule = await import('https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/browser.esm.js');
+    const { DefaultRubyVM } = rubyModule;
+    if (!DefaultRubyVM)
     {
         throw new Error('Failed to load Ruby WASM from CDN');
     }
 
-    // Initialize the Ruby VM
-    const { DefaultRubyVM } = rubyModule;
+    // Fetch and compile the Ruby WASM binary (~15MB on first load)
     const wasmUrl = 'https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.3.0/dist/ruby.wasm';
     const response = await fetch(wasmUrl);
     const wasmBuffer = await response.arrayBuffer();
@@ -467,51 +475,159 @@ async function LoadRubyWasm(languageId: string): Promise<LoadedRuntime>
 /**
  * Loads the Mono WASM runtime with Roslyn for in-browser C# compilation.
  * Assets are hosted alongside the app in /app/wasm/csharp/.
- * First run downloads ~14MB (dotnet.wasm + Roslyn DLLs + BCL DLLs).
+ * First run downloads ~25MB (dotnet.wasm + Roslyn DLLs + BCL DLLs).
  * Subsequent runs use cached assets.
+ *
+ * Architecture (from CSharp-In-Browser by nbarkhina):
+ *   - mono-config.js sets global `config` with DLL manifest
+ *   - runtime.js sets global `Module` with onRuntimeInitialized hook
+ *   - dotnet.js boots Emscripten+Mono, triggers onRuntimeInitialized
+ *   - After DLLs load, runtime calls App.init()
+ *   - App.init() calls BINDING.call_static_method to init the C# side
+ *
+ * The C# CompileAndRun method:
+ *   1. Compiles user code with Roslyn into an in-memory assembly
+ *   2. Finds the first exported type and calls its Run() method
+ *   3. Run() must return Task<string> — the string is the program output
+ *
+ * Since user code typically uses Console.WriteLine + Main(), we wrap it
+ * to redirect Console output into a Run() method that returns the output.
  */
 async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 {
-    // The Mono WASM runtime assets must be hosted alongside the app.
-    // We load dotnet.js which bootstraps the runtime and loads managed DLLs.
+    const G = globalThis as any;
     const baseUrl = GetCSharpWasmBaseUrl();
 
+    // ── Promise that resolves when Mono runtime is fully initialised ─
+    const runtimeReady = new Promise<void>((resolve, reject) =>
+    {
+        G.App = {
+            // Called by runtime.js after all managed DLLs are loaded
+            init()
+            {
+                try
+                {
+                    const BINDING = G.BINDING;
+                    if (BINDING)
+                    {
+                        // Init the C# CompileService (loads Roslyn references)
+                        BINDING.call_static_method(
+                            '[WasmRoslyn]WasmRoslyn.Program:Main',
+                            [G.App, null]
+                        );
+                    }
+                    resolve();
+                }
+                catch (e)
+                {
+                    reject(e);
+                }
+            },
+
+            // These may be called during Init or by other C# code
+            displayAssemblies() { /* no-op in our headless context */ },
+        };
+    });
+
+    // ── Load scripts in strict order ─────────────────────────────────
+    await LoadScript(`${baseUrl}/mono-config.js`);
+    await LoadScript(`${baseUrl}/runtime.js`);
     await LoadScript(`${baseUrl}/dotnet.js`);
 
-    const monoRuntime = (globalThis as any).Module ?? (globalThis as any).MONO;
-    if (!monoRuntime)
+    // Wait for the full bootstrap
+    await runtimeReady;
+
+    const BINDING = G.BINDING;
+    if (!BINDING)
     {
         throw new Error(
-            'C# WASM runtime is not yet available.\n' +
-            'The Mono WASM runtime assets need to be built and deployed.\n' +
-            'This will be available in the next release.'
+            'C# WASM runtime loaded but BINDING global not found.\n' +
+            'The Mono WASM runtime may not have initialised correctly.'
         );
     }
 
     return {
         languageId,
-        module: monoRuntime,
+        module: G.Module,
         async execute(code: string)
         {
             try
             {
-                // Call the CompileAndRun function exposed by the Mono WASM runtime
-                const compileAndRun = (globalThis as any).CompileAndRun
-                    ?? (globalThis as any).Module?.CompileAndRun;
+                // ── Wrap user code ──────────────────────────────────
+                // The Mono WASM runtime compiles the code with Roslyn,
+                // then finds the first exported type and calls its
+                // async Task<string> Run() method. The returned string
+                // is the program output.
+                //
+                // Users write normal C# with Main() and Console.Write*.
+                // We wrap it so Console output is captured and returned
+                // from a Run() method that the runtime expects.
+                const wrappedCode = WrapCSharpCode(code);
 
-                if (!compileAndRun)
+                // ── Set up result capture via async callbacks ────────
+                // Program.Run fires Task.Run(CompileAndRun) and returns
+                // immediately. The C# side calls back via JSObject.Invoke
+                // on the callback object when done.
+                const result = await new Promise<{ compileLog: string; runLog: string }>((resolve) =>
                 {
+                    let compileLog = '';
+                    let runLog = '';
+                    let resolved = false;
+
+                    const callback = {
+                        setCompileLog(log: string)
+                        {
+                            compileLog = log;
+                            // setCompileLog is always called (in finally block).
+                            // If compilation fails, setRunLog won't be called.
+                            // If compilation succeeds, setRunLog is called first.
+                            // Either way, resolve after compileLog arrives.
+                            if (!resolved)
+                            {
+                                resolved = true;
+                                resolve({ compileLog, runLog });
+                            }
+                        },
+                        setRunLog(log: string)
+                        {
+                            runLog = log;
+                        },
+                    };
+
+                    BINDING.call_static_method(
+                        '[WasmRoslyn]WasmRoslyn.Program:Run',
+                        [callback, wrappedCode]
+                    );
+
+                    // Safety timeout — if callbacks never fire (e.g. runtime error)
+                    setTimeout(() =>
+                    {
+                        if (!resolved)
+                        {
+                            resolved = true;
+                            resolve({ compileLog, runLog });
+                        }
+                    }, 30000);
+                });
+
+                // ── Parse results ───────────────────────────────────
+                const compileFailed = result.compileLog &&
+                    !result.compileLog.includes('Compilation success');
+
+                if (compileFailed)
+                {
+                    // Strip HTML tags the runtime may have added
+                    const cleanLog = result.compileLog.replace(/<[^>]*>/g, '');
                     return {
                         stdout: '',
-                        stderr: 'C# runtime loaded but CompileAndRun function not found. ' +
-                            'The Mono WASM runtime assets may need to be rebuilt.',
+                        stderr: cleanLog,
                         exitCode: 1,
                     };
                 }
 
-                const result = compileAndRun(code);
+                const output = result.runLog.replace(/<[^>]*>/g, '');
                 return {
-                    stdout: result ?? '',
+                    stdout: output,
                     stderr: '',
                     exitCode: 0,
                 };
@@ -525,16 +641,102 @@ async function LoadMonoCSharp(languageId: string): Promise<LoadedRuntime>
 }
 
 /**
+ * Wraps user C# code so it works with the CSharp-In-Browser runtime.
+ *
+ * The Mono WASM CompileAndRun expects the compiled assembly to have
+ * an exported type with a public async Task<string> Run() method.
+ * But users write normal C# with Console.WriteLine in a Main method.
+ *
+ * This wrapper:
+ *   1. Redirects Console.Out to a StringWriter
+ *   2. Calls the user's Main method (handling both void and async variants)
+ *   3. Returns the captured console output as the Run() result
+ */
+function WrapCSharpCode(userCode: string): string
+{
+    // Check if the user already has a Run() method (advanced usage)
+    if (/public\s+(async\s+)?Task<string>\s+Run\s*\(/.test(userCode))
+    {
+        return userCode;
+    }
+
+    // Extract the class containing Main. We need to detect the user's
+    // namespace, class name, and Main signature.
+    const nsMatch = userCode.match(/namespace\s+([\w.]+)/);
+    const classMatch = userCode.match(/class\s+(\w+)/);
+    const ns = nsMatch ? nsMatch[1] : 'UserCode';
+    const cls = classMatch ? classMatch[1] : 'Program';
+
+    return `
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+
+// ─── User code (embedded) ────────────────────────────────────────
+${userCode}
+// ─── End user code ───────────────────────────────────────────────
+
+namespace WasmRoslyn.Demo
+{
+    public class RunClass
+    {
+        public async Task<string> Run()
+        {
+            var sw = new StringWriter();
+            Console.SetOut(sw);
+            Console.SetError(sw);
+            try
+            {
+                // Use reflection to call Main — it may be private
+                var type = typeof(${ns}.${cls});
+                var main = type.GetMethod("Main",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (main == null)
+                    throw new Exception("Could not find Main method in ${ns}.${cls}");
+
+                var args = main.GetParameters().Length > 0
+                    ? new object[] { new string[0] }
+                    : new object[0];
+
+                var result = main.Invoke(null, args);
+                if (result is Task task)
+                    await task;
+            }
+            catch (TargetInvocationException tie)
+            {
+                sw.WriteLine(tie.InnerException?.ToString() ?? tie.ToString());
+            }
+            catch (Exception ex)
+            {
+                sw.WriteLine(ex.ToString());
+            }
+            return sw.ToString();
+        }
+    }
+}
+`;
+}
+
+/**
  * Determine the base URL for C# WASM assets.
- * In production, these are hosted at /app/wasm/csharp/ on gh-pages.
- * In development, they're at /wasm/csharp/.
+ * In production (gh-pages), assets live alongside the app at <base>/app/wasm/csharp/.
+ * The base path varies (e.g. /notemac-plus-plus/app/...) so we derive it from
+ * the current location rather than hard-coding it.
+ * In development, they're served from the Vite public dir at /wasm/csharp/.
  */
 function GetCSharpWasmBaseUrl(): string
 {
     const loc = globalThis.location;
-    if (loc && loc.pathname.startsWith('/app/'))
+    if (loc)
     {
-        return '/app/wasm/csharp';
+        // Match paths like /notemac-plus-plus/app/... or /app/...
+        const match = loc.pathname.match(/^(\/.*?)\/app\//);
+        if (match)
+        {
+            const basePath = match[1] === '' ? '' : match[1];
+            return `${basePath}/app/wasm/csharp`;
+        }
     }
     return '/wasm/csharp';
 }
